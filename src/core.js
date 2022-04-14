@@ -8,7 +8,6 @@ require('dotenv').config();
 const BUCKET_X2 = '0x5832000000000000000000000000000000000000000000000000000000000000';
 const BUCKET_C0 = '0x4330000000000000000000000000000000000000000000000000000000000000';
 
-
 const connectorAddresses  = async (web3, dContracts) => { 
         
     const multicall = dContracts["contracts"]["multicall"]; 
@@ -434,6 +433,29 @@ const calcCommission  = async (web3, dContracts, amount) => {
 
 }
 
+const printEvent  = (evente) => { 
+    
+    console.log("");
+    console.log('\x1b[35m%s\x1b[0m', `Event: ${evente.name}`);
+    console.log("");
+    evente.events.forEach(eve => console.log('\x1b[32m%s\x1b[0m', `${eve.name}: ${eve.value}`));    
+
+}
+
+const decodeEvents  = (receipt) => {
+
+    const decodedLogs = abiDecoder.decodeLogs(receipt.logs);
+    
+    const filterIncludes = ["StableTokenMint"];
+            
+    const filteredEvents = decodedLogs.filter(event =>         
+        filterIncludes.includes(event.name)
+    );
+
+    filteredEvents.forEach(evente => printEvent(evente));       
+    
+}
+
 const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCall) => {
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
@@ -459,10 +481,8 @@ const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCal
         transaction.rawTransaction
     );
 
-    const decodedLogs = abiDecoder.decodeLogs(receipt.logs);
-    console.log(decodedLogs);
-    console.log(decodedLogs[0].events);
-    console.log(decodedLogs[1].events);
+    // Print decode events
+    decodeEvents(receipt);    
         
     return receipt;
 
@@ -494,9 +514,7 @@ const mintDoc  = async (web3, dContracts, userAmount) => {
         .encodeABI();
 
     const receipt = await sendTransaction(web3, dContracts, value, estimateGas, encodedCall);
-
-    console.log(receipt);
-
+    
     return receipt;
 
 }
