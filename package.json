@@ -1,0 +1,29 @@
+{
+  "name": "moneyonchain-example-integration",
+  "version": "1.0.0",
+  "description": "Example Money On Chain Integration",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/money-on-chain/example-moc-integration-js.git"
+  },
+  "keywords": [
+    "Web3"
+  ],
+  "author": "Martin Mulone",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/money-on-chain/example-moc-integration-js/issues"
+  },
+  "homepage": "https://github.com/money-on-chain/example-moc-integration-js#readme",
+  "dependencies": {
+    "abi-decoder": "^2.4.0",
+    "bn.js": "^5.2.0",
+    "dotenv": "^16.0.0",
+    "web3": "^1.7.3"
+  }
+}
