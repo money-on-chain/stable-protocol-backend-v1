@@ -1,3 +1,5 @@
+const BN = require("bn.js");
+const abiDecoder = require('abi-decoder');
 const { readJsonFile } = require('./utils');
 
 
@@ -7,22 +9,18 @@ const BUCKET_X2 = '0x58320000000000000000000000000000000000000000000000000000000
 const BUCKET_C0 = '0x4330000000000000000000000000000000000000000000000000000000000000';
 
 
-const connectorAddresses  = async (web3, multicall, moc) => { 
-    
-    const MoCConnector = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoCConnector.json`);   
-    
-    const connectorAddress = await moc.methods.connector().call();
-
-    console.log('Reading MoCConnector... address: ', connectorAddress);    
-    const mocConnector = new web3.eth.Contract(MoCConnector.abi, connectorAddress);
+const connectorAddresses  = async (web3, dContracts) => { 
+        
+    const multicall = dContracts["contracts"]["multicall"]; 
+    const mocconnector = dContracts["contracts"]["mocconnector"];    
 
     const listMethods = [
-        [connectorAddress, mocConnector.methods.mocState().encodeABI()],
-        [connectorAddress, mocConnector.methods.mocInrate().encodeABI()],
-        [connectorAddress, mocConnector.methods.mocExchange().encodeABI()],
-        [connectorAddress, mocConnector.methods.mocSettlement().encodeABI()],
-        [connectorAddress, mocConnector.methods.docToken().encodeABI()],
-        [connectorAddress, mocConnector.methods.bproToken().encodeABI()]
+        [mocconnector.options.address, mocconnector.methods.mocState().encodeABI()],
+        [mocconnector.options.address, mocconnector.methods.mocInrate().encodeABI()],
+        [mocconnector.options.address, mocconnector.methods.mocExchange().encodeABI()],
+        [mocconnector.options.address, mocconnector.methods.mocSettlement().encodeABI()],
+        [mocconnector.options.address, mocconnector.methods.docToken().encodeABI()],
+        [mocconnector.options.address, mocconnector.methods.bproToken().encodeABI()]
     ]
 
     const multicallResult = await multicall.methods.tryBlockAndAggregate(false, listMethods).call();
@@ -42,6 +40,8 @@ const readContracts  = async (web3, config) => {
 
     const Multicall2 = readJsonFile(`./abis/${process.env.MOC_PROJECT}/Multicall2.json`);
     dContracts["json"]["Multicall2"] = Multicall2;
+    const MoCConnector = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoCConnector.json`);   
+    dContracts["json"]["MoCConnector"] = MoCConnector;
     const MoC = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoC.json`);
     dContracts["json"]["MoC"] = MoC;
     const MoCState = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoCState.json`);
@@ -67,6 +67,12 @@ const readContracts  = async (web3, config) => {
     const moc = new web3.eth.Contract(MoC.abi, config.MoC);
     dContracts["contracts"]["moc"] = moc;
 
+    const connectorAddress = await moc.methods.connector().call();
+
+    console.log('Reading MoCConnector... address: ', connectorAddress);    
+    const mocconnector = new web3.eth.Contract(MoCConnector.abi, connectorAddress);
+    dContracts["contracts"]["mocconnector"] = mocconnector;
+
     // Read contracts addresses from connector
     const [
       mocStateAddress,
@@ -75,7 +81,7 @@ const readContracts  = async (web3, config) => {
       mocSettlementAddress,
       docTokenAddress,
       bproTokenAddress
-    ] = await connectorAddresses(web3, multicall, moc);
+    ] = await connectorAddresses(web3, dContracts);
     
     console.log('Reading MoC State Contract... address: ', mocStateAddress);
     const mocstate = new web3.eth.Contract(MoCState.abi, mocStateAddress);
@@ -107,12 +113,28 @@ const readContracts  = async (web3, config) => {
     const moctoken = new web3.eth.Contract(MoCToken.abi, mocTokenAddress);
     dContracts["contracts"]["moctoken"] = moctoken;
 
+    // Abi decoder
+    abiDecoder.addABI(dContracts["json"]["MoC"].abi);
+    abiDecoder.addABI(dContracts["json"]["MoCState"].abi);
+    abiDecoder.addABI(dContracts["json"]["MoCExchange"].abi);
+    abiDecoder.addABI(dContracts["json"]["MoCInrate"].abi);
+    abiDecoder.addABI(dContracts["json"]["MoCSettlement"].abi);
+    abiDecoder.addABI(dContracts["json"]["DocToken"].abi);
+    abiDecoder.addABI(dContracts["json"]["BProToken"].abi);
+    abiDecoder.addABI(dContracts["json"]["MoCToken"].abi);
+
     return dContracts
 
 }
 
 
-const contractStatus  = async (web3, multicall, moc, mocstate, mocinrate, mocsettlement) => { 
+const contractStatus  = async (web3, dContracts) => { 
+
+    const multicall = dContracts["contracts"]["multicall"];
+    const moc = dContracts["contracts"]["moc"];
+    const mocstate = dContracts["contracts"]["mocstate"];
+    const mocinrate = dContracts["contracts"]["mocinrate"];
+    const mocsettlement = dContracts["contracts"]["mocsettlement"];
 
     console.log("Reading contract status ...");
     
@@ -331,7 +353,14 @@ const contractStatus  = async (web3, multicall, moc, mocstate, mocinrate, mocset
   
   }
 
-const userBalance  = async (web3, multicall, moc, mocinrate, moctoken, bprotoken, doctoken, userAddress) => {
+const userBalance  = async (web3, dContracts, userAddress) => {
+
+    const multicall = dContracts["contracts"]["multicall"];
+    const moc = dContracts["contracts"]["moc"];
+    const mocinrate = dContracts["contracts"]["mocinrate"];
+    const moctoken = dContracts["contracts"]["moctoken"];
+    const bprotoken = dContracts["contracts"]["bprotoken"];
+    const doctoken = dContracts["contracts"]["doctoken"];
 
     console.log(`Reading user balance ... account: ${userAddress}`);
         
@@ -347,9 +376,7 @@ const userBalance  = async (web3, multicall, moc, mocinrate, moctoken, bprotoken
 
     // Remove decode result parameter
     const cleanListMethods = listMethods.map(x => [x[0], x[1]]);
-
-    const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call();
-        
+    const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call();        
     const listReturnData = multicallResult[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData));
 
     const userBalance = {};  
@@ -376,10 +403,109 @@ const userBalance  = async (web3, multicall, moc, mocinrate, moctoken, bprotoken
 
 }
 
+const calcCommission  = async (web3, dContracts, amount) => {
+
+    const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+
+    const multicall = dContracts["contracts"]["multicall"];
+    const mocinrate = dContracts["contracts"]["mocinrate"];
+
+    // Calculate commission with multicall
+    const listMethods = [
+        [mocinrate.options.address, mocinrate.methods.calcCommissionValue(amount, 3).encodeABI(), 'uint256'], // 0
+        [mocinrate.options.address, mocinrate.methods.calculateVendorMarkup(vendorAddress, amount).encodeABI(), 'uint256'] // 1        
+    ]
+
+    // Remove decode result parameter
+    const cleanListMethods = listMethods.map(x => [x[0], x[1]]);
+    
+    // Multicall results
+    const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call();
+    
+    // Decode multicall
+    const listReturnData = multicallResult[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData));
+
+    // Dictionary commissions
+    commission = {};
+    commission["commission"] = new BN(listReturnData[0]);
+    commission["vendorMarkup"] = new BN(listReturnData[1]);
+
+    return commission;
+
+}
+
+const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCall) => {
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
+    const privateKey = process.env.USER_PK;
+        
+    // Sign transaction need it PK
+    const transaction = await web3.eth.accounts.signTransaction(
+        {
+            from: userAddress,
+            to: dContracts["contracts"]["moc"]._address,
+            value: value,
+            gas: estimateGas * 2,
+            gasLimit: estimateGas * 2,
+            data: encodedCall,
+        },
+        privateKey
+    );
+
+    console.log("Please wait... sending transaction... Wait until blockchain mine transaction!");
+
+    // Send transaction and get recipt
+    const receipt = await web3.eth.sendSignedTransaction(
+        transaction.rawTransaction
+    );
+
+    const decodedLogs = abiDecoder.decodeLogs(receipt.logs);
+    console.log(decodedLogs);
+    console.log(decodedLogs[0].events);
+    console.log(decodedLogs[1].events);
+        
+    return receipt;
+
+}
+
+const mintDoc  = async (web3, dContracts, userAmount) => {
+
+    const amount = new BN(userAmount * Math.pow(10, 18));    
+
+    const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
+
+    // calculate commissions
+    const commissions = await calcCommission(web3, dContracts, amount);
+
+    // Calculate send values
+    const value = amount.add(commissions["commission"]).add(commissions["vendorMarkup"]);
+
+    const moc = dContracts["contracts"]["moc"];
+
+    // Calculate estimate gas cost
+    const estimateGas = await moc.methods
+        .mintDocVendors(amount, vendorAddress)
+        .estimateGas({ from: userAddress, value: value });
+
+    const encodedCall = moc.methods
+        .mintDocVendors(amount, vendorAddress)
+        .encodeABI();
+
+    const receipt = await sendTransaction(web3, dContracts, value, estimateGas, encodedCall);
+
+    console.log(receipt);
+
+    return receipt;
+
+}
+
    
 module.exports = {
     connectorAddresses,
     contractStatus,
     userBalance,
-    readContracts
+    readContracts,
+    mintDoc
 };

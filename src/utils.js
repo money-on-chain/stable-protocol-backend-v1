@@ -22,9 +22,19 @@ const getWeb3 = (host_uri) => {
   return web3;
 }
 
+const getGasPrice = async (web3) => {
+  try {      
+      let gasPrice = await web3.eth.getGasPrice();
+      gasPrice = web3.utils.fromWei(gasPrice);
+      return gasPrice;
+  } catch (e) {
+      console.log(e);
+  }
+};
 
 
 module.exports = {
     readJsonFile,
-    getWeb3
+    getWeb3,
+    getGasPrice
 };
