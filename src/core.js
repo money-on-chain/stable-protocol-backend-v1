@@ -1,5 +1,7 @@
 const BN = require("bn.js");
 const abiDecoder = require('abi-decoder');
+const Web3 = require('web3');
+
 const { readJsonFile } = require('./utils');
 
 
@@ -402,6 +404,46 @@ const userBalance  = async (web3, dContracts, userAddress) => {
 
 }
 
+const formatUserBalance  = (userBalance) => {
+
+    fmtUserBalance = {}
+    fmtUserBalance["blockHeight"] = userBalance["blockHeight"];
+    fmtUserBalance["mocBalance"] = Web3.utils.fromWei(userBalance["mocBalance"]);
+    fmtUserBalance["mocAllowance"] = Web3.utils.fromWei(userBalance["mocAllowance"]);
+    fmtUserBalance["docBalance"] = Web3.utils.fromWei(userBalance["docBalance"]);
+    fmtUserBalance["bproBalance"] = Web3.utils.fromWei(userBalance["bproBalance"]);
+    fmtUserBalance["rbtcBalance"] = Web3.utils.fromWei(userBalance["rbtcBalance"]);
+    fmtUserBalance["docToRedeem"] = Web3.utils.fromWei(userBalance["docToRedeem"]);
+    fmtUserBalance["bprox2Balance"] = Web3.utils.fromWei(userBalance["bprox2Balance"]);
+    fmtUserBalance["potentialBprox2MaxInterest"] = userBalance["potentialBprox2MaxInterest"];
+    fmtUserBalance["bProHoldIncentive"] = userBalance["bProHoldIncentive"];
+    fmtUserBalance["estimateGasMintBpro"] = userBalance["estimateGasMintBpro"];
+    fmtUserBalance["estimateGasMintDoc"] = userBalance["estimateGasMintDoc"];
+    fmtUserBalance["estimateGasMintBprox2"] = userBalance["estimateGasMintBprox2"];
+    fmtUserBalance["userAddress"] = userBalance["userAddress"];
+
+    return fmtUserBalance
+
+}
+
+const renderUserBalance  = (userBalance) => {
+
+    var render = `
+User: ${userBalance["userAddress"]}
+RBTC Balance: ${userBalance["rbtcBalance"]} RBTC
+DOC Balance: ${userBalance["docBalance"]} DOC
+BPRO Balance: ${userBalance["bproBalance"]} BPRO
+BTCX Balance: ${userBalance["bprox2Balance"]} BTCX
+MOC Balance: ${userBalance["mocBalance"]} MOC
+MOC Allowance: ${userBalance["mocAllowance"]} MOC
+DOC queue to redeem: ${userBalance["docToRedeem"]} DOC
+    `;
+
+    return render
+
+}
+
+
 const calcCommission  = async (web3, dContracts, amount) => {
 
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
@@ -460,6 +502,12 @@ const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCal
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const privateKey = process.env.USER_PK;
+    const gasMultiplier = process.env.GAS_MULTIPLIER;
+
+    console.log("Please wait... sending transaction... Wait until blockchain mine transaction!");
+
+    // Get gas price from node
+    const gasPrice = await web3.eth.getGasPrice();
         
     // Sign transaction need it PK
     const transaction = await web3.eth.accounts.signTransaction(
@@ -467,15 +515,14 @@ const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCal
             from: userAddress,
             to: dContracts["contracts"]["moc"]._address,
             value: value,
-            gas: estimateGas * 2,
-            gasLimit: estimateGas * 2,
+            gas: estimateGas * gasMultiplier,
+            gasPrice: gasPrice,
+            gasLimit: estimateGas * gasMultiplier,
             data: encodedCall,
         },
         privateKey
     );
-
-    console.log("Please wait... sending transaction... Wait until blockchain mine transaction!");
-
+    
     // Send transaction and get recipt
     const receipt = await web3.eth.sendSignedTransaction(
         transaction.rawTransaction
@@ -525,5 +572,7 @@ module.exports = {
     contractStatus,
     userBalance,
     readContracts,
-    mintDoc
+    mintDoc,
+    formatUserBalance,
+    renderUserBalance
 };

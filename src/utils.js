@@ -24,8 +24,8 @@ const getWeb3 = (host_uri) => {
 
 const getGasPrice = async (web3) => {
   try {      
-      let gasPrice = await web3.eth.getGasPrice();
-      gasPrice = web3.utils.fromWei(gasPrice);
+      const gasPrice = await web3.eth.getGasPrice();
+      //gasPrice = web3.utils.fromWei(gasPrice);
       return gasPrice;
   } catch (e) {
       console.log(e);
