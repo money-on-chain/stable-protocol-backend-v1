@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
+    "mint-doc": "node src/mintDoc.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,7 +23,7 @@
   "homepage": "https://github.com/money-on-chain/example-moc-integration-js#readme",
   "dependencies": {
     "abi-decoder": "^2.4.0",
-    "bn.js": "^5.2.0",
+    "bignumber.js": "^9.0.2",
     "dotenv": "^16.0.0",
     "web3": "^1.7.3"
   }

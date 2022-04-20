@@ -1,4 +1,8 @@
-const BN = require("bn.js");
+//const BN = require("bn.js");
+const BigNumber = require('bignumber.js');
+BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
+const reservePrecision = new BigNumber(10).exponentiatedBy(18);
+
 const abiDecoder = require('abi-decoder');
 const Web3 = require('web3');
 
@@ -354,6 +358,34 @@ const contractStatus  = async (web3, dContracts) => {
   
   }
 
+const renderContractStatus  = (contracStatus) => {
+
+    var render = `
+Bitcoin Price: ${Web3.utils.fromWei(contracStatus["bitcoinPrice"])} USD
+Bitcoin EMA Price: ${Web3.utils.fromWei(contracStatus["bitcoinMovingAverage"])} USD
+MoC Price: ${Web3.utils.fromWei(contracStatus["mocPrice"])} USD
+BPRO Available to redeem: ${Web3.utils.fromWei(contracStatus["bproAvailableToRedeem"])} BPRO
+BTCx Available to mint: ${Web3.utils.fromWei(contracStatus["bprox2AvailableToMint"])} BTCX
+DOC Available to mint: ${Web3.utils.fromWei(contracStatus["docAvailableToMint"])} DOC
+DOC Available to redeem: ${Web3.utils.fromWei(contracStatus["docAvailableToRedeem"])} DOC
+BPRO Leverage: ${Web3.utils.fromWei(contracStatus["b0Leverage"])} 
+BPRO Target Coverage: ${Web3.utils.fromWei(contracStatus["b0Leverage"])} 
+Total BTC in contract: ${Web3.utils.fromWei(contracStatus["totalBTCAmount"])} 
+Total BTC inrate Bag: ${Web3.utils.fromWei(contracStatus["b0BTCInrateBag"])} 
+Global Coverage: ${Web3.utils.fromWei(contracStatus["globalCoverage"])} 
+BTCx Coverage: ${Web3.utils.fromWei(contracStatus["x2Coverage"])} 
+BTCx Leverage: ${Web3.utils.fromWei(contracStatus["x2Leverage"])} 
+BPRO Price: ${Web3.utils.fromWei(contracStatus["bproPriceInUsd"])} USD
+BTCx Price: ${Web3.utils.fromWei(contracStatus["bprox2PriceInRbtc"])} RBTC
+Contract State: ${contracStatus["state"]} 
+Contract Paused: ${contracStatus["paused"]} 
+Contract Protected: ${contracStatus["protected"]} 
+    `;
+
+    return render;
+
+}
+
 const userBalance  = async (web3, dContracts, userAddress) => {
 
     const multicall = dContracts["contracts"]["multicall"];
@@ -404,59 +436,60 @@ const userBalance  = async (web3, dContracts, userAddress) => {
 
 }
 
-const formatUserBalance  = (userBalance) => {
-
-    fmtUserBalance = {}
-    fmtUserBalance["blockHeight"] = userBalance["blockHeight"];
-    fmtUserBalance["mocBalance"] = Web3.utils.fromWei(userBalance["mocBalance"]);
-    fmtUserBalance["mocAllowance"] = Web3.utils.fromWei(userBalance["mocAllowance"]);
-    fmtUserBalance["docBalance"] = Web3.utils.fromWei(userBalance["docBalance"]);
-    fmtUserBalance["bproBalance"] = Web3.utils.fromWei(userBalance["bproBalance"]);
-    fmtUserBalance["rbtcBalance"] = Web3.utils.fromWei(userBalance["rbtcBalance"]);
-    fmtUserBalance["docToRedeem"] = Web3.utils.fromWei(userBalance["docToRedeem"]);
-    fmtUserBalance["bprox2Balance"] = Web3.utils.fromWei(userBalance["bprox2Balance"]);
-    fmtUserBalance["potentialBprox2MaxInterest"] = userBalance["potentialBprox2MaxInterest"];
-    fmtUserBalance["bProHoldIncentive"] = userBalance["bProHoldIncentive"];
-    fmtUserBalance["estimateGasMintBpro"] = userBalance["estimateGasMintBpro"];
-    fmtUserBalance["estimateGasMintDoc"] = userBalance["estimateGasMintDoc"];
-    fmtUserBalance["estimateGasMintBprox2"] = userBalance["estimateGasMintBprox2"];
-    fmtUserBalance["userAddress"] = userBalance["userAddress"];
-
-    return fmtUserBalance
-
-}
-
 const renderUserBalance  = (userBalance) => {
 
     var render = `
 User: ${userBalance["userAddress"]}
-RBTC Balance: ${userBalance["rbtcBalance"]} RBTC
-DOC Balance: ${userBalance["docBalance"]} DOC
-BPRO Balance: ${userBalance["bproBalance"]} BPRO
-BTCX Balance: ${userBalance["bprox2Balance"]} BTCX
-MOC Balance: ${userBalance["mocBalance"]} MOC
-MOC Allowance: ${userBalance["mocAllowance"]} MOC
-DOC queue to redeem: ${userBalance["docToRedeem"]} DOC
+RBTC Balance: ${Web3.utils.fromWei(userBalance["rbtcBalance"])} RBTC
+DOC Balance: ${Web3.utils.fromWei(userBalance["docBalance"])} DOC
+BPRO Balance: ${Web3.utils.fromWei(userBalance["bproBalance"])} BPRO
+BTCX Balance: ${Web3.utils.fromWei(userBalance["bprox2Balance"])} BTCX
+MOC Balance: ${Web3.utils.fromWei(userBalance["mocBalance"])} MOC
+MOC Allowance: ${Web3.utils.fromWei(userBalance["mocAllowance"])} MOC
+DOC queue to redeem: ${Web3.utils.fromWei(userBalance["docToRedeem"])} DOC
     `;
 
-    return render
+    return render;
 
 }
 
+const toContractPrecision  = (amount) => {
+    return Web3.utils.toWei(amount.toFormat(18, BigNumber.ROUND_DOWN), 'ether');
+}
 
-const calcCommission  = async (web3, dContracts, amount) => {
+
+const calcCommission  = async (web3, dContracts, dataContractStatus, reserveAmount, token) => {
 
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
 
     const multicall = dContracts["contracts"]["multicall"];
     const mocinrate = dContracts["contracts"]["mocinrate"];
 
+    let moc_type;
+    let reserve_type;
+    switch (token) {
+        case 'DOC':
+            reserve_type = dataContractStatus["commissionRatesTypes"]["MINT_DOC_FEES_RBTC"];
+            moc_type = dataContractStatus["commissionRatesTypes"]["MINT_DOC_FEES_MOC"];
+            break;
+        case 'BPRO':
+            reserve_type = dataContractStatus["commissionRatesTypes"]["MINT_BPRO_FEES_RBTC"];
+            moc_type = dataContractStatus["commissionRatesTypes"]["MINT_BPRO_FEES_MOC"];
+            break;
+        case 'BTCX':
+            reserve_type = dataContractStatus["commissionRatesTypes"]["MINT_BTCX_FEES_RBTC"];
+            moc_type = dataContractStatus["commissionRatesTypes"]["MINT_BTCX_FEES_MOC"];
+            break;
+      }
+     
+    
     // Calculate commission with multicall
     const listMethods = [
-        [mocinrate.options.address, mocinrate.methods.calcCommissionValue(amount, 3).encodeABI(), 'uint256'], // 0
-        [mocinrate.options.address, mocinrate.methods.calculateVendorMarkup(vendorAddress, amount).encodeABI(), 'uint256'] // 1        
+        [mocinrate.options.address, mocinrate.methods.calcCommissionValue(toContractPrecision(reserveAmount), reserve_type).encodeABI(), 'uint256'], // 0
+        [mocinrate.options.address, mocinrate.methods.calcCommissionValue(toContractPrecision(reserveAmount), moc_type).encodeABI(), 'uint256'], // 1
+        [mocinrate.options.address, mocinrate.methods.calculateVendorMarkup(vendorAddress, toContractPrecision(reserveAmount)).encodeABI(), 'uint256'] // 2
     ]
-
+    
     // Remove decode result parameter
     const cleanListMethods = listMethods.map(x => [x[0], x[1]]);
     
@@ -468,19 +501,70 @@ const calcCommission  = async (web3, dContracts, amount) => {
 
     // Dictionary commissions
     commission = {};
-    commission["commission"] = new BN(listReturnData[0]);
-    commission["vendorMarkup"] = new BN(listReturnData[1]);
+    commission["commission_reserve"] = listReturnData[0];
+    commission["commission_moc"] = listReturnData[1];
+    commission["vendorMarkup"] = listReturnData[2];
 
     return commission;
 
 }
 
-const printEvent  = (evente) => { 
+const addCommissions  = async (web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, token) => {
+
+    // get reserve price from contract
+    const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus["bitcoinPrice"]));
+
+    // calculate commissions
+    const commissions = await calcCommission(web3, dContracts, dataContractStatus, reserveAmount, token);
+
+    const commissionInReserve = new BigNumber(Web3.utils.fromWei(commissions["commission_reserve"]))
+                          .plus(new BigNumber(Web3.utils.fromWei(commissions["vendorMarkup"])));
+    
+    const commissionInMoc = new BigNumber(Web3.utils.fromWei(commissions["commission_moc"]))
+                      .plus(new BigNumber(Web3.utils.fromWei(commissions["vendorMarkup"])))
+                      .times(reservePrice).div(Web3.utils.fromWei(dataContractStatus["mocPrice"]));
+
+    const enoughMOCBalance = BigNumber(Web3.utils.fromWei(userBalanceStats["mocBalance"])).gte(commissionInMoc);
+
+    const enoughMOCAllowance = BigNumber(Web3.utils.fromWei(userBalanceStats["mocAllowance"])).gt(0) 
+                            && BigNumber(Web3.utils.fromWei(userBalanceStats["mocAllowance"])).gte(commissionInMoc);
+
+    // add commission to value send
+    let valueToSend;
+
+    if (enoughMOCBalance && enoughMOCAllowance) {
+        valueToSend = reserveAmount;
+        console.log(`Paying commission with MoC Tokens: ${commissionInMoc} MOC`);
+    } else {
+        valueToSend = reserveAmount.plus(commissionInReserve);
+        console.log(`Paying commission with RBTC: ${commissionInReserve} MOC`);
+    }
+
+    return valueToSend;
+}
+
+const renderEventField  = (eveName, eveValue) => { 
+
+    const formatItems = new Set([
+        'amount', 
+        'reserveTotal', 
+        'reservePrice', 
+        'mocCommissionValue', 
+        'mocPrice'])
+
+    if (formatItems.has(eveName)) {eveValue = Web3.utils.fromWei(eveValue)}
+
+    console.log('\x1b[32m%s\x1b[0m', `${eveName}: ${eveValue}`);
+
+}
+
+
+const renderEvent  = (evente) => { 
     
     console.log("");
     console.log('\x1b[35m%s\x1b[0m', `Event: ${evente.name}`);
     console.log("");
-    evente.events.forEach(eve => console.log('\x1b[32m%s\x1b[0m', `${eve.name}: ${eve.value}`));    
+    evente.events.forEach(eve => renderEventField(eve.name, eve.value));
 
 }
 
@@ -494,7 +578,7 @@ const decodeEvents  = (receipt) => {
         filterIncludes.includes(event.name)
     );
 
-    filteredEvents.forEach(evente => printEvent(evente));       
+    filteredEvents.forEach(evente => renderEvent(evente));       
     
 }
 
@@ -514,7 +598,7 @@ const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCal
         {
             from: userAddress,
             to: dContracts["contracts"]["moc"]._address,
-            value: value,
+            value: toContractPrecision(value),
             gas: estimateGas * gasMultiplier,
             gasPrice: gasPrice,
             gasLimit: estimateGas * gasMultiplier,
@@ -535,32 +619,79 @@ const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCal
 
 }
 
-const mintDoc  = async (web3, dContracts, userAmount) => {
+const statusFromContracts  = async (web3, dContracts) => {
 
-    const amount = new BN(userAmount * Math.pow(10, 18));    
+    // Read current status info from different contract MoCState.sol MoCInrate.sol 
+    // MoCSettlement.sol MoC.sol in one call throught Multicall
+    const dataContractStatus = await contractStatus(web3, dContracts);
+    
+    console.log('\x1b[35m%s\x1b[0m', `Contract Status`);
+    console.log();
+    console.log('\x1b[32m%s\x1b[0m', renderContractStatus(dataContractStatus));
 
-    const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+    return dataContractStatus;
+
+}
+
+const userBalanceFromContracts  = async (web3, dContracts, userAddress) => {
+
+    // Get user token and allowances balance
+    const userBalanceStats = await userBalance(web3, dContracts, userAddress);
+    
+    console.log('\x1b[35m%s\x1b[0m', `User Balance: ${userAddress}`);
+    console.log();
+    console.log('\x1b[32m%s\x1b[0m', renderUserBalance(userBalanceStats));
+
+    return userBalanceStats;
+
+}
+
+
+const mintDoc  = async (web3, dContracts, docAmount) => {
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
+    const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
 
-    // calculate commissions
-    const commissions = await calcCommission(web3, dContracts, amount);
+    // Get information from contracts
+    const dataContractStatus = await statusFromContracts(web3, dContracts);
 
-    // Calculate send values
-    const value = amount.add(commissions["commission"]).add(commissions["vendorMarkup"]);
+    // Get user balance address
+    const userBalanceStats = await userBalanceFromContracts(web3, dContracts, userAddress);
+        
+    // get bitcoin price from contract
+    const bitcoinPrice = new BigNumber(Web3.utils.fromWei(dataContractStatus["bitcoinPrice"]));
+
+    // Doc amount in reserve (RBTC or RIF)
+    const reserveAmount = new BigNumber(docAmount).div(bitcoinPrice);
+    
+    const valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'DOC');
+    
+    // Checks
+    console.log(`To mint ${docAmount} DOC you need > ${valueToSend.toString()} RBTC in your balance`);
+
+
+    // User have suficient reserve to pay?
+    const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats["rbtcBalance"]));    
+    if (valueToSend > userReserveBalance) throw new Error('Insuficient reserve balance');
+
+    // There are suficient Doc in the contracts to mint?
+    const docAvalaiblesToMint = new BigNumber(Web3.utils.fromWei(dataContractStatus["docAvailableToMint"]));    
+    if (new BigNumber(docAmount) > docAvalaiblesToMint) throw new Error('Insuficient DoCs avalaibles to mint');  
 
     const moc = dContracts["contracts"]["moc"];
 
     // Calculate estimate gas cost
     const estimateGas = await moc.methods
-        .mintDocVendors(amount, vendorAddress)
-        .estimateGas({ from: userAddress, value: value });
+        .mintDocVendors(toContractPrecision(reserveAmount), vendorAddress)
+        .estimateGas({ from: userAddress, value: toContractPrecision(valueToSend) });
 
+    // encode function     
     const encodedCall = moc.methods
-        .mintDocVendors(amount, vendorAddress)
+        .mintDocVendors(toContractPrecision(reserveAmount), vendorAddress)
         .encodeABI();
 
-    const receipt = await sendTransaction(web3, dContracts, value, estimateGas, encodedCall);
+    // send transaction to the blockchain and get receipt
+    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
     
     return receipt;
 
@@ -573,6 +704,6 @@ module.exports = {
     userBalance,
     readContracts,
     mintDoc,
-    formatUserBalance,
-    renderUserBalance
+    renderUserBalance,
+    renderContractStatus
 };

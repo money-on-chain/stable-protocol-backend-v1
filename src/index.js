@@ -1,5 +1,5 @@
 const { readJsonFile, getWeb3 } = require('./utils');
-const { contractStatus, userBalance, readContracts, mintDoc, formatUserBalance, renderUserBalance } = require('./core');
+const { contractStatus, userBalance, readContracts, mintDoc, renderUserBalance, renderContractStatus } = require('./core');
 
 
 require('dotenv').config();
@@ -22,18 +22,19 @@ const main  = async () => {
 
     console.log(dataContractStatus);
 
+    console.log('\x1b[35m%s\x1b[0m', `Contract Status`);
+    console.log();
+    console.log('\x1b[32m%s\x1b[0m', renderContractStatus(dataContractStatus));
+
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     
     // Get user balance
     const userBalanceStats = await userBalance(web3, dContracts, userAddress);
-
-    const fmtUserBalance = formatUserBalance(userBalanceStats);
+    
     console.log('\x1b[35m%s\x1b[0m', `User Balance: ${userAddress}`);
     console.log();
-    console.log('\x1b[32m%s\x1b[0m', renderUserBalance(fmtUserBalance));
-
-    const receipt = await mintDoc(web3, dContracts, 0.00001);
-    
+    console.log('\x1b[32m%s\x1b[0m', renderUserBalance(userBalanceStats));
+        
 }
 
 
