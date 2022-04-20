@@ -1,5 +1,5 @@
 const { readJsonFile, getWeb3 } = require('./utils');
-const { contractStatus, userBalance, readContracts, mintDoc, renderUserBalance, renderContractStatus } = require('./core');
+const { contractStatus, userBalance, readContracts, renderUserBalance, renderContractStatus } = require('./core');
 
 
 require('dotenv').config();
@@ -19,9 +19,7 @@ const main  = async () => {
     // Read info from different contract MoCState.sol MoCInrate.sol MoCSettlement.sol MoC.sol
     // in one call throught Multicall
     const dataContractStatus = await contractStatus(web3, dContracts);
-
-    console.log(dataContractStatus);
-
+    
     console.log('\x1b[35m%s\x1b[0m', `Contract Status`);
     console.log();
     console.log('\x1b[32m%s\x1b[0m', renderContractStatus(dataContractStatus));

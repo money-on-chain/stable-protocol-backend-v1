@@ -666,11 +666,10 @@ const mintDoc  = async (web3, dContracts, docAmount) => {
     
     const valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'DOC');
     
-    // Checks
-    console.log(`To mint ${docAmount} DOC you need > ${valueToSend.toString()} RBTC in your balance`);
-
+    // Verifications
 
     // User have suficient reserve to pay?
+    console.log(`To mint ${docAmount} DOC you need > ${valueToSend.toString()} RBTC in your balance`);
     const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats["rbtcBalance"]));    
     if (valueToSend > userReserveBalance) throw new Error('Insuficient reserve balance');
 
@@ -692,6 +691,8 @@ const mintDoc  = async (web3, dContracts, docAmount) => {
 
     // send transaction to the blockchain and get receipt
     const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    
+    console.log(`Transaction hash: ${receipt.transactionHash}`);
     
     return receipt;
 
