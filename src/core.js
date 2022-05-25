@@ -1,5 +1,5 @@
-//const BN = require("bn.js");
 const BigNumber = require('bignumber.js');
+
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN });
 const reservePrecision = new BigNumber(10).exponentiatedBy(18);
 
@@ -458,7 +458,7 @@ const toContractPrecision  = (amount) => {
 }
 
 
-const calcCommission  = async (web3, dContracts, dataContractStatus, reserveAmount, token) => {
+const calcCommission  = async (web3, dContracts, dataContractStatus, reserveAmount, token, action) => {
 
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
 
@@ -469,16 +469,31 @@ const calcCommission  = async (web3, dContracts, dataContractStatus, reserveAmou
     let reserve_type;
     switch (token) {
         case 'DOC':
-            reserve_type = dataContractStatus["commissionRatesTypes"]["MINT_DOC_FEES_RBTC"];
-            moc_type = dataContractStatus["commissionRatesTypes"]["MINT_DOC_FEES_MOC"];
+            if (action === 'MINT') {
+                reserve_type = dataContractStatus["commissionRatesTypes"]["MINT_DOC_FEES_RBTC"];
+                moc_type = dataContractStatus["commissionRatesTypes"]["MINT_DOC_FEES_MOC"];
+            } else {
+                reserve_type = dataContractStatus["commissionRatesTypes"]["REDEEM_DOC_FEES_RBTC"];
+                moc_type = dataContractStatus["commissionRatesTypes"]["REDEEM_DOC_FEES_MOC"];
+            }            
             break;
         case 'BPRO':
-            reserve_type = dataContractStatus["commissionRatesTypes"]["MINT_BPRO_FEES_RBTC"];
-            moc_type = dataContractStatus["commissionRatesTypes"]["MINT_BPRO_FEES_MOC"];
+            if (action === 'MINT') {
+                reserve_type = dataContractStatus["commissionRatesTypes"]["MINT_BPRO_FEES_RBTC"];
+                moc_type = dataContractStatus["commissionRatesTypes"]["MINT_BPRO_FEES_MOC"];
+            } else {
+                reserve_type = dataContractStatus["commissionRatesTypes"]["REDEEM_BPRO_FEES_RBTC"];
+                moc_type = dataContractStatus["commissionRatesTypes"]["REDEEM_BPRO_FEES_MOC"];
+            }
             break;
         case 'BTCX':
-            reserve_type = dataContractStatus["commissionRatesTypes"]["MINT_BTCX_FEES_RBTC"];
-            moc_type = dataContractStatus["commissionRatesTypes"]["MINT_BTCX_FEES_MOC"];
+            if (action === 'MINT') {
+                reserve_type = dataContractStatus["commissionRatesTypes"]["MINT_BTCX_FEES_RBTC"];
+                moc_type = dataContractStatus["commissionRatesTypes"]["MINT_BTCX_FEES_MOC"];
+            } else {
+                reserve_type = dataContractStatus["commissionRatesTypes"]["REDEEM_BTCX_FEES_RBTC"];
+                moc_type = dataContractStatus["commissionRatesTypes"]["REDEEM_BTCX_FEES_MOC"];
+            }
             break;
       }
      
@@ -509,23 +524,27 @@ const calcCommission  = async (web3, dContracts, dataContractStatus, reserveAmou
 
 }
 
-const addCommissions  = async (web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, token) => {
+const addCommissions  = async (web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, token, action) => {
 
     // get reserve price from contract
     const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus["bitcoinPrice"]));
 
-    // calculate commissions
-    const commissions = await calcCommission(web3, dContracts, dataContractStatus, reserveAmount, token);
+    // Get commissions from contracts
+    const commissions = await calcCommission(web3, dContracts, dataContractStatus, reserveAmount, token, action);
 
+    // Calculate commissions using Reserve payment(RBTC or RIF)
     const commissionInReserve = new BigNumber(Web3.utils.fromWei(commissions["commission_reserve"]))
                           .plus(new BigNumber(Web3.utils.fromWei(commissions["vendorMarkup"])));
     
+    // Calculate commissions using MoC Token payment
     const commissionInMoc = new BigNumber(Web3.utils.fromWei(commissions["commission_moc"]))
                       .plus(new BigNumber(Web3.utils.fromWei(commissions["vendorMarkup"])))
                       .times(reservePrice).div(Web3.utils.fromWei(dataContractStatus["mocPrice"]));
 
+    // Enough MoC to Pay commission with MoC Token                  
     const enoughMOCBalance = BigNumber(Web3.utils.fromWei(userBalanceStats["mocBalance"])).gte(commissionInMoc);
 
+    // Enough MoC allowance to Pay commission with MoC Token
     const enoughMOCAllowance = BigNumber(Web3.utils.fromWei(userBalanceStats["mocAllowance"])).gt(0) 
                             && BigNumber(Web3.utils.fromWei(userBalanceStats["mocAllowance"])).gte(commissionInMoc);
 
@@ -537,7 +556,7 @@ const addCommissions  = async (web3, dContracts, dataContractStatus, userBalance
         console.log(`Paying commission with MoC Tokens: ${commissionInMoc} MOC`);
     } else {
         valueToSend = reserveAmount.plus(commissionInReserve);
-        console.log(`Paying commission with RBTC: ${commissionInReserve} MOC`);
+        console.log(`Paying commission with RBTC: ${commissionInReserve} RBTC`);
     }
 
     return valueToSend;
@@ -550,7 +569,13 @@ const renderEventField  = (eveName, eveValue) => {
         'reserveTotal', 
         'reservePrice', 
         'mocCommissionValue', 
-        'mocPrice'])
+        'mocPrice', 
+        'commission', 
+        'mocCommissionValue', 
+        'mocPrice', 
+        'btcMarkup', 
+        'mocMarkup', 
+        'interests'])
 
     if (formatItems.has(eveName)) {eveValue = Web3.utils.fromWei(eveValue)}
 
@@ -572,7 +597,7 @@ const decodeEvents  = (receipt) => {
 
     const decodedLogs = abiDecoder.decodeLogs(receipt.logs);
     
-    const filterIncludes = ["StableTokenMint"];
+    const filterIncludes = ["StableTokenMint", "StableTokenRedeem", "FreeStableTokenRedeem"];
             
     const filteredEvents = decodedLogs.filter(event =>         
         filterIncludes.includes(event.name)
@@ -590,6 +615,13 @@ const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCal
 
     console.log("Please wait... sending transaction... Wait until blockchain mine transaction!");
 
+    let valueToSend;
+    if ((typeof value === 'undefined') || value === null) {
+        valueToSend = '0x';
+    } else {
+        valueToSend = toContractPrecision(value);
+    }
+
     // Get gas price from node
     const gasPrice = await web3.eth.getGasPrice();
         
@@ -598,7 +630,7 @@ const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCal
         {
             from: userAddress,
             to: dContracts["contracts"]["moc"]._address,
-            value: toContractPrecision(value),
+            value: valueToSend,
             gas: estimateGas * gasMultiplier,
             gasPrice: gasPrice,
             gasLimit: estimateGas * gasMultiplier,
@@ -657,14 +689,14 @@ const mintDoc  = async (web3, dContracts, docAmount) => {
 
     // Get user balance address
     const userBalanceStats = await userBalanceFromContracts(web3, dContracts, userAddress);
-        
+    docBalance
     // get bitcoin price from contract
     const bitcoinPrice = new BigNumber(Web3.utils.fromWei(dataContractStatus["bitcoinPrice"]));
 
     // Doc amount in reserve (RBTC or RIF)
     const reserveAmount = new BigNumber(docAmount).div(bitcoinPrice);
     
-    const valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'DOC');
+    const valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'DOC', 'MINT');
     
     // Verifications
 
@@ -698,6 +730,58 @@ const mintDoc  = async (web3, dContracts, docAmount) => {
 
 }
 
+const redeemDoc  = async (web3, dContracts, docAmount) => {
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
+    const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+
+    // Get information from contracts
+    const dataContractStatus = await statusFromContracts(web3, dContracts);
+
+    // Get user balance address
+    const userBalanceStats = await userBalanceFromContracts(web3, dContracts, userAddress);
+        
+    // get bitcoin price from contract
+    const bitcoinPrice = new BigNumber(Web3.utils.fromWei(dataContractStatus["bitcoinPrice"]));
+
+    // Doc amount in reserve (RBTC or RIF)
+    const reserveAmount = new BigNumber(docAmount).div(bitcoinPrice);
+
+    // Redeem function... no values sent
+    const valueToSend = null;    
+        
+    // Verifications
+
+    // User have suficient DoCs in balance?
+    console.log(`Redeeming ${docAmount} DOC ... getting aprox: ${reserveAmount} RBTC... `);
+    const userDoCBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats["docBalance"]));    
+    if (new BigNumber(docAmount) > userDoCBalance) throw new Error('Insuficient DoC user balance');
+
+    // There are suficient Free Doc in the contracts to redeem?
+    const docAvalaiblesToRedeem = new BigNumber(Web3.utils.fromWei(dataContractStatus["docAvailableToRedeem"]));    
+    if (new BigNumber(docAmount) > docAvalaiblesToRedeem) throw new Error('Insuficient DoCs avalaibles to redeem in contract');  
+
+    const moc = dContracts["contracts"]["moc"];
+
+    // Calculate estimate gas cost
+    const estimateGas = await moc.methods
+        .redeemFreeDocVendors(toContractPrecision(reserveAmount), vendorAddress)
+        .estimateGas({ from: userAddress, value: '0x' });
+
+    // encode function     
+    const encodedCall = moc.methods
+        .redeemFreeDocVendors(toContractPrecision(reserveAmount), vendorAddress)
+        .encodeABI();
+
+    // send transaction to the blockchain and get receipt
+    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    
+    console.log(`Transaction hash: ${receipt.transactionHash}`);
+    
+    return receipt;
+
+}
+
    
 module.exports = {
     connectorAddresses,
@@ -705,6 +789,7 @@ module.exports = {
     userBalance,
     readContracts,
     mintDoc,
+    redeemDoc,
     renderUserBalance,
     renderContractStatus
 };

@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "mint-doc": "node src/mintDoc.js",
+    "redeem-doc": "node src/redeemDoc.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
