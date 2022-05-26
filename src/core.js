@@ -745,7 +745,8 @@ const renderEventField  = (eveName, eveValue) => {
         'mocPrice', 
         'btcMarkup', 
         'mocMarkup', 
-        'interests'])
+        'interests', 
+        'leverage'])
 
     if (formatItems.has(eveName)) {eveValue = Web3.utils.fromWei(eveValue)}
 
@@ -859,22 +860,32 @@ const userBalanceFromContracts  = async (web3, dContracts, userAddress) => {
 
 const mintDoc  = async (web3, dContracts, docAmount) => {
 
+    // Mint stable token with collateral coin base: RBTC
+
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+    const mintSlippage = `${process.env.MINT_SLIPPAGE}`;
 
     // Get information from contracts
     const dataContractStatus = await statusFromContracts(web3, dContracts);
 
     // Get user balance address
     const userBalanceStats = await userBalanceFromContracts(web3, dContracts, userAddress);
-    //docBalance
+    
     // get bitcoin price from contract
     const bitcoinPrice = new BigNumber(Web3.utils.fromWei(dataContractStatus["bitcoinPrice"]));
 
     // Doc amount in reserve (RBTC or RIF)
     const reserveAmount = new BigNumber(docAmount).div(bitcoinPrice);
     
-    const valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'DOC', 'MINT');
+    let valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'DOC', 'MINT');
+
+    // Add Slippage plus %
+    const mintSlippageAmount = new BigNumber(mintSlippage).div(100).times(reserveAmount);
+    
+    valueToSend = new BigNumber(valueToSend).plus(mintSlippageAmount);
+
+    console.log(`Mint Slippage using ${mintSlippage} %. Slippage amount: ${mintSlippageAmount.toString()} Total to send: ${valueToSend.toString()}`);
     
     // Verifications
 
@@ -910,6 +921,8 @@ const mintDoc  = async (web3, dContracts, docAmount) => {
 
 const redeemDoc  = async (web3, dContracts, docAmount) => {
 
+    // Redeem stable token receiving coin base: RBTC
+
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
 
@@ -943,12 +956,12 @@ const redeemDoc  = async (web3, dContracts, docAmount) => {
 
     // Calculate estimate gas cost
     const estimateGas = await moc.methods
-        .redeemFreeDocVendors(toContractPrecision(reserveAmount), vendorAddress)
+        .redeemFreeDocVendors(toContractPrecision(new BigNumber(docAmount)), vendorAddress)
         .estimateGas({ from: userAddress, value: '0x' });
 
     // encode function     
     const encodedCall = moc.methods
-        .redeemFreeDocVendors(toContractPrecision(reserveAmount), vendorAddress)
+        .redeemFreeDocVendors(toContractPrecision(new BigNumber(docAmount)), vendorAddress)
         .encodeABI();
 
     // send transaction to the blockchain and get receipt
@@ -963,8 +976,11 @@ const redeemDoc  = async (web3, dContracts, docAmount) => {
 
 const mintBPro  = async (web3, dContracts, bproAmount) => {
 
+    // Mint BitPro token with collateral coin base: RBTC
+
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+    const mintSlippage = `${process.env.MINT_SLIPPAGE}`;
 
     // Get information from contracts
     const dataContractStatus = await statusFromContracts(web3, dContracts);
@@ -978,8 +994,15 @@ const mintBPro  = async (web3, dContracts, bproAmount) => {
     // BPro amount in reserve (RBTC or RIF)
     const reserveAmount = new BigNumber(bproAmount).times(bproPriceInRbtc);
     
-    const valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'BPRO', 'MINT');
+    let valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'BPRO', 'MINT');
+
+    // Add Slippage plus %
+    const mintSlippageAmount = new BigNumber(mintSlippage).div(100).times(reserveAmount);
     
+    valueToSend = new BigNumber(valueToSend).plus(mintSlippageAmount);
+
+    console.log(`Mint Slippage using ${mintSlippage} %. Slippage amount: ${mintSlippageAmount.toString()} Total to send: ${valueToSend.toString()}`);
+        
     // Verifications
 
     // User have suficient reserve to pay?
@@ -1009,6 +1032,8 @@ const mintBPro  = async (web3, dContracts, bproAmount) => {
 }
 
 const redeemBPro  = async (web3, dContracts, bproAmount) => {
+
+    // Redeem BPro token receiving coin base: RBTC
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
@@ -1043,12 +1068,12 @@ const redeemBPro  = async (web3, dContracts, bproAmount) => {
 
     // Calculate estimate gas cost
     const estimateGas = await moc.methods
-        .redeemBProVendors(toContractPrecision(reserveAmount), vendorAddress)
+        .redeemBProVendors(toContractPrecision(new BigNumber(bproAmount)), vendorAddress)
         .estimateGas({ from: userAddress, value: '0x' });
 
     // encode function     
     const encodedCall = moc.methods
-        .redeemBProVendors(toContractPrecision(reserveAmount), vendorAddress)
+        .redeemBProVendors(toContractPrecision(new BigNumber(bproAmount)), vendorAddress)
         .encodeABI();
 
     // send transaction to the blockchain and get receipt
@@ -1059,6 +1084,132 @@ const redeemBPro  = async (web3, dContracts, bproAmount) => {
     return receipt;
 
 }
+
+const calcMintInterest = async (dContracts, amount) => {
+
+    const mocinrate = dContracts["contracts"]["mocinrate"];
+    const calcMintInterest = await mocinrate.methods.calcMintInterestValues(BUCKET_X2, toContractPrecision(amount)).call();
+    return calcMintInterest;
+}
+
+const mintBTCx  = async (web3, dContracts, btcxAmount) => {
+
+    // Mint BTCx token with collateral coin base: RBTC
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
+    const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+    const mintSlippage = `${process.env.MINT_SLIPPAGE}`;
+
+    // Get information from contracts
+    const dataContractStatus = await statusFromContracts(web3, dContracts);
+
+    // Get user balance address
+    const userBalanceStats = await userBalanceFromContracts(web3, dContracts, userAddress);
+        
+    // Price of BTCX in RBTC
+    const bprox2PriceInRbtc = new BigNumber(Web3.utils.fromWei(dataContractStatus["bprox2PriceInRbtc"]));
+    
+    // BPro amount in reserve (RBTC or RIF)
+    const reserveAmount = new BigNumber(btcxAmount).times(bprox2PriceInRbtc);
+    
+    let valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'BTCX', 'MINT');
+
+    // Calc Interest to mint BTCX
+    const mintInterest = await calcMintInterest(dContracts, reserveAmount);
+
+    valueToSend = new BigNumber(valueToSend).plus(new BigNumber(Web3.utils.fromWei(mintInterest)));
+
+    console.log(`Mint BTCX Interest ${mintInterest}`);
+
+    // Add Slippage plus %
+    const mintSlippageAmount = new BigNumber(mintSlippage).div(100).times(reserveAmount);
+    
+    valueToSend = new BigNumber(valueToSend).plus(mintSlippageAmount);
+
+    console.log(`Mint Slippage using ${mintSlippage} %. Slippage amount: ${mintSlippageAmount.toString()} Total to send: ${valueToSend.toString()}`);
+            
+    // Verifications
+
+    // User have suficient reserve to pay?
+    console.log(`To mint ${btcxAmount} BTCx you need > ${valueToSend.toString()} RBTC in your balance`);
+    const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats["rbtcBalance"]));    
+    if (valueToSend > userReserveBalance) throw new Error('Insuficient reserve balance');
+
+    // There are suficient BTCX in the contracts to mint?
+    const btcxAvalaiblesToMint = new BigNumber(Web3.utils.fromWei(dataContractStatus["bprox2AvailableToMint"]));    
+    if (new BigNumber(btcxAmount) > btcxAvalaiblesToMint) throw new Error('Insuficient BTCx avalaibles to mint');  
+    
+    const moc = dContracts["contracts"]["moc"];
+
+    // Calculate estimate gas cost
+    const estimateGas = await moc.methods
+        .mintBProxVendors(BUCKET_X2, toContractPrecision(reserveAmount), vendorAddress)
+        .estimateGas({ from: userAddress, value: toContractPrecision(valueToSend) });
+
+    // encode function     
+    const encodedCall = moc.methods
+        .mintBProxVendors(BUCKET_X2, toContractPrecision(reserveAmount), vendorAddress)
+        .encodeABI();
+
+    // send transaction to the blockchain and get receipt
+    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    
+    console.log(`Transaction hash: ${receipt.transactionHash}`);
+    
+    return receipt;
+
+}
+
+const redeemBTCx  = async (web3, dContracts, btcxAmount) => {
+
+    // Redeem BTCx token receiving coin base: RBTC
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
+    const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+
+    // Get information from contracts
+    const dataContractStatus = await statusFromContracts(web3, dContracts);
+
+    // Get user balance address
+    const userBalanceStats = await userBalanceFromContracts(web3, dContracts, userAddress);
+        
+    // Price of BTCx in RBTC
+    const btcxPriceInRbtc = new BigNumber(Web3.utils.fromWei(dataContractStatus["bprox2PriceInRbtc"]));
+
+    // BTCx amount in reserve RBTC
+    const reserveAmount = new BigNumber(btcxAmount).times(btcxPriceInRbtc);
+
+    // Redeem function... no values sent
+    const valueToSend = null;    
+        
+    // Verifications
+
+    // User have suficient BTCx in balance?
+    console.log(`Redeeming ${btcxAmount} BTCx ... getting aprox: ${reserveAmount} RBTC... `);
+    const userBTCxBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats["bprox2Balance"]));    
+    if (new BigNumber(btcxAmount) > userBTCxBalance) throw new Error('Insuficient BTCx user balance');
+    
+    const moc = dContracts["contracts"]["moc"];
+
+    // Calculate estimate gas cost
+    const estimateGas = await moc.methods
+        .redeemBProxVendors(BUCKET_X2, toContractPrecision(new BigNumber(btcxAmount)), vendorAddress)
+        .estimateGas({ from: userAddress, value: '0x' });
+
+    // encode function     
+    const encodedCall = moc.methods
+        .redeemBProxVendors(BUCKET_X2, toContractPrecision(new BigNumber(btcxAmount)), vendorAddress)
+        .encodeABI();
+
+    // send transaction to the blockchain and get receipt
+    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    
+    console.log(`Transaction hash: ${receipt.transactionHash}`);
+    
+    return receipt;
+
+}
+
    
 module.exports = {
     connectorAddresses,
@@ -1070,5 +1221,7 @@ module.exports = {
     renderUserBalance,
     renderContractStatus,
     mintBPro,
-    redeemBPro
+    redeemBPro,
+    mintBTCx,
+    redeemBTCx
 };
