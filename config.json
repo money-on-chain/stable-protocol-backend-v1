@@ -10,5 +10,17 @@
     "mocMainnet2": {
         "MoC": "0xf773B590aF754D597770937Fa8ea7AbDf2668370",
         "Multicall2": "0x8f344c3b2a02a801c24635f594c5652c8a2eb02a"
+    },
+    "rdocTestnetAlpha": {
+        "MoC": "0x4512f4C1d984bbf8B7f7404EddFb1881cFA79EfD",
+        "Multicall2": "0xaf7be1ef9537018feda5397d9e3bb9a1e4e27ac8"
+    },
+    "rdocTestnet": {
+        "MoC": "0x7e2F245F7dc8e78576ECB13AEFc0a101E9BE1AD3",
+        "Multicall2": "0xaf7be1ef9537018feda5397d9e3bb9a1e4e27ac8"
+    },
+    "rdocMainnet": {
+        "MoC": "0xCfF3fcaeC2352C672C38d77cb1a064B7D50ce7e1",
+        "Multicall2": "0x8f344c3b2a02a801c24635f594c5652c8a2eb02a"
     }
 }

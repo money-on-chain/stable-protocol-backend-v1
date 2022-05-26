@@ -5,19 +5,23 @@ Code example verification of Money on chain operations
 ### Setup
 
 1. `npm install`
-2. Clone `.env.mocTestnet` and save it as `.env`
+2. Clone `.env.mocTestnet` and save it as `.env` ... use environment you want to use please refer environment table
 3. Fill in wallet address and private key (it needs some testnet RBTC) in that file.
-
 
 ```
 USER_ADDRESS=
 USER_PK=
 HOST_URI=https://public-node.testnet.rsk.co
 MOC_ENVIRONMENT=mocTestnet
-MOC_PROJECT=MoC
 VENDOR_ADDRESS=0xf69287F5Ca3cC3C6d3981f2412109110cB8af076
 GAS_MULTIPLIER=2
 OPERATION_AMOUNT_MINT_DOC=10
+OPERATION_AMOUNT_REDEEM_DOC=10
+OPERATION_AMOUNT_MINT_BPRO=0.0001
+OPERATION_AMOUNT_REDEEM_BPRO=0.0001
+OPERATION_AMOUNT_MINT_BTCX=0.0001
+OPERATION_AMOUNT_REDEEM_BTCX=0.00001
+MINT_SLIPPAGE=0.2
 ```
 
 #### Enviroment table
@@ -34,7 +38,32 @@ Enviroment is our already deployed contracts. For example **mocMainnet2** is our
 | rdocMainnet       | RIF     | rif.moneyonchain.com             | Mainnet    |
 
 
+
+### Faucets
+
+In testnet you may need some test tRIF o tRBTC
+
+* **Faucet tRBTC**: https://faucet.rsk.co/
+* **Faucet tRIF**: https://faucet.rifos.org/
+
+
+
 ### How to run
+
+
+| Command                             | Action                                        | Obs                       | 
+|-------------------------------------|-----------------------------------------------|---------------------------|
+| npm run commission-moc-enable       | Enable paying commission MoC                  |                           |
+| npm run commission-moc-disable      | Disable paying commission MoC                 |                           |
+| npm run mint-doc                    | Mint DoC or Rdoc depend of the environment    |  In rdoc environment before make allowance action     |
+| npm run redeem-doc                  | Redeem DoC or Rdoc depend of the environment  |       |
+| npm run mint-bpro                   | Mint BPro or RIFP depend of the environment   |  In rdoc environment before make allowance action     |
+| npm run redeem-bpro                 | Redeem BPro or RIFP depend of the environment |       |
+| npm run mint-btcx                   | Mint BTCx or RIFx depend of the environment   |  In rdoc environment before make allowance action     |
+| npm run redeem-btcx                 | Redeem BTCx or RIFx depend of the environment |  In rdoc environment before make allowance action     |
+
+
+Example:
 
 `npm run mint-doc`
 

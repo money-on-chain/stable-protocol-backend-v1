@@ -38,30 +38,32 @@ const connectorAddresses  = async (web3, dContracts) => {
 
 const readContracts  = async (web3, config) => { 
 
+    const appProject = getAppMoCProject();
+
     dContracts = {};
     dContracts["json"] = {};
     dContracts["contracts"] = {};
     dContracts["contractsAddresses"] = {};
 
-    const Multicall2 = readJsonFile(`./abis/${process.env.MOC_PROJECT}/Multicall2.json`);
+    const Multicall2 = readJsonFile(`./abis/${appProject}/Multicall2.json`);
     dContracts["json"]["Multicall2"] = Multicall2;
-    const MoCConnector = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoCConnector.json`);   
+    const MoCConnector = readJsonFile(`./abis/${appProject}/MoCConnector.json`);   
     dContracts["json"]["MoCConnector"] = MoCConnector;
-    const MoC = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoC.json`);
+    const MoC = readJsonFile(`./abis/${appProject}/MoC.json`);
     dContracts["json"]["MoC"] = MoC;
-    const MoCState = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoCState.json`);
+    const MoCState = readJsonFile(`./abis/${appProject}/MoCState.json`);
     dContracts["json"]["MoCState"] = MoCState;
-    const MoCExchange = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoCExchange.json`);
+    const MoCExchange = readJsonFile(`./abis/${appProject}/MoCExchange.json`);
     dContracts["json"]["MoCExchange"] = MoCExchange;
-    const MoCInrate = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoCInrate.json`);
+    const MoCInrate = readJsonFile(`./abis/${appProject}/MoCInrate.json`);
     dContracts["json"]["MoCInrate"] = MoCInrate;
-    const MoCSettlement = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoCSettlement.json`);
+    const MoCSettlement = readJsonFile(`./abis/${appProject}/MoCSettlement.json`);
     dContracts["json"]["MoCSettlement"] = MoCSettlement;
-    const DocToken = readJsonFile(`./abis/${process.env.MOC_PROJECT}/DocToken.json`);
+    const DocToken = readJsonFile(`./abis/${appProject}/DocToken.json`);
     dContracts["json"]["DocToken"] = DocToken;
-    const BProToken = readJsonFile(`./abis/${process.env.MOC_PROJECT}/BProToken.json`);
+    const BProToken = readJsonFile(`./abis/${appProject}/BProToken.json`);
     dContracts["json"]["BProToken"] = BProToken;
-    const MoCToken = readJsonFile(`./abis/${process.env.MOC_PROJECT}/MoCToken.json`);
+    const MoCToken = readJsonFile(`./abis/${appProject}/MoCToken.json`);
     dContracts["json"]["MoCToken"] = MoCToken;
     
     console.log('Reading Multicall2 Contract... address: ', config.Multicall2);
@@ -132,17 +134,55 @@ const readContracts  = async (web3, config) => {
 
 }
 
+const getAppMode = () => {
+
+    const mocEnvironment = `${process.env.MOC_ENVIRONMENT}`;
+
+    let appMode;
+    switch (mocEnvironment) {
+        case 'mocTestnetAlpha':
+        case 'mocTestnet':
+        case 'mocMainnet2':    
+            appMode = "MoC";           
+            break;
+        case 'rdocTestnetAlpha':
+        case 'rdocTestnet':
+        case 'rdocMainnet':    
+            appMode = "RRC20";
+            break;
+        default:
+            throw new Error('Environment not implemented! Please refer to table list of MoC Environments');            
+    }
+    return appMode;
+}
+
+const getAppMoCProject = () => {
+
+    const mocEnvironment = `${process.env.MOC_ENVIRONMENT}`;
+
+    let appProject;
+    switch (mocEnvironment) {
+        case 'mocTestnetAlpha':
+        case 'mocTestnet':
+        case 'mocMainnet2':    
+            appProject = "MoC";           
+            break;
+        case 'rdocTestnetAlpha':
+        case 'rdocTestnet':
+        case 'rdocMainnet':    
+            appProject = "RDoC";
+            break;
+        default:
+            throw new Error('Environment not implemented! Please refer to table list of MoC Environments');            
+    }
+    return appProject;
+}
+
 
 const contractStatus  = async (web3, dContracts) => { 
 
-    const mocProject = `${process.env.MOC_PROJECT}`;
-    let appMode;
-    if (mocProject === "MoC") {
-        appMode = "MoC";
-    } else {
-        appMode = "RRC20";
-    }
-
+    const appMode = getAppMode();
+    
     const multicall = dContracts["contracts"]["multicall"];
     const moc = dContracts["contracts"]["moc"];
     const mocstate = dContracts["contracts"]["mocstate"];
@@ -894,6 +934,10 @@ const mintDoc  = async (web3, dContracts, docAmount) => {
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
     const mintSlippage = `${process.env.MINT_SLIPPAGE}`;
+    
+    // Ensure is in correct app mode
+    const appMode = getAppMode();
+    if (appMode != "MoC") throw new Error('This function is only for app mode = MoC');
 
     // Get information from contracts
     const dataContractStatus = await statusFromContracts(web3, dContracts);
@@ -955,6 +999,10 @@ const redeemDoc  = async (web3, dContracts, docAmount) => {
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
 
+    // Ensure is in correct app mode
+    const appMode = getAppMode();
+    if (appMode != "MoC") throw new Error('This function is only for app mode = MoC');
+
     // Get information from contracts
     const dataContractStatus = await statusFromContracts(web3, dContracts);
 
@@ -1011,6 +1059,10 @@ const mintBPro  = async (web3, dContracts, bproAmount) => {
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
     const mintSlippage = `${process.env.MINT_SLIPPAGE}`;
 
+    // Ensure is in correct app mode
+    const appMode = getAppMode();
+    if (appMode != "MoC") throw new Error('This function is only for app mode = MoC');
+
     // Get information from contracts
     const dataContractStatus = await statusFromContracts(web3, dContracts);
 
@@ -1066,6 +1118,10 @@ const redeemBPro  = async (web3, dContracts, bproAmount) => {
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+
+    // Ensure is in correct app mode
+    const appMode = getAppMode();
+    if (appMode != "MoC") throw new Error('This function is only for MoC Mode... are you using in your enviroment RIF projects?');
 
     // Get information from contracts
     const dataContractStatus = await statusFromContracts(web3, dContracts);
@@ -1128,6 +1184,10 @@ const mintBTCx  = async (web3, dContracts, btcxAmount) => {
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
     const mintSlippage = `${process.env.MINT_SLIPPAGE}`;
+
+    // Ensure is in correct app mode
+    const appMode = getAppMode();
+    if (appMode != "MoC") throw new Error('This function is only for app mode = MoC');
 
     // Get information from contracts
     const dataContractStatus = await statusFromContracts(web3, dContracts);
@@ -1195,6 +1255,10 @@ const redeemBTCx  = async (web3, dContracts, btcxAmount) => {
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase();
+
+    // Ensure is in correct app mode
+    const appMode = getAppMode();
+    if (appMode != "MoC") throw new Error('This function is only for app mode = MoC');
 
     // Get information from contracts
     const dataContractStatus = await statusFromContracts(web3, dContracts);
