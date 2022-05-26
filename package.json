@@ -11,6 +11,8 @@
     "redeem-bpro": "node src/redeemBPro.js",
     "mint-btcx": "node src/mintBTCx.js",
     "redeem-btcx": "node src/redeemBTCx.js",
+    "commission-moc-enable": "node src/commissionMocEnable.js",
+    "commission-moc-disable": "node src/commissionMocDisable.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

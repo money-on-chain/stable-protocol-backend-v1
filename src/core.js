@@ -786,7 +786,7 @@ const decodeEvents  = (receipt) => {
     
 }
 
-const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCall) => {
+const sendTransaction  = async (web3, value, estimateGas, encodedCall, toContract) => {
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
     const privateKey = process.env.USER_PK;
@@ -808,7 +808,7 @@ const sendTransaction  = async (web3, dContracts, value, estimateGas, encodedCal
     const transaction = await web3.eth.accounts.signTransaction(
         {
             from: userAddress,
-            to: dContracts["contracts"]["moc"]._address,
+            to: toContract,
             value: valueToSend,
             gas: estimateGas * gasMultiplier,
             gasPrice: gasPrice,
@@ -857,6 +857,35 @@ const userBalanceFromContracts  = async (web3, dContracts, userAddress) => {
 
 }
 
+const AllowPayingCommissionMoC  = async (web3, dContracts, allow) => {
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
+    const moctoken = dContracts["contracts"]["moctoken"];
+
+    let amountAllowance = '0';
+    const valueToSend = null;
+    if (allow) {
+        amountAllowance = Number.MAX_SAFE_INTEGER.toString();
+    }
+
+    // Calculate estimate gas cost
+    const estimateGas = await moctoken.methods
+        .approve(dContracts["contracts"]["moc"]._address, web3.utils.toWei(amountAllowance))
+        .estimateGas({ from: userAddress, value: '0x' });
+
+    // encode function     
+    const encodedCall = moctoken.methods
+        .approve(dContracts["contracts"]["moc"]._address, web3.utils.toWei(amountAllowance))
+        .encodeABI();
+
+    // send transaction to the blockchain and get receipt
+    const receipt = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, moctoken._address);
+    
+    console.log(`Transaction hash: ${receipt.transactionHash}`);
+    
+    return receipt;
+
+}
 
 const mintDoc  = async (web3, dContracts, docAmount) => {
 
@@ -911,7 +940,7 @@ const mintDoc  = async (web3, dContracts, docAmount) => {
         .encodeABI();
 
     // send transaction to the blockchain and get receipt
-    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    const receipt = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, dContracts["contracts"]["moc"]._address);
     
     console.log(`Transaction hash: ${receipt.transactionHash}`);
     
@@ -965,7 +994,7 @@ const redeemDoc  = async (web3, dContracts, docAmount) => {
         .encodeABI();
 
     // send transaction to the blockchain and get receipt
-    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    const receipt = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, dContracts["contracts"]["moc"]._address);
     
     console.log(`Transaction hash: ${receipt.transactionHash}`);
     
@@ -1023,7 +1052,7 @@ const mintBPro  = async (web3, dContracts, bproAmount) => {
         .encodeABI();
 
     // send transaction to the blockchain and get receipt
-    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    const receipt = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, dContracts["contracts"]["moc"]._address);
     
     console.log(`Transaction hash: ${receipt.transactionHash}`);
     
@@ -1077,7 +1106,7 @@ const redeemBPro  = async (web3, dContracts, bproAmount) => {
         .encodeABI();
 
     // send transaction to the blockchain and get receipt
-    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    const receipt = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, dContracts["contracts"]["moc"]._address);
     
     console.log(`Transaction hash: ${receipt.transactionHash}`);
     
@@ -1152,7 +1181,7 @@ const mintBTCx  = async (web3, dContracts, btcxAmount) => {
         .encodeABI();
 
     // send transaction to the blockchain and get receipt
-    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    const receipt = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, dContracts["contracts"]["moc"]._address);
     
     console.log(`Transaction hash: ${receipt.transactionHash}`);
     
@@ -1202,7 +1231,7 @@ const redeemBTCx  = async (web3, dContracts, btcxAmount) => {
         .encodeABI();
 
     // send transaction to the blockchain and get receipt
-    const receipt = await sendTransaction(web3, dContracts, valueToSend, estimateGas, encodedCall);
+    const receipt = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, dContracts["contracts"]["moc"]._address);
     
     console.log(`Transaction hash: ${receipt.transactionHash}`);
     
@@ -1223,5 +1252,6 @@ module.exports = {
     mintBPro,
     redeemBPro,
     mintBTCx,
-    redeemBTCx
+    redeemBTCx,
+    AllowPayingCommissionMoC
 };
