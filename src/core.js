@@ -858,7 +858,8 @@ const renderEventField  = (eveName, eveValue) => {
         'leverage', 
         'value', 
         'paidMoC', 
-        'paidReserveToken'])
+        'paidReserveToken',
+        'paidRBTC'])
 
     if (formatItemsWei.has(eveName)) {eveValue = Web3.utils.fromWei(eveValue)}
 
