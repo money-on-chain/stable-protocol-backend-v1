@@ -14,6 +14,7 @@
     "commission-moc-enable": "node src/commissionMocEnable.js",
     "commission-moc-disable": "node src/commissionMocDisable.js",
     "allowance-use-reserve-token": "node src/allowanceReserveToken.js",
+    "admin-vendor-info": "node src/adminVendorInfo.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

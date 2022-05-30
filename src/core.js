@@ -856,7 +856,9 @@ const renderEventField  = (eveName, eveValue) => {
         'mocMarkup', 
         'interests', 
         'leverage', 
-        'value'])
+        'value', 
+        'paidMoC', 
+        'paidReserveToken'])
 
     if (formatItemsWei.has(eveName)) {eveValue = Web3.utils.fromWei(eveValue)}
 
@@ -1032,6 +1034,21 @@ const AllowanceUseReserveToken  = async (web3, dContracts, allow) => {
     console.log(`Transaction hash: ${receipt.transactionHash}`);
     
     return receipt;
+
+}
+
+
+const AdminVendorInfo  = async (web3, dContracts, vendorAddress) => {
+
+    const mocvendors = dContracts["contracts"]["mocvendors"];
+
+    const vendor = await mocvendors.methods.vendors(vendorAddress).call();  
+    
+    console.log('\x1b[35m%s\x1b[0m', `Vendor Account: ${vendorAddress}`);
+    console.log('\x1b[32m%s\x1b[0m', `Is Active: ${vendor.isActive}`);
+    console.log('\x1b[35m%s\x1b[0m', `Markup: ${Web3.utils.fromWei(vendor.markup)}`);
+    console.log('\x1b[32m%s\x1b[0m', `Total Paid in MoC: ${Web3.utils.fromWei(vendor.totalPaidInMoC)}`);
+    console.log('\x1b[35m%s\x1b[0m', `Staking: ${Web3.utils.fromWei(vendor.staking)}`);    
 
 }
 
@@ -1809,6 +1826,7 @@ module.exports = {
     AllowPayingCommissionMoC,
     AllowanceUseReserveToken,
     getAppMode,
+    AdminVendorInfo,
     mintStable,
     redeemStable,
     mintRiskpro,    
