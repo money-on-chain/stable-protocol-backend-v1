@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js",
-    "mint-doc": "node src/mintDoc.js",
-    "redeem-doc": "node src/redeemDoc.js",
-    "mint-bpro": "node src/mintBPro.js",
-    "redeem-bpro": "node src/redeemBPro.js",
-    "mint-btcx": "node src/mintBTCx.js",
-    "redeem-btcx": "node src/redeemBTCx.js",
+    "mint-stable": "node src/mintStable.js",
+    "redeem-stable": "node src/redeemStable.js",
+    "mint-riskpro": "node src/mintRiskpro.js",
+    "redeem-riskpro": "node src/redeemRiskpro.js",
+    "mint-riskprox": "node src/mintRiskprox.js",
+    "redeem-riskprox": "node src/redeemRiskprox.js",
     "commission-moc-enable": "node src/commissionMocEnable.js",
     "commission-moc-disable": "node src/commissionMocDisable.js",
     "test": "echo \"Error: no test specified\" && exit 1"

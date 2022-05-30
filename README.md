@@ -1,6 +1,6 @@
 # Money on Chain Integration - Nodejs
 
-Code example verification of Money on chain operations
+Money on chain stable token operations with multi collateral (coinbase or RRC20) code examples.
 
 ### Setup
 
@@ -15,14 +15,26 @@ HOST_URI=https://public-node.testnet.rsk.co
 MOC_ENVIRONMENT=mocTestnet
 VENDOR_ADDRESS=0xf69287F5Ca3cC3C6d3981f2412109110cB8af076
 GAS_MULTIPLIER=2
-OPERATION_AMOUNT_MINT_DOC=10
-OPERATION_AMOUNT_REDEEM_DOC=10
-OPERATION_AMOUNT_MINT_BPRO=0.0001
-OPERATION_AMOUNT_REDEEM_BPRO=0.0001
-OPERATION_AMOUNT_MINT_BTCX=0.0001
-OPERATION_AMOUNT_REDEEM_BTCX=0.00001
+OPERATION_AMOUNT_MINT_STABLE=10
+OPERATION_AMOUNT_REDEEM_STABLE=10
+OPERATION_AMOUNT_MINT_RISKPRO=0.0001
+OPERATION_AMOUNT_REDEEM_RISKPRO=0.0001
+OPERATION_AMOUNT_MINT_RISKPROX=0.0001
+OPERATION_AMOUNT_REDEEM_RISKPROX=0.00001
 MINT_SLIPPAGE=0.2
 ```
+
+#### Money on Chain projects and tokens 
+
+| Token generic     | Project | Token Name  | Collateral   |
+|-------------------|---------|-------------|--------------|
+| Stable            | MOC     | DOC         | RBTC         |
+| RiskPro           | MOC     | BPRO        | RBTC         |
+| RiskProx          | MOC     | BTCX        | RBTC         |
+| Stable            | ROC     | RDOC        | RIF          |
+| RiskPro           | ROC     | RIFP        | RIF          |
+| RiskProx          | ROC     | RIFX        | RIF          |
+
 
 #### Enviroment table
 
@@ -36,7 +48,6 @@ Enviroment is our already deployed contracts. For example **mocMainnet2** is our
 | rdocTestnetAlpha  | RIF     |                                  | Testnet    |
 | rdocTestnet       | RIF     | rif-testnet.moneyonchain.com     | Testnet    |
 | rdocMainnet       | RIF     | rif.moneyonchain.com             | Mainnet    |
-
 
 
 ### Faucets
@@ -55,23 +66,23 @@ In testnet you may need some test tRIF o tRBTC
 |-------------------------------------|-----------------------------------------------|---------------------------|
 | npm run commission-moc-enable       | Enable paying commission MoC                  |                           |
 | npm run commission-moc-disable      | Disable paying commission MoC                 |                           |
-| npm run mint-doc                    | Mint DoC or Rdoc depend of the environment    |  In rdoc environment before make allowance action     |
-| npm run redeem-doc                  | Redeem DoC or Rdoc depend of the environment  |       |
-| npm run mint-bpro                   | Mint BPro or RIFP depend of the environment   |  In rdoc environment before make allowance action     |
-| npm run redeem-bpro                 | Redeem BPro or RIFP depend of the environment |       |
-| npm run mint-btcx                   | Mint BTCx or RIFx depend of the environment   |  In rdoc environment before make allowance action     |
-| npm run redeem-btcx                 | Redeem BTCx or RIFx depend of the environment |  In rdoc environment before make allowance action     |
+| npm run mint-stable                 | Mint DoC or Rdoc depend of the environment    |  In rdoc environment before make allowance action     |
+| npm run redeem-stable               | Redeem DoC or Rdoc depend of the environment  |       |
+| npm run mint-riskpro                | Mint BPro or RIFP depend of the environment   |  In rdoc environment before make allowance action     |
+| npm run redeem-riskpro              | Redeem BPro or RIFP depend of the environment |       |
+| npm run mint-riskprox               | Mint BTCx or RIFx depend of the environment   |  In rdoc environment before make allowance action     |
+| npm run redeem-riskprox             | Redeem BTCx or RIFx depend of the environment |  In rdoc environment before make allowance action     |
 
 
 Example:
 
-`npm run mint-doc`
+`npm run mint-stable`
 
 
 Result:
 
 ```
-npm run mint-doc
+npm run mint-stable
 
 > moneyonchain-example-integration@1.0.0 mint-doc example-moc-integration-js
 > node src/mintDoc.js

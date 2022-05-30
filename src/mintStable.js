@@ -1,5 +1,5 @@
 const { readJsonFile, getWeb3 } = require('./utils');
-const { readContracts, mintBPro } = require('./core');
+const { readContracts, mintStable, mintStableRRC20, getAppMode } = require('./core');
 
 
 require('dotenv').config();
@@ -18,10 +18,16 @@ const main  = async () => {
     dContracts = await readContracts(web3, config);
 
     // Get amount from environment
-    const amountBPro = `${process.env.OPERATION_AMOUNT_MINT_BPRO}`;
-       
-    // Send transaction and get receipt
-    const receipt = await mintBPro(web3, dContracts, amountBPro);
+    const amountStable = `${process.env.OPERATION_AMOUNT_MINT_STABLE}`;
+
+    const appMode = getAppMode();
+    if (appMode === "MoC") {     
+        // Collateral Coinbase   
+        const receipt = await mintStable(web3, dContracts, config, amountStable);
+    } else {
+        // Collateral RRC20
+        const receipt = await mintStableRRC20(web3, dContracts, config, amountStable);
+    }
     
 }
 
