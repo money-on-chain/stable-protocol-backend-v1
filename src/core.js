@@ -77,6 +77,8 @@ const readContracts  = async (web3, config) => {
     dContracts["json"]["MoCToken"] = MoCToken;
     const ReserveToken = readJsonFile(`./abis/${appProject}/ReserveToken.json`);
     dContracts["json"]["ReserveToken"] = ReserveToken;
+    const MoCVendors = readJsonFile(`./abis/${appProject}/MoCVendors.json`);
+    dContracts["json"]["MoCVendors"] = MoCVendors;
     
     console.log('Reading Multicall2 Contract... address: ', config.Multicall2);
     const multicall = new web3.eth.Contract(Multicall2.abi, config.Multicall2);
@@ -134,10 +136,15 @@ const readContracts  = async (web3, config) => {
     }    
 
     const mocTokenAddress = await mocstate.methods.getMoCToken().call();
+    const mocVendorsAddress = await mocstate.methods.getMoCVendors().call();
 
     console.log('Reading MoC Token Contract... address: ', mocTokenAddress);
     const moctoken = new web3.eth.Contract(MoCToken.abi, mocTokenAddress);
     dContracts["contracts"]["moctoken"] = moctoken;
+
+    console.log('Reading MoC Vendors Contract... address: ', mocVendorsAddress);
+    const mocvendors = new web3.eth.Contract(MoCVendors.abi, mocVendorsAddress);
+    dContracts["contracts"]["mocvendors"] = mocvendors;
 
     // Abi decoder
     abiDecoder.addABI(dContracts["json"]["MoC"].abi);
@@ -148,6 +155,7 @@ const readContracts  = async (web3, config) => {
     abiDecoder.addABI(dContracts["json"]["DocToken"].abi);
     abiDecoder.addABI(dContracts["json"]["BProToken"].abi);
     abiDecoder.addABI(dContracts["json"]["MoCToken"].abi);
+    abiDecoder.addABI(dContracts["json"]["MoCVendors"].abi);
     if (appMode === 'RRC20') {
         abiDecoder.addABI(dContracts["json"]["ReserveToken"].abi);
     }
