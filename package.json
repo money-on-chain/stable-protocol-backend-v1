@@ -13,6 +13,7 @@
     "redeem-riskprox": "node src/redeemRiskprox.js",
     "commission-moc-enable": "node src/commissionMocEnable.js",
     "commission-moc-disable": "node src/commissionMocDisable.js",
+    "allowance-use-reserve-token": "node src/allowanceReserveToken.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

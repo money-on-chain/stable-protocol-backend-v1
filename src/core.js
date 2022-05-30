@@ -993,6 +993,41 @@ const AllowPayingCommissionMoC  = async (web3, dContracts, allow) => {
 
 }
 
+const AllowanceUseReserveToken  = async (web3, dContracts, allow) => {
+
+    // Ensure is in correct app mode
+    const appMode = getAppMode();
+    if (appMode != "RRC20") throw new Error('This function is only for app mode = RRC20');
+    
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase();
+    const reservetoken = dContracts["contracts"]["reservetoken"];
+
+    let amountAllowance = '0';
+    const valueToSend = null;
+    if (allow) {
+        amountAllowance = Number.MAX_SAFE_INTEGER.toString();
+    }
+
+    // Calculate estimate gas cost
+    const estimateGas = await reservetoken.methods
+        .approve(dContracts["contracts"]["moc"]._address, web3.utils.toWei(amountAllowance))
+        .estimateGas({ from: userAddress, value: '0x' });
+
+    // encode function     
+    const encodedCall = reservetoken.methods
+        .approve(dContracts["contracts"]["moc"]._address, web3.utils.toWei(amountAllowance))
+        .encodeABI();
+
+    // send transaction to the blockchain and get receipt
+    const {receipt, filteredEvents} = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, reservetoken._address);
+    
+    console.log(`Transaction hash: ${receipt.transactionHash}`);
+    
+    return receipt;
+
+}
+
+
 const calcMintInterest = async (dContracts, amount) => {
 
     const mocinrate = dContracts["contracts"]["mocinrate"];
@@ -1764,6 +1799,7 @@ module.exports = {
     renderUserBalance,
     renderContractStatus,
     AllowPayingCommissionMoC,
+    AllowanceUseReserveToken,
     getAppMode,
     mintStable,
     redeemStable,
