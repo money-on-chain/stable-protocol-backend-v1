@@ -2,6 +2,16 @@
 
 Money on chain stable token operations with multi collateral (coinbase or RRC20) code examples.
 
+* Mint / Redeem Stable Token: DoC or RDOC
+* Mint / Redeem RiskPro Token: BPro or RIFP
+* Mint / Redeem RiskProX Token: BTCx or RIFx
+* Allowance to use RIF
+* Enable / Disable Paying Commissions with MoC Token
+* Status of Main MoC Contracts
+* Admin: Vendor information
+* Admin: Vendor add stake
+* Admin: Vendor remove stake
+
 ### Setup
 
 1. `npm install`
@@ -72,6 +82,9 @@ In testnet you may need some test tRIF o tRBTC
 | npm run redeem-riskpro              | Redeem BPro or RIFP depend of the environment |       |
 | npm run mint-riskprox               | Mint BTCx or RIFx depend of the environment   |  In rdoc environment before make allowance action     |
 | npm run redeem-riskprox             | Redeem BTCx or RIFx depend of the environment |  In rdoc environment before make allowance action     |
+| npm run allowance-use-reserve-token | Allowance to use Reserve Token in MoC         |                                                       |
+
+
 
 
 Example:
