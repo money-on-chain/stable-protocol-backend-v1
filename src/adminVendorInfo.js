@@ -1,28 +1,22 @@
-const { readJsonFile, getWeb3 } = require('./utils');
-const { readContracts, AdminVendorInfo } = require('./core');
+const { readJsonFile, getWeb3 } = require('./utils')
+const { readContracts, AdminVendorInfo } = require('./core')
 
+require('dotenv').config()
 
-require('dotenv').config();
+const main = async () => {
+  const configPath = './config.json'
+  const config = readJsonFile(configPath)[process.env.MOC_ENVIRONMENT]
 
+  // get web3 connection
+  const web3 = getWeb3(process.env.HOST_URI)
 
-const main  = async () => {
+  // Obtain all contracts from one address of the MoC.sol
+  const dContracts = await readContracts(web3, config)
 
-    const configPath = `./config.json`;
-    
-    const config = readJsonFile(configPath)[process.env.MOC_ENVIRONMENT];
-            
-    // get web3 connection
-    const web3 = getWeb3(process.env.HOST_URI);
+  const vendorAddress = `${process.env.VENDOR_ADDRESS}`
 
-    // Obtain all contracts from one address of the MoC.sol
-    dContracts = await readContracts(web3, config);
-
-    const vendorAddress = `${process.env.VENDOR_ADDRESS}`;
-           
-    // Get info from vendor
-    const info = await AdminVendorInfo(web3, dContracts, vendorAddress);
-    
+  // Get info from vendor
+  await AdminVendorInfo(web3, dContracts, vendorAddress)
 }
 
-
-main();
+main()
