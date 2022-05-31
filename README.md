@@ -1,6 +1,6 @@
 # Money on Chain Integration - Nodejs
 
-Money on chain stable token operations with multi collateral (coinbase or RRC20) code examples.
+Money on chain stable token operations with multi collateral (coinbase or RRC20).
 
 * Mint / Redeem Stable Token: DoC or RDOC
 * Mint / Redeem RiskPro Token: BPro or RIFP
