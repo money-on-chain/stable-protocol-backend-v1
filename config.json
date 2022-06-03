@@ -32,6 +32,7 @@
     "mocTestnet": {
         "MoC": "0x2820f6d4D199B8D8838A4B26F9917754B86a0c1F",
         "Multicall2": "0xaf7be1ef9537018feda5397d9e3bb9a1e4e27ac8",
+        "IRegistry": "0x2c4B59edE1998229a9509Ec7D15D206e91A246F1",
         "tokens": {
             "COINBASE": {
                 "name": "RBTC",

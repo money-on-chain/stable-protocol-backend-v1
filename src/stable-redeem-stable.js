@@ -1,5 +1,7 @@
-const { readJsonFile, getWeb3 } = require('./utils')
-const { readContracts, redeemRiskpro, redeemRiskproRRC20, getAppMode } = require('./core')
+const { readJsonFile, getWeb3, getAppMode } = require('./lib/utils')
+const { readContracts } = require('./lib/contracts')
+const { redeemStable } = require('./lib/moc-coinbase')
+const { redeemStableRRC20 } = require('./lib/moc-rrc20')
 
 require('dotenv').config()
 
@@ -15,15 +17,15 @@ const main = async () => {
   const dContracts = await readContracts(web3, config)
 
   // Get amount from environment
-  const amountRiskpro = `${process.env.OPERATION_AMOUNT_REDEEM_RISKPRO}`
+  const amountStable = `${process.env.OPERATION_AMOUNT_REDEEM_STABLE}`
 
   const appMode = getAppMode()
   if (appMode === 'MoC') {
     // Collateral Coinbase
-    const { receipt, filteredEvents } = await redeemRiskpro(web3, dContracts, config, amountRiskpro)
+    const { receipt, filteredEvents } = await redeemStable(web3, dContracts, config, amountStable)
   } else {
     // Collateral RRC20
-    const { receipt, filteredEvents } = await redeemRiskproRRC20(web3, dContracts, config, amountRiskpro)
+    const { receipt, filteredEvents } = await redeemStableRRC20(web3, dContracts, config, amountStable)
   }
 }
 

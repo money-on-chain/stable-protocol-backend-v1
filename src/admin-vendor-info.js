@@ -1,5 +1,6 @@
-const { readJsonFile, getWeb3 } = require('./utils')
-const { readContracts, AdminVendorAllowance } = require('./core')
+const { readJsonFile, getWeb3 } = require('./lib/utils')
+const { readContracts } = require('./lib/contracts')
+const { AdminVendorInfo } = require('./lib/moc-vendors')
 
 require('dotenv').config()
 
@@ -13,8 +14,10 @@ const main = async () => {
   // Obtain all contracts from one address of the MoC.sol
   const dContracts = await readContracts(web3, config)
 
-  // Send transaction and get receipt
-  const { receipt, filteredEvents } = await AdminVendorAllowance(web3, dContracts, true)
+  const vendorAddress = `${process.env.VENDOR_ADDRESS}`
+
+  // Get info from vendor
+  await AdminVendorInfo(web3, dContracts, vendorAddress)
 }
 
 main()
