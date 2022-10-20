@@ -130,6 +130,9 @@ const readContracts = async (web3, config) => {
   const IVotingMachine = readJsonFile('./abis/omoc/IVotingMachine.json')
   dContracts.json.IVotingMachine = IVotingMachine
 
+  const IVestingFactory = readJsonFile('./abis/omoc/IVestingFactory.json')
+  dContracts.json.IVestingFactory = IVestingFactory
+
   console.log('Reading OMOC: IRegistry Contract... address: ', config.IRegistry)
   const iregistry = new web3.eth.Contract(IRegistry.abi, config.IRegistry)
   dContracts.contracts.iregistry = iregistry
@@ -157,9 +160,17 @@ const readContracts = async (web3, config) => {
   const isupporters = new web3.eth.Contract(ISupporters.abi, supportersAddress)
   dContracts.contracts.isupporters = isupporters
 
-  console.log('Reading OMOC: IVestingMachine Contract... address: ', vestingMachineAddress)
-  const ivestingmachine = new web3.eth.Contract(IVestingMachine.abi, vestingMachineAddress)
-  dContracts.contracts.ivestingmachine = ivestingmachine
+  console.log('Reading OMOC: IVestingFactory Contract... address: ', vestingMachineAddress)
+  const ivestingfactory = new web3.eth.Contract(IVestingFactory.abi, vestingMachineAddress)
+  dContracts.contracts.ivestingfactory = ivestingfactory
+
+  // reading vesting machine from enviroment address
+  const vestingAddress = `${process.env.OMOC_VESTING_ADDRESS}`.toLowerCase()
+  if (vestingAddress) {
+    console.log('Reading OMOC: IVestingMachine Contract... address: ', vestingAddress)
+    const ivestingmachine = new web3.eth.Contract(IVestingMachine.abi, vestingAddress)
+    dContracts.contracts.ivestingmachine = ivestingmachine
+  }
 
   console.log('Reading OMOC: IVotingMachine Contract... address: ', votingMachineAddress)
   const ivotingmachine = new web3.eth.Contract(IVotingMachine.abi, votingMachineAddress)

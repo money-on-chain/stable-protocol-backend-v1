@@ -4,7 +4,10 @@ const Web3 = require('web3')
 /* eslint-disable no-undef */
 const BigNumber = require('bignumber.js')
 
-BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN })
+BigNumber.config({
+  ROUNDING_MODE: BigNumber.ROUND_DOWN,
+  FORMAT: { decimalSeparator: '.', groupSeparator: ',' }
+})
 
 const BUCKET_X2 = '0x5832000000000000000000000000000000000000000000000000000000000000'
 const BUCKET_C0 = '0x4330000000000000000000000000000000000000000000000000000000000000'
@@ -83,6 +86,26 @@ const getAppMoCProject = () => {
   return appProject
 }
 
+const precision = (contractDecimals) => new BigNumber(10).exponentiatedBy(contractDecimals)
+
+const formatVisibleValue = (amount, decimals) => {
+  return BigNumber(amount).div(precision(18)).toFormat(decimals, BigNumber.ROUND_UP, {
+    decimalSeparator: '.',
+    groupSeparator: ','
+  })
+}
+
+const formatTimestamp = (timestamp) => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).format(timestamp)
+}
+
 module.exports = {
   readJsonFile,
   getWeb3,
@@ -90,6 +113,8 @@ module.exports = {
   toContractPrecision,
   getAppMode,
   getAppMoCProject,
+  formatVisibleValue,
+  formatTimestamp,
   BUCKET_X2,
   BUCKET_C0
 }

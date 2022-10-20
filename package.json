@@ -17,6 +17,8 @@
     "admin-vendor-allowance": "node src/admin-vendor-allowance.js",
     "admin-vendor-add-stake": "node src/admin-vendor-add-stake.js",
     "admin-vendor-remove-stake": "node src/admin-vendor-remove-stake.js",
+    "omoc-info": "node src/omoc-info.js",
+    "omoc-vesting-verify": "node src/omoc-vesting-verify.js",
     "eslint": "eslint . --ext .jsx --ext .js"    
   },
   "repository": {
