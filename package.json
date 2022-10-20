@@ -19,6 +19,7 @@
     "admin-vendor-remove-stake": "node src/admin-vendor-remove-stake.js",
     "omoc-info": "node src/omoc-info.js",
     "omoc-vesting-verify": "node src/omoc-vesting-verify.js",
+    "stable-mint-stable-calc-commission": "node src/stable-mint-stable-calc-commission.js",
     "eslint": "eslint . --ext .jsx --ext .js"    
   },
   "repository": {
