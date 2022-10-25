@@ -18,7 +18,7 @@ const main = async () => {
   const dContracts = await readContracts(web3, configProject)
 
   // Get amount from environment
-  const amountTP = `${process.env.OPERATION_AMOUNT_REDEEM_STABLE}`
+  const amountTP = `${process.env.OPERATION_AMOUNT_REDEEM_TP}`
 
   if (configProject.appMode === 'MoC') {
     // Collateral Coinbase

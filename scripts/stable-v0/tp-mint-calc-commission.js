@@ -37,7 +37,7 @@ const main = async () => {
   const dContracts = await readContracts(web3, config)
 
   // Get amount from environment
-  const amountStable = `${process.env.OPERATION_AMOUNT_MINT_STABLE}`
+  const amountStable = `${process.env.OPERATION_AMOUNT_MINT_TP}`
 
   // Get vendor from environment
   const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase()
