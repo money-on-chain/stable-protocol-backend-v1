@@ -13,7 +13,7 @@ const BUCKET_X2 = '0x58320000000000000000000000000000000000000000000000000000000
 const BUCKET_C0 = '0x4330000000000000000000000000000000000000000000000000000000000000'
 
 const readJsonFile = (path) => {
-  console.log('Read json path: ', path)
+  //console.log('Read json path: ', path)
   let config
 
   if (fs.existsSync(path)) {
