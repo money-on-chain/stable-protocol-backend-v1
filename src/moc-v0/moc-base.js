@@ -1,9 +1,9 @@
 import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 
-import  { sendTransaction } from '../transaction.js'
-import  { toContractPrecision, BUCKET_X2 } from '../utils.js'
-import  { calcCommission } from './multicall.js'
+import { sendTransaction } from '../transaction.js'
+import { toContractPrecision, BUCKET_X2 } from '../utils.js'
+import { calcCommission } from './multicall.js'
 
 const addCommissions = async (web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, token, action) => {
   // get reserve price from contract

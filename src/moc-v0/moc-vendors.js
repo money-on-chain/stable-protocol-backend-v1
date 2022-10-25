@@ -1,5 +1,5 @@
 import Web3 from 'web3'
-import  { sendTransaction } from '../transaction.js'
+import { sendTransaction } from '../transaction.js'
 
 const AdminVendorInfo = async (web3, dContracts, vendorAddress) => {
   const mocvendors = dContracts.contracts.mocvendors

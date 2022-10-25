@@ -1,4 +1,4 @@
-import { readJsonFile, toContractPrecision, BUCKET_X2, BUCKET_C0 } from '../utils.js'
+import { toContractPrecision, BUCKET_X2, BUCKET_C0 } from '../utils.js'
 
 const connectorAddresses = async (web3, dContracts, configProject) => {
   const multicall = dContracts.contracts.multicall
@@ -28,7 +28,6 @@ const connectorAddresses = async (web3, dContracts, configProject) => {
 
   return listReturnData
 }
-
 
 const contractStatus = async (web3, dContracts, configProject) => {
   const appMode = configProject.appMode
@@ -414,19 +413,19 @@ const contractStatus = async (web3, dContracts, configProject) => {
   const d24BlockHeights = dMocState.blockHeight - dMocState.dayBlockSpan;
   // Remove decode result parameter
   if (appMode === 'MoC') {
-      listMethods = [
-          [mocstate.options.address, mocstate.methods.getBitcoinPrice().encodeABI(), 'uint256'], // 0
-          [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
-          [mocstate.options.address, mocstate.methods.bproUsdPrice().encodeABI(), 'uint256'], // 2
-          [mocstate.options.address, mocstate.methods.bucketBProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 3
-      ]
+    listMethods = [
+      [mocstate.options.address, mocstate.methods.getBitcoinPrice().encodeABI(), 'uint256'], // 0
+      [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
+      [mocstate.options.address, mocstate.methods.bproUsdPrice().encodeABI(), 'uint256'], // 2
+      [mocstate.options.address, mocstate.methods.bucketBProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 3
+    ]
   } else {
     listMethods = [
-          [mocstate.options.address, mocstate.methods.getReserveTokenPrice().encodeABI(), 'uint256'], // 0
-          [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
-          [mocstate.options.address, mocstate.methods.riskProUsdPrice().encodeABI(), 'uint256'], // 2
-          [mocstate.options.address, mocstate.methods.bucketRiskProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 3
-      ]
+      [mocstate.options.address, mocstate.methods.getReserveTokenPrice().encodeABI(), 'uint256'], // 0
+      [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
+      [mocstate.options.address, mocstate.methods.riskProUsdPrice().encodeABI(), 'uint256'], // 2
+      [mocstate.options.address, mocstate.methods.bucketRiskProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 3
+    ]
   }
 
   const cleanListMethodsHistoric = listMethods.map(x => [x[0], x[1]])
@@ -448,7 +447,6 @@ const contractStatus = async (web3, dContracts, configProject) => {
 }
 
 const userBalance = async (web3, dContracts, userAddress, configProject) => {
-
   const appMode = configProject.appMode
 
   const multicall = dContracts.contracts.multicall
@@ -599,7 +597,6 @@ const calcCommission = async (web3, dContracts, dataContractStatus, reserveAmoun
 
   return commission
 }
-
 
 export {
   contractStatus,

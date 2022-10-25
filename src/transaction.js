@@ -1,7 +1,7 @@
 import Web3 from 'web3'
 import abiDecoder from 'abi-decoder'
 
-import  { toContractPrecision } from './utils.js'
+import { toContractPrecision } from './utils.js'
 
 const addABI = (dContracts, appMode) => {
   // Abi decoder
@@ -19,7 +19,6 @@ const addABI = (dContracts, appMode) => {
   }
 }
 
-
 const addABIOMoC = (dContracts) => {
   abiDecoder.addABI(dContracts.json.IRegistry.abi)
   abiDecoder.addABI(dContracts.json.IStakingMachine.abi)
@@ -28,7 +27,6 @@ const addABIOMoC = (dContracts) => {
   abiDecoder.addABI(dContracts.json.IVestingMachine.abi)
   abiDecoder.addABI(dContracts.json.IVotingMachine.abi)
 }
-
 
 const renderEventField = (eveName, eveValue) => {
   const formatItemsWei = new Set([

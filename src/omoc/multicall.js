@@ -135,7 +135,6 @@ const omocInfoAddress = async (web3, dContracts, userAddress, vestingAddress) =>
   return omocInfo
 }
 
-
 export {
   omocInfoAddress,
   registryAddresses

@@ -4,7 +4,6 @@ import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 import fs from 'fs'
 
-
 BigNumber.config({
   ROUNDING_MODE: BigNumber.ROUND_DOWN,
   FORMAT: { decimalSeparator: '.', groupSeparator: ',' }

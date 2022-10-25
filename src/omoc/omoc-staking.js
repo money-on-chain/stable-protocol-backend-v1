@@ -1,9 +1,8 @@
 import BigNumber from 'bignumber.js'
 
-import  { sendTransaction } from '../transaction.js'
-import  { formatVisibleValue, formatTimestamp } from '../utils.js'
-import  { omocInfoAddress } from './multicall.js'
-
+import { sendTransaction } from '../transaction.js'
+import { formatVisibleValue, formatTimestamp } from '../utils.js'
+import { omocInfoAddress } from './multicall.js'
 
 const renderOmocInfo = (omocInfo, config) => {
   const render = `

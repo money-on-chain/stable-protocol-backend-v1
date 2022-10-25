@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 import BigNumber from 'bignumber.js'
-import Web3 from 'web3'
 import * as dotenv from 'dotenv'
 
 import { readJsonFile } from '../utils.js'
@@ -13,10 +12,6 @@ dotenv.config()
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN })
 
 const readContracts = async (web3, configProject, dContracts) => {
-
-  const appProject = configProject.appProject
-  const appMode = configProject.appMode
-
   // Omoc Contracts
   const IRegistry = readJsonFile('./abis/omoc/IRegistry.json')
   dContracts.json.IRegistry = IRegistry
@@ -87,15 +82,6 @@ const readContracts = async (web3, configProject, dContracts) => {
 
   return dContracts
 }
-/*
-const addABI = (dContracts) => {
-  abiDecoder.addABI(dContracts.json.IRegistry.abi)
-  abiDecoder.addABI(dContracts.json.IStakingMachine.abi)
-  abiDecoder.addABI(dContracts.json.IDelayMachine.abi)
-  abiDecoder.addABI(dContracts.json.ISupporters.abi)
-  abiDecoder.addABI(dContracts.json.IVestingMachine.abi)
-  abiDecoder.addABI(dContracts.json.IVotingMachine.abi)
-}*/
 
 export {
   readContracts

@@ -1,11 +1,10 @@
 import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 
-import  { toContractPrecision, BUCKET_X2 } from '../utils.js'
-import  { sendTransaction } from '../transaction.js'
-import  { addCommissions, calcMintInterest } from './moc-base.js'
-import  { statusFromContracts, userBalanceFromContracts } from './contracts.js'
-
+import { toContractPrecision, BUCKET_X2 } from '../utils.js'
+import { sendTransaction } from '../transaction.js'
+import { addCommissions, calcMintInterest } from './moc-base.js'
+import { statusFromContracts, userBalanceFromContracts } from './contracts.js'
 
 const AllowanceUseReserveToken = async (web3, dContracts, allow, configProject) => {
   // Ensure is in correct app mode
