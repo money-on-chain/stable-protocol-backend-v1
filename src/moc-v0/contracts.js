@@ -1,21 +1,23 @@
 /* eslint-disable no-undef */
-const BigNumber = require('bignumber.js')
+import BigNumber from 'bignumber.js'
+import Web3 from 'web3'
+import * as dotenv from 'dotenv'
+
+import { readJsonFile } from '../utils.js'
+import { addABI } from '../transaction.js'
+
+import { contractStatus, connectorAddresses, userBalance } from './multicall.js'
+import { registryAddresses } from '../omoc/multicall.js'
+
+dotenv.config()
 
 BigNumber.config({ ROUNDING_MODE: BigNumber.ROUND_DOWN })
 
-const Web3 = require('web3')
+const readContracts = async (web3, configProject) => {
+  const appProject = configProject.appProject
+  const appMode = configProject.appMode
 
-const { readJsonFile, getAppMode, getAppMoCProject } = require('./utils')
-const { contractStatus, connectorAddresses, registryAddresses, userBalance } = require('./multicall')
-const { addABI } = require('./transaction')
-
-require('dotenv').config()
-
-const readContracts = async (web3, config) => {
-  const appProject = getAppMoCProject()
-  const appMode = getAppMode()
-
-  dContracts = {}
+  const dContracts = {}
   dContracts.json = {}
   dContracts.contracts = {}
   dContracts.contractsAddresses = {}
@@ -45,12 +47,12 @@ const readContracts = async (web3, config) => {
   const MoCVendors = readJsonFile(`./abis/${appProject}/MoCVendors.json`)
   dContracts.json.MoCVendors = MoCVendors
 
-  console.log('Reading Multicall2 Contract... address: ', config.Multicall2)
-  const multicall = new web3.eth.Contract(Multicall2.abi, config.Multicall2)
+  console.log('Reading Multicall2 Contract... address: ', process.env.CONTRACT_MULTICALL2)
+  const multicall = new web3.eth.Contract(Multicall2.abi, process.env.CONTRACT_MULTICALL2)
   dContracts.contracts.multicall = multicall
 
-  console.log('Reading MoC Contract... address: ', config.MoC)
-  const moc = new web3.eth.Contract(MoC.abi, config.MoC)
+  console.log('Reading MoC Contract... address: ', process.env.CONTRACT_MOC)
+  const moc = new web3.eth.Contract(MoC.abi, process.env.CONTRACT_MOC)
   dContracts.contracts.moc = moc
 
   const connectorAddress = await moc.methods.connector().call()
@@ -68,7 +70,7 @@ const readContracts = async (web3, config) => {
     stableTokenAddress,
     riskproTokenAddress,
     reserveTokenAddress
-  ] = await connectorAddresses(web3, dContracts)
+  ] = await connectorAddresses(web3, dContracts, configProject)
 
   console.log('Reading MoC State Contract... address: ', mocStateAddress)
   const mocstate = new web3.eth.Contract(MoCState.abi, mocStateAddress)
@@ -111,6 +113,7 @@ const readContracts = async (web3, config) => {
   const mocvendors = new web3.eth.Contract(MoCVendors.abi, mocVendorsAddress)
   dContracts.contracts.mocvendors = mocvendors
 
+  /*
   // Omoc Contracts
   const IRegistry = readJsonFile('./abis/omoc/IRegistry.json')
   dContracts.json.IRegistry = IRegistry
@@ -133,8 +136,8 @@ const readContracts = async (web3, config) => {
   const IVestingFactory = readJsonFile('./abis/omoc/IVestingFactory.json')
   dContracts.json.IVestingFactory = IVestingFactory
 
-  console.log('Reading OMOC: IRegistry Contract... address: ', config.IRegistry)
-  const iregistry = new web3.eth.Contract(IRegistry.abi, config.IRegistry)
+  console.log('Reading OMOC: IRegistry Contract... address: ', process.env.CONTRACT_IREGISTRY)
+  const iregistry = new web3.eth.Contract(IRegistry.abi, process.env.CONTRACT_IREGISTRY)
   dContracts.contracts.iregistry = iregistry
 
   // Read contracts addresses from registry
@@ -165,8 +168,8 @@ const readContracts = async (web3, config) => {
   dContracts.contracts.ivestingfactory = ivestingfactory
 
   // reading vesting machine from enviroment address
-  const vestingAddress = `${process.env.OMOC_VESTING_ADDRESS}`.toLowerCase()
-  if (vestingAddress) {
+  if (typeof process.env.CONTRACT_OMOC_VESTING_ADDRESS !== 'undefined') {
+    const vestingAddress = `${process.env.CONTRACT_OMOC_VESTING_ADDRESS}`.toLowerCase()
     console.log('Reading OMOC: IVestingMachine Contract... address: ', vestingAddress)
     const ivestingmachine = new web3.eth.Contract(IVestingMachine.abi, vestingAddress)
     dContracts.contracts.ivestingmachine = ivestingmachine
@@ -175,9 +178,10 @@ const readContracts = async (web3, config) => {
   console.log('Reading OMOC: IVotingMachine Contract... address: ', votingMachineAddress)
   const ivotingmachine = new web3.eth.Contract(IVotingMachine.abi, votingMachineAddress)
   dContracts.contracts.ivotingmachine = ivotingmachine
+  */
 
   // Add to abi decoder
-  addABI(dContracts)
+  addABI(dContracts, appMode)
 
   return dContracts
 }
@@ -223,35 +227,34 @@ ${config.tokens.STABLE.name} queue to redeem: ${Web3.utils.fromWei(userBalance.d
   return render
 }
 
-const statusFromContracts = async (web3, dContracts, config) => {
+const statusFromContracts = async (web3, dContracts, configProject) => {
   // Read current status info from different contract MoCState.sol MoCInrate.sol
   // MoCSettlement.sol MoC.sol in one call throught Multicall
-  const dataContractStatus = await contractStatus(web3, dContracts)
+  const dataContractStatus = await contractStatus(web3, dContracts, configProject)
 
   console.log('\x1b[35m%s\x1b[0m', 'Contract Status')
   console.log()
-  console.log('\x1b[32m%s\x1b[0m', renderContractStatus(dataContractStatus, config))
+  console.log('\x1b[32m%s\x1b[0m', renderContractStatus(dataContractStatus, configProject))
 
   return dataContractStatus
 }
 
-const userBalanceFromContracts = async (web3, dContracts, config, userAddress) => {
+const userBalanceFromContracts = async (web3, dContracts, configProject, userAddress) => {
   // Get user token and allowances balance
-  const userBalanceStats = await userBalance(web3, dContracts, userAddress)
+  const userBalanceStats = await userBalance(web3, dContracts, userAddress, configProject)
   console.log()
-  console.log('\x1b[32m%s\x1b[0m', renderUserBalance(userBalanceStats, config))
+  console.log('\x1b[32m%s\x1b[0m', renderUserBalance(userBalanceStats, configProject))
 
   return userBalanceStats
 }
 
-module.exports = {
+export {
   connectorAddresses,
   contractStatus,
   userBalance,
   readContracts,
   renderUserBalance,
   renderContractStatus,
-  getAppMode,
   statusFromContracts,
   userBalanceFromContracts
 }

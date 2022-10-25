@@ -1,12 +1,12 @@
-const BigNumber = require('bignumber.js')
-const Web3 = require('web3')
+import BigNumber from 'bignumber.js'
+import Web3 from 'web3'
 
-const { toContractPrecision, getAppMode, BUCKET_X2 } = require('./utils')
-const { sendTransaction } = require('./transaction')
-const { addCommissions, calcMintInterest } = require('./moc-base')
-const { statusFromContracts, userBalanceFromContracts } = require('./contracts')
+import  { toContractPrecision, BUCKET_X2 } from '../utils.js'
+import  { sendTransaction } from '../transaction.js'
+import  { addCommissions, calcMintInterest } from './moc-base.js'
+import  { statusFromContracts, userBalanceFromContracts } from './contracts.js'
 
-const mintStable = async (web3, dContracts, config, stableAmount) => {
+const mintStable = async (web3, dContracts, configProject, stableAmount) => {
   // Mint stable token with collateral coin base
 
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
@@ -14,14 +14,13 @@ const mintStable = async (web3, dContracts, config, stableAmount) => {
   const mintSlippage = `${process.env.MINT_SLIPPAGE}`
 
   // Ensure is in correct app mode
-  const appMode = getAppMode()
-  if (appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
+  if (configProject.appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
 
   // Get information from contracts
-  const dataContractStatus = await statusFromContracts(web3, dContracts, config)
+  const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
 
   // Get user balance address
-  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, config, userAddress)
+  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
 
   // get bitcoin price from contract
   const bitcoinPrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.bitcoinPrice))
@@ -41,13 +40,13 @@ const mintStable = async (web3, dContracts, config, stableAmount) => {
   // Verifications
 
   // User have suficient reserve to pay?
-  console.log(`To mint ${stableAmount} ${config.tokens.STABLE.name} you need > ${valueToSend.toString()} ${config.tokens.RESERVE.name} in your balance`)
+  console.log(`To mint ${stableAmount} ${configProject.tokens.STABLE.name} you need > ${valueToSend.toString()} ${configProject.tokens.RESERVE.name} in your balance`)
   const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.rbtcBalance))
-  if (valueToSend.gt(userReserveBalance)) throw new Error('Insuficient reserve balance')
+  if (valueToSend.gt(userReserveBalance)) throw new Error('Insufficient reserve balance')
 
   // There are suficient STABLE in the contracts to mint?
   const stableAvalaiblesToMint = new BigNumber(Web3.utils.fromWei(dataContractStatus.docAvailableToMint))
-  if (new BigNumber(stableAmount).gt(stableAvalaiblesToMint)) throw new Error(`Insuficient ${config.tokens.STABLE.name} avalaibles to mint`)
+  if (new BigNumber(stableAmount).gt(stableAvalaiblesToMint)) throw new Error(`Insuficient ${configProject.tokens.STABLE.name} avalaibles to mint`)
 
   const moc = dContracts.contracts.moc
 
@@ -69,21 +68,20 @@ const mintStable = async (web3, dContracts, config, stableAmount) => {
   return { receipt, filteredEvents }
 }
 
-const redeemStable = async (web3, dContracts, config, stableAmount) => {
+const redeemStable = async (web3, dContracts, configProject, stableAmount) => {
   // Redeem stable token receiving coin base
 
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
   const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase()
 
   // Ensure is in correct app mode
-  const appMode = getAppMode()
-  if (appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
+  if (configProject.appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
 
   // Get information from contracts
-  const dataContractStatus = await statusFromContracts(web3, dContracts, config)
+  const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
 
   // Get user balance address
-  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, config, userAddress)
+  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
 
   // get bitcoin price from contract
   const bitcoinPrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.bitcoinPrice))
@@ -97,13 +95,13 @@ const redeemStable = async (web3, dContracts, config, stableAmount) => {
   // Verifications
 
   // User have suficient STABLE in balance?
-  console.log(`Redeeming ${stableAmount} ${config.tokens.STABLE.name} ... getting aprox: ${reserveAmount} ${config.tokens.RESERVE.name}... `)
+  console.log(`Redeeming ${stableAmount} ${configProject.tokens.STABLE.name} ... getting aprox: ${reserveAmount} ${configProject.tokens.RESERVE.name}... `)
   const userStableBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.docBalance))
   if (new BigNumber(stableAmount).gt(userStableBalance)) throw new Error('Insuficient STABLE user balance')
 
   // There are suficient Free Stable in the contracts to redeem?
   const stableAvalaiblesToRedeem = new BigNumber(Web3.utils.fromWei(dataContractStatus.docAvailableToRedeem))
-  if (new BigNumber(stableAmount).gt(stableAvalaiblesToRedeem)) throw new Error(`Insuficient ${config.tokens.RESERVE.name} avalaibles to redeem in contract`)
+  if (new BigNumber(stableAmount).gt(stableAvalaiblesToRedeem)) throw new Error(`Insuficient ${configProject.tokens.RESERVE.name} avalaibles to redeem in contract`)
 
   const moc = dContracts.contracts.moc
 
@@ -125,7 +123,7 @@ const redeemStable = async (web3, dContracts, config, stableAmount) => {
   return { receipt, filteredEvents }
 }
 
-const mintRiskpro = async (web3, dContracts, config, riskproAmount) => {
+const mintRiskpro = async (web3, dContracts, configProject, riskproAmount) => {
   // Mint RiskPro token with collateral coin base
 
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
@@ -133,14 +131,13 @@ const mintRiskpro = async (web3, dContracts, config, riskproAmount) => {
   const mintSlippage = `${process.env.MINT_SLIPPAGE}`
 
   // Ensure is in correct app mode
-  const appMode = getAppMode()
-  if (appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
+  if (configProject.appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
 
   // Get information from contracts
-  const dataContractStatus = await statusFromContracts(web3, dContracts, config)
+  const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
 
   // Get user balance address
-  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, config, userAddress)
+  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
 
   // Price of RISKPRO in RESERVE
   const riskproPriceInReserve = new BigNumber(Web3.utils.fromWei(dataContractStatus.bproPriceInRbtc))
@@ -160,7 +157,7 @@ const mintRiskpro = async (web3, dContracts, config, riskproAmount) => {
   // Verifications
 
   // User have suficient reserve to pay?
-  console.log(`To mint ${riskproAmount} ${config.tokens.RISKPRO.name} you need > ${valueToSend.toString()} ${config.tokens.RESERVE.name} in your balance`)
+  console.log(`To mint ${riskproAmount} ${configProject.tokens.RISKPRO.name} you need > ${valueToSend.toString()} ${configProject.tokens.RESERVE.name} in your balance`)
   const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.rbtcBalance))
   if (valueToSend.gt(userReserveBalance)) throw new Error('Insuficient reserve balance')
 
@@ -184,21 +181,20 @@ const mintRiskpro = async (web3, dContracts, config, riskproAmount) => {
   return { receipt, filteredEvents }
 }
 
-const redeemRiskpro = async (web3, dContracts, config, riskproAmount) => {
+const redeemRiskpro = async (web3, dContracts, configProject, riskproAmount) => {
   // Redeem RISKPRO token receiving coin base
 
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
   const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase()
 
   // Ensure is in correct app mode
-  const appMode = getAppMode()
-  if (appMode !== 'MoC') throw new Error('This function is only for MoC Mode... are you using in your enviroment RIF projects?')
+  if (configProject.appMode !== 'MoC') throw new Error('This function is only for MoC Mode... are you using in your enviroment RIF projects?')
 
   // Get information from contracts
-  const dataContractStatus = await statusFromContracts(web3, dContracts, config)
+  const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
 
   // Get user balance address
-  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, config, userAddress)
+  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
 
   // Price of RISKPRO in RESERVE
   const riskproPriceInReserve = new BigNumber(Web3.utils.fromWei(dataContractStatus.bproPriceInRbtc))
@@ -212,13 +208,13 @@ const redeemRiskpro = async (web3, dContracts, config, riskproAmount) => {
   // Verifications
 
   // User have suficient RISKPRO in balance?
-  console.log(`Redeeming ${riskproAmount} ${config.tokens.RISKPRO.name} ... getting aprox: ${reserveAmount} ${config.tokens.RESERVE.name}... `)
+  console.log(`Redeeming ${riskproAmount} ${configProject.tokens.RISKPRO.name} ... getting aprox: ${reserveAmount} ${configProject.tokens.RESERVE.name}... `)
   const userRiskproBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.bproBalance))
-  if (new BigNumber(riskproAmount).gt(userRiskproBalance)) throw new Error(`Insuficient ${config.tokens.RISKPRO.name} user balance`)
+  if (new BigNumber(riskproAmount).gt(userRiskproBalance)) throw new Error(`Insuficient ${configProject.tokens.RISKPRO.name} user balance`)
 
   // There are suficient RISKPRO in the contracts to redeem?
   const riskproAvailableToRedeem = new BigNumber(Web3.utils.fromWei(dataContractStatus.bproAvailableToRedeem))
-  if (new BigNumber(riskproAmount).gt(riskproAvailableToRedeem)) throw new Error(`Insuficient ${config.tokens.RISKPRO.name} avalaibles to redeem in contract`)
+  if (new BigNumber(riskproAmount).gt(riskproAvailableToRedeem)) throw new Error(`Insuficient ${configProject.tokens.RISKPRO.name} avalaibles to redeem in contract`)
 
   const moc = dContracts.contracts.moc
 
@@ -240,7 +236,7 @@ const redeemRiskpro = async (web3, dContracts, config, riskproAmount) => {
   return { receipt, filteredEvents }
 }
 
-const mintRiskprox = async (web3, dContracts, config, riskproxAmount) => {
+const mintRiskprox = async (web3, dContracts, configProject, riskproxAmount) => {
   // Mint RiskproX token with collateral coin base
 
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
@@ -248,14 +244,13 @@ const mintRiskprox = async (web3, dContracts, config, riskproxAmount) => {
   const mintSlippage = `${process.env.MINT_SLIPPAGE}`
 
   // Ensure is in correct app mode
-  const appMode = getAppMode()
-  if (appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
+  if (configProject.appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
 
   // Get information from contracts
-  const dataContractStatus = await statusFromContracts(web3, dContracts, config)
+  const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
 
   // Get user balance address
-  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, config, userAddress)
+  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
 
   // Price of Riskprox in coinbase
   const bprox2PriceInReserve = new BigNumber(Web3.utils.fromWei(dataContractStatus.bprox2PriceInRbtc))
@@ -282,13 +277,13 @@ const mintRiskprox = async (web3, dContracts, config, riskproxAmount) => {
   // Verifications
 
   // User have suficient reserve to pay?
-  console.log(`To mint ${riskproxAmount} ${config.tokens.RISKPROX.name} you need > ${valueToSend.toString()} ${config.tokens.RESERVE.name} in your balance`)
+  console.log(`To mint ${riskproxAmount} ${configProject.tokens.RISKPROX.name} you need > ${valueToSend.toString()} ${configProject.tokens.RESERVE.name} in your balance`)
   const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.rbtcBalance))
   if (valueToSend.gt(userReserveBalance)) throw new Error('Insuficient reserve balance')
 
   // There are suficient RISKPROX in the contracts to mint?
   const riskproxAvalaiblesToMint = new BigNumber(Web3.utils.fromWei(dataContractStatus.bprox2AvailableToMint))
-  if (new BigNumber(riskproxAmount).gt(riskproxAvalaiblesToMint)) throw new Error(`Insuficient ${config.tokens.RISKPROX.name} avalaibles to mint`)
+  if (new BigNumber(riskproxAmount).gt(riskproxAvalaiblesToMint)) throw new Error(`Insuficient ${configProject.tokens.RISKPROX.name} avalaibles to mint`)
 
   const moc = dContracts.contracts.moc
 
@@ -310,21 +305,20 @@ const mintRiskprox = async (web3, dContracts, config, riskproxAmount) => {
   return { receipt, filteredEvents }
 }
 
-const redeemRiskprox = async (web3, dContracts, config, riskproxAmount) => {
+const redeemRiskprox = async (web3, dContracts, configProject, riskproxAmount) => {
   // Redeem RISKPROx token receiving coin base
 
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
   const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase()
 
   // Ensure is in correct app mode
-  const appMode = getAppMode()
-  if (appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
+  if (configProject.appMode !== 'MoC') throw new Error('This function is only for app mode = MoC')
 
   // Get information from contracts
-  const dataContractStatus = await statusFromContracts(web3, dContracts, config)
+  const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
 
   // Get user balance address
-  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, config, userAddress)
+  const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
 
   // Price of RISKPROx in RESERVE
   const riskproxPriceInReserve = new BigNumber(Web3.utils.fromWei(dataContractStatus.bprox2PriceInRbtc))
@@ -338,9 +332,9 @@ const redeemRiskprox = async (web3, dContracts, config, riskproxAmount) => {
   // Verifications
 
   // User have suficient RISKPROx in balance?
-  console.log(`Redeeming ${riskproxAmount} ${config.tokens.RISKPROX.name} ... getting aprox: ${reserveAmount} ${config.tokens.RESERVE.name}... `)
+  console.log(`Redeeming ${riskproxAmount} ${configProject.tokens.RISKPROX.name} ... getting aprox: ${reserveAmount} ${configProject.tokens.RESERVE.name}... `)
   const userRiskproxBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.bprox2Balance))
-  if (new BigNumber(riskproxAmount).gt(userRiskproxBalance)) throw new Error(`Insuficient ${config.tokens.RISKPROX.name} user balance`)
+  if (new BigNumber(riskproxAmount).gt(userRiskproxBalance)) throw new Error(`Insuficient ${configProject.tokens.RISKPROX.name} user balance`)
 
   const moc = dContracts.contracts.moc
 
@@ -362,7 +356,7 @@ const redeemRiskprox = async (web3, dContracts, config, riskproxAmount) => {
   return { receipt, filteredEvents }
 }
 
-module.exports = {
+export {
   mintStable,
   redeemStable,
   mintRiskpro,

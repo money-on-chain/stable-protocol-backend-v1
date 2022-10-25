@@ -3,6 +3,7 @@
   "version": "1.0.1",
   "description": "Money On Chain Integration",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "stable-mint-stable": "node src/stable-mint-stable.js",
     "stable-redeem-stable": "node src/stable-redeem-stable.js",

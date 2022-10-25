@@ -1,10 +1,9 @@
-const abiDecoder = require('abi-decoder')
-const Web3 = require('web3')
+import Web3 from 'web3'
+import abiDecoder from 'abi-decoder'
 
-const { toContractPrecision, getAppMode } = require('./utils')
+import  { toContractPrecision } from './utils.js'
 
-const addABI = (dContracts) => {
-  const appMode = getAppMode()
+const addABI = (dContracts, appMode) => {
   // Abi decoder
   abiDecoder.addABI(dContracts.json.MoC.abi)
   abiDecoder.addABI(dContracts.json.MoCState.abi)
@@ -18,6 +17,10 @@ const addABI = (dContracts) => {
   if (appMode === 'RRC20') {
     abiDecoder.addABI(dContracts.json.ReserveToken.abi)
   }
+}
+
+
+const addABIOMoC = (dContracts) => {
   abiDecoder.addABI(dContracts.json.IRegistry.abi)
   abiDecoder.addABI(dContracts.json.IStakingMachine.abi)
   abiDecoder.addABI(dContracts.json.IDelayMachine.abi)
@@ -25,6 +28,7 @@ const addABI = (dContracts) => {
   abiDecoder.addABI(dContracts.json.IVestingMachine.abi)
   abiDecoder.addABI(dContracts.json.IVotingMachine.abi)
 }
+
 
 const renderEventField = (eveName, eveValue) => {
   const formatItemsWei = new Set([
@@ -128,7 +132,8 @@ const sendTransaction = async (web3, value, estimateGas, encodedCall, toContract
   return { receipt, filteredEvents }
 }
 
-module.exports = {
+export {
   sendTransaction,
-  addABI
+  addABI,
+  addABIOMoC
 }

@@ -1,9 +1,9 @@
-const BigNumber = require('bignumber.js')
-const Web3 = require('web3')
+import BigNumber from 'bignumber.js'
+import Web3 from 'web3'
 
-const { sendTransaction } = require('./transaction')
-const { calcCommission } = require('./multicall')
-const { toContractPrecision, BUCKET_X2 } = require('./utils')
+import  { sendTransaction } from '../transaction.js'
+import  { toContractPrecision, BUCKET_X2 } from '../utils.js'
+import  { calcCommission } from './multicall.js'
 
 const addCommissions = async (web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, token, action) => {
   // get reserve price from contract
@@ -76,7 +76,7 @@ const calcMintInterest = async (dContracts, amount) => {
   return calcMintInterest
 }
 
-module.exports = {
+export {
   addCommissions,
   AllowPayingCommissionMoC,
   calcMintInterest

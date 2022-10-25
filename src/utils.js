@@ -1,8 +1,9 @@
-const fs = require('fs')
-const Web3 = require('web3')
-
 /* eslint-disable no-undef */
-const BigNumber = require('bignumber.js')
+
+import BigNumber from 'bignumber.js'
+import Web3 from 'web3'
+import fs from 'fs'
+
 
 BigNumber.config({
   ROUNDING_MODE: BigNumber.ROUND_DOWN,
@@ -44,48 +45,6 @@ const toContractPrecision = (amount) => {
   return Web3.utils.toWei(amount.toFormat(18, BigNumber.ROUND_DOWN), 'ether')
 }
 
-const getAppMode = () => {
-  const mocEnvironment = `${process.env.MOC_ENVIRONMENT}`
-
-  let appMode
-  switch (mocEnvironment) {
-    case 'mocTestnetAlpha':
-    case 'mocTestnet':
-    case 'mocMainnet2':
-      appMode = 'MoC'
-      break
-    case 'rdocTestnetAlpha':
-    case 'rdocTestnet':
-    case 'rdocMainnet':
-      appMode = 'RRC20'
-      break
-    default:
-      throw new Error('Environment not implemented! Please refer to table list of MoC Environments')
-  }
-  return appMode
-}
-
-const getAppMoCProject = () => {
-  const mocEnvironment = `${process.env.MOC_ENVIRONMENT}`
-
-  let appProject
-  switch (mocEnvironment) {
-    case 'mocTestnetAlpha':
-    case 'mocTestnet':
-    case 'mocMainnet2':
-      appProject = 'MoC'
-      break
-    case 'rdocTestnetAlpha':
-    case 'rdocTestnet':
-    case 'rdocMainnet':
-      appProject = 'RDoC'
-      break
-    default:
-      throw new Error('Environment not implemented! Please refer to table list of MoC Environments')
-  }
-  return appProject
-}
-
 const precision = (contractDecimals) => new BigNumber(10).exponentiatedBy(contractDecimals)
 
 const formatVisibleValue = (amount, decimals) => {
@@ -106,13 +65,11 @@ const formatTimestamp = (timestamp) => {
   }).format(timestamp)
 }
 
-module.exports = {
+export {
   readJsonFile,
   getWeb3,
   getGasPrice,
   toContractPrecision,
-  getAppMode,
-  getAppMoCProject,
   formatVisibleValue,
   formatTimestamp,
   BUCKET_X2,

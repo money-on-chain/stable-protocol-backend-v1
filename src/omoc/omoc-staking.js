@@ -1,7 +1,9 @@
-const BigNumber = require('bignumber.js')
-const { sendTransaction } = require('./transaction')
-const { omocInfoAddress } = require('./multicall')
-const { formatVisibleValue, formatTimestamp } = require('./utils')
+import BigNumber from 'bignumber.js'
+
+import  { sendTransaction } from '../transaction.js'
+import  { formatVisibleValue, formatTimestamp } from '../utils.js'
+import  { omocInfoAddress } from './multicall.js'
+
 
 const renderOmocInfo = (omocInfo, config) => {
   const render = `
@@ -32,15 +34,17 @@ Period: ${omocInfo.supporters.period}
 Total MoC: ${formatVisibleValue(omocInfo.supporters.totalMoc, 2)} 
 Total Token: ${formatVisibleValue(omocInfo.supporters.totalToken, 2)} 
 
-4. Vesting
-
-Holder: ${omocInfo.vestingmachine.getHolder} 
-Locked: ${formatVisibleValue(omocInfo.vestingmachine.getLocked, 2)} 
-Available: ${formatVisibleValue(omocInfo.vestingmachine.getAvailable, 2)} 
-Verified: ${omocInfo.vestingmachine.isVerified} 
-Total invested MOCs: ${formatVisibleValue(omocInfo.vestingmachine.getTotal, 2)} 
-MOCs: ${formatVisibleValue(omocInfo.vestingmachine.mocBalance, 2)} 
     `
+  /*
+  4. Vesting
+
+Holder: ${omocInfo.vestingmachine.getHolder}
+Locked: ${formatVisibleValue(omocInfo.vestingmachine.getLocked, 2)}
+Available: ${formatVisibleValue(omocInfo.vestingmachine.getAvailable, 2)}
+Verified: ${omocInfo.vestingmachine.isVerified}
+Total invested MOCs: ${formatVisibleValue(omocInfo.vestingmachine.getTotal, 2)}
+MOCs: ${formatVisibleValue(omocInfo.vestingmachine.mocBalance, 2)}
+  */
   return render
 }
 
@@ -101,7 +105,7 @@ const OmocInfo = async (web3, dContracts, config, userAddress) => {
   console.log()
   console.log('\x1b[32m%s\x1b[0m', renderOmocInfo(infoOmoc, config))
   console.log()
-  console.log('\x1b[32m%s\x1b[0m', renderVestingParameters(infoOmoc, config))
+  //console.log('\x1b[32m%s\x1b[0m', renderVestingParameters(infoOmoc, config))
 }
 
 const StakingAllowance = async (web3, dContracts, allow) => {
@@ -157,7 +161,7 @@ const vestingVerify = async (web3, dContracts) => {
   return { receipt, filteredEvents }
 }
 
-module.exports = {
+export {
   OmocInfo,
   StakingAllowance,
   vestingVerify

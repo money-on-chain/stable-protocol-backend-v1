@@ -1,5 +1,5 @@
-const Web3 = require('web3')
-const { sendTransaction } = require('./transaction')
+import Web3 from 'web3'
+import  { sendTransaction } from '../transaction.js'
 
 const AdminVendorInfo = async (web3, dContracts, vendorAddress) => {
   const mocvendors = dContracts.contracts.mocvendors
@@ -87,7 +87,7 @@ const AdminVendorRemoveStake = async (web3, dContracts, amountStake) => {
   return { receipt, filteredEvents }
 }
 
-module.exports = {
+export {
   AdminVendorInfo,
   AdminVendorAllowance,
   AdminVendorAddStake,
