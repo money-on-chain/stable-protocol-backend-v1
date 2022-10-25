@@ -2,8 +2,8 @@ import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'
 import { readContracts } from '../../src/moc-v0/contracts.js'
-import { redeemRiskprox } from '../../src/moc-v0/moc-coinbase.js'
-import { redeemRiskproxRRC20 } from '../../src/moc-v0/moc-rrc20.js'
+import { mintTC } from '../../src/moc-v0/moc-coinbase.js'
+import { mintTCRRC20 } from '../../src/moc-v0/moc-rrc20.js'
 
 dotenv.config()
 
@@ -18,14 +18,14 @@ const main = async () => {
   const dContracts = await readContracts(web3, configProject)
 
   // Get amount from environment
-  const amountRiskprox = `${process.env.OPERATION_AMOUNT_REDEEM_RISKPROX}`
+  const amountTC = `${process.env.OPERATION_AMOUNT_MINT_RISKPRO}`
 
   if (configProject.appMode === 'MoC') {
     // Collateral Coinbase
-    const { receipt, filteredEvents } = await redeemRiskprox(web3, dContracts, configProject, amountRiskprox)
+    const { receipt, filteredEvents } = await mintTC(web3, dContracts, configProject, amountTC)
   } else {
     // Collateral RRC20
-    const { receipt, filteredEvents } = await redeemRiskproxRRC20(web3, dContracts, configProject, amountRiskprox)
+    const { receipt, filteredEvents } = await mintTCRRC20(web3, dContracts, configProject, amountTC)
   }
 }
 

@@ -2,8 +2,8 @@ import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'
 import { readContracts } from '../../src/moc-v0/contracts.js'
-import { redeemStable } from '../../src/moc-v0/moc-coinbase.js'
-import { redeemStableRRC20 } from '../../src/moc-v0/moc-rrc20.js'
+import { redeemTX } from '../../src/moc-v0/moc-coinbase.js'
+import { redeemTXRRC20 } from '../../src/moc-v0/moc-rrc20.js'
 
 dotenv.config()
 
@@ -18,14 +18,14 @@ const main = async () => {
   const dContracts = await readContracts(web3, configProject)
 
   // Get amount from environment
-  const amountStable = `${process.env.OPERATION_AMOUNT_REDEEM_STABLE}`
+  const amountTX = `${process.env.OPERATION_AMOUNT_REDEEM_RISKPROX}`
 
   if (configProject.appMode === 'MoC') {
     // Collateral Coinbase
-    const { receipt, filteredEvents } = await redeemStable(web3, dContracts, configProject, amountStable)
+    const { receipt, filteredEvents } = await redeemTX(web3, dContracts, configProject, amountTX)
   } else {
     // Collateral RRC20
-    const { receipt, filteredEvents } = await redeemStableRRC20(web3, dContracts, configProject, amountStable)
+    const { receipt, filteredEvents } = await redeemTXRRC20(web3, dContracts, configProject, amountTX)
   }
 }
 
