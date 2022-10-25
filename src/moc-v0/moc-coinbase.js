@@ -40,13 +40,13 @@ const mintTP = async (web3, dContracts, configProject, tpAmount) => {
   // Verifications
 
   // User have sufficient reserve to pay?
-  console.log(`To mint ${tpAmount} ${configProject.tokens.STABLE.name} you need > ${valueToSend.toString()} ${configProject.tokens.RESERVE.name} in your balance`)
+  console.log(`To mint ${tpAmount} ${configProject.tokens.TP.name} you need > ${valueToSend.toString()} ${configProject.tokens.RESERVE.name} in your balance`)
   const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.rbtcBalance))
   if (valueToSend.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.RESERVE.name} balance`)
 
   // There are sufficient PEGGED in the contracts to mint?
   const tpAvailableToMint = new BigNumber(Web3.utils.fromWei(dataContractStatus.docAvailableToMint))
-  if (new BigNumber(tpAmount).gt(tpAvailableToMint)) throw new Error(`Insufficient ${configProject.tokens.STABLE.name} available to mint`)
+  if (new BigNumber(tpAmount).gt(tpAvailableToMint)) throw new Error(`Insufficient ${configProject.tokens.TP.name} available to mint`)
 
   const moc = dContracts.contracts.moc
 
@@ -95,9 +95,9 @@ const redeemTP = async (web3, dContracts, configProject, tpAmount) => {
   // Verifications
 
   // User have sufficient PEGGED in balance?
-  console.log(`Redeeming ${tpAmount} ${configProject.tokens.STABLE.name} ... getting approx: ${reserveAmount} ${configProject.tokens.RESERVE.name}... `)
+  console.log(`Redeeming ${tpAmount} ${configProject.tokens.TP.name} ... getting approx: ${reserveAmount} ${configProject.tokens.RESERVE.name}... `)
   const userTPBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.docBalance))
-  if (new BigNumber(tpAmount).gt(userTPBalance)) throw new Error(`Insufficient ${configProject.tokens.STABLE.name} user balance`)
+  if (new BigNumber(tpAmount).gt(userTPBalance)) throw new Error(`Insufficient ${configProject.tokens.TP.name} user balance`)
 
   // There are sufficient Free Pegged in the contracts to redeem?
   const tpAvailableToRedeem = new BigNumber(Web3.utils.fromWei(dataContractStatus.docAvailableToRedeem))
@@ -157,7 +157,7 @@ const mintTC = async (web3, dContracts, configProject, tcAmount) => {
   // Verifications
 
   // User have sufficient reserve to pay?
-  console.log(`To mint ${tcAmount} ${configProject.tokens.RISKPRO.name} you need > ${valueToSend.toString()} ${configProject.tokens.RESERVE.name} in your balance`)
+  console.log(`To mint ${tcAmount} ${configProject.tokens.TC.name} you need > ${valueToSend.toString()} ${configProject.tokens.RESERVE.name} in your balance`)
   const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.rbtcBalance))
   if (valueToSend.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.RESERVE.name} balance`)
 
@@ -208,13 +208,13 @@ const redeemTC = async (web3, dContracts, configProject, tcAmount) => {
   // Verifications
 
   // User have sufficient TC in balance?
-  console.log(`Redeeming ${tcAmount} ${configProject.tokens.RISKPRO.name} ... getting approx: ${reserveAmount} ${configProject.tokens.RESERVE.name}... `)
+  console.log(`Redeeming ${tcAmount} ${configProject.tokens.TC.name} ... getting approx: ${reserveAmount} ${configProject.tokens.RESERVE.name}... `)
   const userTCBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.bproBalance))
-  if (new BigNumber(tcAmount).gt(userTCBalance)) throw new Error(`Insufficient ${configProject.tokens.RISKPRO.name} user balance`)
+  if (new BigNumber(tcAmount).gt(userTCBalance)) throw new Error(`Insufficient ${configProject.tokens.TC.name} user balance`)
 
   // There are sufficient TC in the contracts to redeem?
   const tcAvailableToRedeem = new BigNumber(Web3.utils.fromWei(dataContractStatus.bproAvailableToRedeem))
-  if (new BigNumber(tcAmount).gt(tcAvailableToRedeem)) throw new Error(`Insufficient ${configProject.tokens.RISKPRO.name} available to redeem in contract`)
+  if (new BigNumber(tcAmount).gt(tcAvailableToRedeem)) throw new Error(`Insufficient ${configProject.tokens.TC.name} available to redeem in contract`)
 
   const moc = dContracts.contracts.moc
 
@@ -277,13 +277,13 @@ const mintTX = async (web3, dContracts, configProject, txAmount) => {
   // Verifications
 
   // User have sufficient reserve to pay?
-  console.log(`To mint ${txAmount} ${configProject.tokens.RISKPROX.name} you need > ${valueToSend.toString()} ${configProject.tokens.RESERVE.name} in your balance`)
+  console.log(`To mint ${txAmount} ${configProject.tokens.TX.name} you need > ${valueToSend.toString()} ${configProject.tokens.RESERVE.name} in your balance`)
   const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.rbtcBalance))
   if (valueToSend.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.RESERVE.name} balance`)
 
   // There are sufficient TX in the contracts to mint?
   const txAvailableToMint = new BigNumber(Web3.utils.fromWei(dataContractStatus.bprox2AvailableToMint))
-  if (new BigNumber(txAmount).gt(txAvailableToMint)) throw new Error(`Insufficient ${configProject.tokens.RISKPROX.name} available to mint`)
+  if (new BigNumber(txAmount).gt(txAvailableToMint)) throw new Error(`Insufficient ${configProject.tokens.TX.name} available to mint`)
 
   const moc = dContracts.contracts.moc
 
@@ -332,9 +332,9 @@ const redeemTX = async (web3, dContracts, configProject, txAmount) => {
   // Verifications
 
   // User have sufficient TX in balance?
-  console.log(`Redeeming ${txAmount} ${configProject.tokens.RISKPROX.name} ... getting approx: ${reserveAmount} ${configProject.tokens.RESERVE.name}... `)
+  console.log(`Redeeming ${txAmount} ${configProject.tokens.TX.name} ... getting approx: ${reserveAmount} ${configProject.tokens.RESERVE.name}... `)
   const userTXBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.bprox2Balance))
-  if (new BigNumber(txAmount).gt(userTXBalance)) throw new Error(`Insufficient ${configProject.tokens.RISKPROX.name} user balance`)
+  if (new BigNumber(txAmount).gt(userTXBalance)) throw new Error(`Insufficient ${configProject.tokens.TX.name} user balance`)
 
   const moc = dContracts.contracts.moc
 

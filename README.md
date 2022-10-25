@@ -1,10 +1,10 @@
 # Money on Chain Integration - Nodejs
 
-Money on chain stable token operations with multi collateral (coinbase or RRC20).
+Money on chain stable token operations with multi collateral (coinbase or RRC20). Version v0 and v1.
 
-* Mint / Redeem Stable Token: DoC or RDOC
-* Mint / Redeem RiskPro Token: BPro or RIFP
-* Mint / Redeem RiskProX Token: BTCx or RIFx
+* Mint / Redeem Pegged Token: DoC or RDOC
+* Mint / Redeem Collateral Token: BPro or RIFP
+* Mint / Redeem Token X: BTCx or RIFx
 * Allowance to use RIF
 * Enable / Disable Paying Commissions with MoC Token
 * Status of Main MoC Contracts
@@ -36,19 +36,19 @@ MINT_SLIPPAGE=0.2
 
 #### Money on Chain projects and tokens 
 
-| Token generic     | Project | Token Name  | Collateral   |
-|-------------------|---------|-------------|--------------|
-| Stable            | MOC     | DOC         | RBTC         |
-| RiskPro           | MOC     | BPRO        | RBTC         |
-| RiskProx          | MOC     | BTCX        | RBTC         |
-| Stable            | ROC     | RDOC        | RIF          |
-| RiskPro           | ROC     | RIFP        | RIF          |
-| RiskProx          | ROC     | RIFX        | RIF          |
+| Token generic   | Project | Token Name  | Collateral   |
+|-----------------|---------|-------------|--------------|
+| Pegged (TP)     | MOC     | DOC         | RBTC         |
+| Collateral (TC) | MOC     | BPRO        | RBTC         |
+| X (TX)          | MOC     | BTCX        | RBTC         |
+| Pegged (TP)     | ROC     | RDOC        | RIF          |
+| Collateral (TC) | ROC     | RIFP        | RIF          |
+| X (TX)          | ROC     | RIFX        | RIF          |
 
 
-#### Enviroment table
+#### Environment table
 
-Enviroment is our already deployed contracts. For example **mocMainnet2** is our MOC current production enviroment.
+Environment is our already deployed contracts. For example **mocMainnet2** is our MOC current production enviroment.
 
 | Network Name      | Project | Enviroment                       | Network    |
 |-------------------|---------|----------------------------------|------------|
@@ -70,22 +70,6 @@ In testnet you may need some test tRIF o tRBTC
 
 
 ### How to run
-
-
-| Command                                    | Action                                        | Obs                       | 
-|--------------------------------------------|-----------------------------------------------|---------------------------|
-| npm run stable-commission-moc-enable       | Enable paying commission MoC                  |                           |
-| npm run stable-commission-moc-disable      | Disable paying commission MoC                 |                           |
-| npm run stable-mint-stable                 | Mint DoC or Rdoc depend of the environment    |  In rdoc environment before make allowance action     |
-| npm run stable-redeem-stable               | Redeem DoC or Rdoc depend of the environment  |       |
-| npm run stable-mint-riskpro                | Mint BPro or RIFP depend of the environment   |  In rdoc environment before make allowance action     |
-| npm run stable-redeem-riskpro              | Redeem BPro or RIFP depend of the environment |       |
-| npm run stable-mint-riskprox               | Mint BTCx or RIFx depend of the environment   |  In rdoc environment before make allowance action     |
-| npm run stable-redeem-riskprox             | Redeem BTCx or RIFx depend of the environment |  In rdoc environment before make allowance action     |
-| npm run stable-allowance-use-reserve-token | Allowance to use Reserve Token in MoC         |                                                       |
-
-
-
 
 Example:
 
