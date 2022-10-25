@@ -96,7 +96,7 @@ const readContracts = async (web3, configProject) => {
   dContracts.contracts.tc = tc
 
   if (appMode === 'RRC20') {
-    console.log('Reading RESERVE Token Contract... address: ', reserveTokenAddress)
+    console.log(`Reading ${configProject.tokens.RESERVE.name} Token Contract... address: `, reserveTokenAddress)
     const reservetoken = new web3.eth.Contract(ReserveToken.abi, reserveTokenAddress)
     dContracts.contracts.reservetoken = reservetoken
   }
@@ -104,7 +104,7 @@ const readContracts = async (web3, configProject) => {
   const mocTokenAddress = await mocstate.methods.getMoCToken().call()
   const mocVendorsAddress = await mocstate.methods.getMoCVendors().call()
 
-  console.log('Reading MoC Token Contract... address: ', mocTokenAddress)
+  console.log(`Reading ${configProject.tokens.MOC.name} Token Contract... address: `, mocTokenAddress)
   const moctoken = new web3.eth.Contract(MoCToken.abi, mocTokenAddress)
   dContracts.contracts.moctoken = moctoken
 
