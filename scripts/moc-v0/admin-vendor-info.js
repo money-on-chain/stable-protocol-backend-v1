@@ -19,7 +19,7 @@ const main = async () => {
   const vendorAddress = `${process.env.VENDOR_ADDRESS}`
 
   // Get info from vendor
-  await AdminVendorInfo(web3, dContracts, vendorAddress)
+  await AdminVendorInfo(web3, dContracts, vendorAddress, configProject)
 }
 
 main()

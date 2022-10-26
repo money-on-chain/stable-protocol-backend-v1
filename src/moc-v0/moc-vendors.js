@@ -1,7 +1,7 @@
 import Web3 from 'web3'
 import { sendTransaction } from '../transaction.js'
 
-const AdminVendorInfo = async (web3, dContracts, vendorAddress) => {
+const AdminVendorInfo = async (web3, dContracts, vendorAddress, configProject) => {
   const mocvendors = dContracts.contracts.mocvendors
 
   const vendor = await mocvendors.methods.vendors(vendorAddress).call()
@@ -9,7 +9,7 @@ const AdminVendorInfo = async (web3, dContracts, vendorAddress) => {
   console.log('\x1b[35m%s\x1b[0m', `Vendor Account: ${vendorAddress}`)
   console.log('\x1b[32m%s\x1b[0m', `Is Active: ${vendor.isActive}`)
   console.log('\x1b[35m%s\x1b[0m', `Markup: ${Web3.utils.fromWei(vendor.markup)}`)
-  console.log('\x1b[32m%s\x1b[0m', `Total Paid in TG: ${Web3.utils.fromWei(vendor.totalPaidInMoC)}`)
+  console.log('\x1b[32m%s\x1b[0m', `Total Paid in ${configProject.tokens.TG.name}: ${Web3.utils.fromWei(vendor.totalPaidInMoC)}`)
   console.log('\x1b[35m%s\x1b[0m', `Staking: ${Web3.utils.fromWei(vendor.staking)}`)
 }
 
