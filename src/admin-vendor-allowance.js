@@ -1,5 +1,6 @@
-const { readJsonFile, getWeb3 } = require('./utils')
-const { readContracts, AllowanceUseReserveToken } = require('./core')
+const { readJsonFile, getWeb3 } = require('./lib/utils')
+const { readContracts } = require('./lib/contracts')
+const { AdminVendorAllowance } = require('./lib/moc-vendors')
 
 require('dotenv').config()
 
@@ -14,7 +15,7 @@ const main = async () => {
   const dContracts = await readContracts(web3, config)
 
   // Send transaction and get receipt
-  const { receipt, filteredEvents } = await AllowanceUseReserveToken(web3, dContracts, true)
+  const { receipt, filteredEvents } = await AdminVendorAllowance(web3, dContracts, true)
 }
 
 main()

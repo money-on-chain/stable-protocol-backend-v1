@@ -72,17 +72,17 @@ In testnet you may need some test tRIF o tRBTC
 ### How to run
 
 
-| Command                             | Action                                        | Obs                       | 
-|-------------------------------------|-----------------------------------------------|---------------------------|
-| npm run commission-moc-enable       | Enable paying commission MoC                  |                           |
-| npm run commission-moc-disable      | Disable paying commission MoC                 |                           |
-| npm run mint-stable                 | Mint DoC or Rdoc depend of the environment    |  In rdoc environment before make allowance action     |
-| npm run redeem-stable               | Redeem DoC or Rdoc depend of the environment  |       |
-| npm run mint-riskpro                | Mint BPro or RIFP depend of the environment   |  In rdoc environment before make allowance action     |
-| npm run redeem-riskpro              | Redeem BPro or RIFP depend of the environment |       |
-| npm run mint-riskprox               | Mint BTCx or RIFx depend of the environment   |  In rdoc environment before make allowance action     |
-| npm run redeem-riskprox             | Redeem BTCx or RIFx depend of the environment |  In rdoc environment before make allowance action     |
-| npm run allowance-use-reserve-token | Allowance to use Reserve Token in MoC         |                                                       |
+| Command                                    | Action                                        | Obs                       | 
+|--------------------------------------------|-----------------------------------------------|---------------------------|
+| npm run stable-commission-moc-enable       | Enable paying commission MoC                  |                           |
+| npm run stable-commission-moc-disable      | Disable paying commission MoC                 |                           |
+| npm run stable-mint-stable                 | Mint DoC or Rdoc depend of the environment    |  In rdoc environment before make allowance action     |
+| npm run stable-redeem-stable               | Redeem DoC or Rdoc depend of the environment  |       |
+| npm run stable-mint-riskpro                | Mint BPro or RIFP depend of the environment   |  In rdoc environment before make allowance action     |
+| npm run stable-redeem-riskpro              | Redeem BPro or RIFP depend of the environment |       |
+| npm run stable-mint-riskprox               | Mint BTCx or RIFx depend of the environment   |  In rdoc environment before make allowance action     |
+| npm run stable-redeem-riskprox             | Redeem BTCx or RIFx depend of the environment |  In rdoc environment before make allowance action     |
+| npm run stable-allowance-use-reserve-token | Allowance to use Reserve Token in MoC         |                                                       |
 
 
 

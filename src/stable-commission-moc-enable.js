@@ -1,5 +1,6 @@
-const { readJsonFile, getWeb3 } = require('./utils')
-const { readContracts, AllowPayingCommissionMoC } = require('./core')
+const { readJsonFile, getWeb3 } = require('./lib/utils')
+const { readContracts } = require('./lib/contracts')
+const { AllowPayingCommissionMoC } = require('./lib/moc-base')
 
 require('dotenv').config()
 

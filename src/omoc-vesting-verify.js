@@ -1,5 +1,6 @@
-const { readJsonFile, getWeb3 } = require('./utils')
-const { readContracts, AdminVendorAddStake } = require('./core')
+const { readJsonFile, getWeb3 } = require('./lib/utils')
+const { readContracts } = require('./lib/contracts')
+const { vestingVerify } = require('./lib/omoc-staking')
 
 require('dotenv').config()
 
@@ -13,11 +14,8 @@ const main = async () => {
   // Obtain all contracts from one address of the MoC.sol
   const dContracts = await readContracts(web3, config)
 
-  // Get amount from environment
-  const amountAddStake = `${process.env.ADMIN_VENDORS_ADD_STAKE_AMOUNT}`
-
   // Send transaction and get receipt
-  const { receipt, filteredEvents } = await AdminVendorAddStake(web3, dContracts, amountAddStake)
+  const { receipt, filteredEvents } = await vestingVerify(web3, dContracts)
 }
 
 main()

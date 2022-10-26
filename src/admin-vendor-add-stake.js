@@ -1,5 +1,6 @@
-const { readJsonFile, getWeb3 } = require('./utils')
-const { readContracts, AdminVendorRemoveStake } = require('./core')
+const { readJsonFile, getWeb3 } = require('./lib/utils')
+const { readContracts } = require('./lib/contracts')
+const { AdminVendorAddStake } = require('./lib/moc-vendors')
 
 require('dotenv').config()
 
@@ -14,10 +15,10 @@ const main = async () => {
   const dContracts = await readContracts(web3, config)
 
   // Get amount from environment
-  const amountAddStake = `${process.env.ADMIN_VENDORS_REMOVE_STAKE_AMOUNT}`
+  const amountAddStake = `${process.env.ADMIN_VENDORS_ADD_STAKE_AMOUNT}`
 
   // Send transaction and get receipt
-  const { receipt, filteredEvents } = await AdminVendorRemoveStake(web3, dContracts, amountAddStake)
+  const { receipt, filteredEvents } = await AdminVendorAddStake(web3, dContracts, amountAddStake)
 }
 
 main()

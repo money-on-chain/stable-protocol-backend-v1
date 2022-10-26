@@ -1,5 +1,5 @@
-const { readJsonFile, getWeb3 } = require('./utils')
-const { contractStatus, userBalance, readContracts, renderUserBalance, renderContractStatus } = require('./core')
+const { readJsonFile, getWeb3 } = require('./lib/utils')
+const { readContracts, contractStatus, userBalance, renderUserBalance, renderContractStatus } = require('./lib/contracts')
 
 require('dotenv').config()
 

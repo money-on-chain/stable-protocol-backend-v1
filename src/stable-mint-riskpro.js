@@ -1,5 +1,7 @@
-const { readJsonFile, getWeb3 } = require('./utils')
-const { readContracts, mintRiskpro, mintRiskproRRC20, getAppMode } = require('./core')
+const { readJsonFile, getWeb3, getAppMode } = require('./lib/utils')
+const { readContracts } = require('./lib/contracts')
+const { mintRiskpro } = require('./lib/moc-coinbase')
+const { mintRiskproRRC20 } = require('./lib/moc-rrc20')
 
 require('dotenv').config()
 
