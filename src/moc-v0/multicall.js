@@ -31,6 +31,7 @@ const connectorAddresses = async (web3, dContracts, configProject) => {
 
 const contractStatus = async (web3, dContracts, configProject) => {
   const appMode = configProject.appMode
+  const appProject = configProject.appProject
 
   const multicall = dContracts.contracts.multicall
   const moc = dContracts.contracts.moc
@@ -408,6 +409,8 @@ const contractStatus = async (web3, dContracts, configProject) => {
   }
 
   dMocState.commissionRates = commissionRates
+
+  if (appProject === 'bnb') return dMocState  // need archive
 
   // Historics Price 24hs ago
   const d24BlockHeights = dMocState.blockHeight - dMocState.dayBlockSpan;
