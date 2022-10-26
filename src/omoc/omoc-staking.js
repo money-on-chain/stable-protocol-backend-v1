@@ -109,7 +109,7 @@ const OmocInfo = async (web3, dContracts, config, userAddress) => {
 
 const StakingAllowance = async (web3, dContracts, allow) => {
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
-  const moctoken = dContracts.contracts.moctoken
+  const tg = dContracts.contracts.tg
 
   let amountAllowance = '0'
   const valueToSend = null
@@ -118,17 +118,17 @@ const StakingAllowance = async (web3, dContracts, allow) => {
   }
 
   // Calculate estimate gas cost
-  const estimateGas = await moctoken.methods
+  const estimateGas = await tg.methods
     .approve(dContracts.contracts.mocvendors._address, web3.utils.toWei(amountAllowance))
     .estimateGas({ from: userAddress, value: '0x' })
 
   // encode function
-  const encodedCall = moctoken.methods
+  const encodedCall = tg.methods
     .approve(dContracts.contracts.mocvendors._address, web3.utils.toWei(amountAllowance))
     .encodeABI()
 
   // send transaction to the blockchain and get receipt
-  const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, moctoken._address)
+  const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, tg._address)
 
   console.log(`Transaction hash: ${receipt.transactionHash}`)
 

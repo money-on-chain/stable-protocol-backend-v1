@@ -53,13 +53,13 @@ const mintTPRRC20 = async (web3, dContracts, configProject, tpAmount) => {
   // Get user balance address
   const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
 
-  // get bitcoin price from contract
-  const bitcoinPrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.bitcoinPrice))
+  // get reserve price from contract
+  const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.bitcoinPrice))
 
   // Pegged amount in reserve
-  const reserveAmount = new BigNumber(tpAmount).div(bitcoinPrice)
+  const reserveAmount = new BigNumber(tpAmount).div(reservePrice)
 
-  let valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'STABLE', 'MINT')
+  let valueToSend = await addCommissions(web3, dContracts, configProject, dataContractStatus, userBalanceStats, reserveAmount, 'STABLE', 'MINT')
 
   // Add Slippage plus %
   const mintSlippageAmount = new BigNumber(mintSlippage).div(100).times(reserveAmount)
@@ -122,11 +122,11 @@ const redeemTPRRC20 = async (web3, dContracts, configProject, tpAmount) => {
   // Get user balance address
   const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
 
-  // get bitcoin price from contract
-  const bitcoinPrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.bitcoinPrice))
+  // get reserve price from contract
+  const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.bitcoinPrice))
 
   // Pegged amount in reserve
-  const reserveAmount = new BigNumber(tpAmount).div(bitcoinPrice)
+  const reserveAmount = new BigNumber(tpAmount).div(reservePrice)
 
   // Redeem function... no values sent
   const valueToSend = null
@@ -184,7 +184,7 @@ const mintTCRRC20 = async (web3, dContracts, configProject, tcAmount) => {
   // TC amount in reserve
   const reserveAmount = new BigNumber(tcAmount).times(tcPriceInReserve)
 
-  let valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'RISKPRO', 'MINT')
+  let valueToSend = await addCommissions(web3, dContracts, configProject, dataContractStatus, userBalanceStats, reserveAmount, 'RISKPRO', 'MINT')
 
   // Add Slippage plus %
 
@@ -304,7 +304,7 @@ const mintTXRRC20 = async (web3, dContracts, configProject, txAmount) => {
   // TX amount in reserve
   const reserveAmount = new BigNumber(txAmount).times(txPriceInReserve)
 
-  let valueToSend = await addCommissions(web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, 'RISKPROX', 'MINT')
+  let valueToSend = await addCommissions(web3, dContracts, configProject, dataContractStatus, userBalanceStats, reserveAmount, 'RISKPROX', 'MINT')
 
   // Calc Interest to mint TX
   const mintInterest = await calcMintInterest(dContracts, reserveAmount)

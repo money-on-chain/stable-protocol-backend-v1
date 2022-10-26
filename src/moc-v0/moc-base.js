@@ -5,7 +5,8 @@ import { sendTransaction } from '../transaction.js'
 import { toContractPrecision, BUCKET_X2 } from '../utils.js'
 import { calcCommission } from './multicall.js'
 
-const addCommissions = async (web3, dContracts, dataContractStatus, userBalanceStats, reserveAmount, token, action) => {
+const addCommissions = async (web3, dContracts, configProject, dataContractStatus, userBalanceStats, reserveAmount, token, action) => {
+
   // get reserve price from contract
   const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.bitcoinPrice))
 
@@ -16,35 +17,35 @@ const addCommissions = async (web3, dContracts, dataContractStatus, userBalanceS
   const commissionInReserve = new BigNumber(Web3.utils.fromWei(commissions.commission_reserve))
     .plus(new BigNumber(Web3.utils.fromWei(commissions.vendorMarkup)))
 
-  // Calculate commissions using MoC Token payment
-  const commissionInMoc = new BigNumber(Web3.utils.fromWei(commissions.commission_moc))
+  // Calculate commissions using TG payment
+  const commissionInTG = new BigNumber(Web3.utils.fromWei(commissions.commission_moc))
     .plus(new BigNumber(Web3.utils.fromWei(commissions.vendorMarkup)))
     .times(reservePrice).div(Web3.utils.fromWei(dataContractStatus.mocPrice))
 
-  // Enough MoC to Pay commission with MoC Token
-  const enoughMOCBalance = BigNumber(Web3.utils.fromWei(userBalanceStats.mocBalance)).gte(commissionInMoc)
+  // Enough TG to Pay commission with TG
+  const enoughTGBalance = BigNumber(Web3.utils.fromWei(userBalanceStats.mocBalance)).gte(commissionInTG)
 
-  // Enough MoC allowance to Pay commission with MoC Token
-  const enoughMOCAllowance = BigNumber(Web3.utils.fromWei(userBalanceStats.mocAllowance)).gt(0) &&
-      BigNumber(Web3.utils.fromWei(userBalanceStats.mocAllowance)).gte(commissionInMoc)
+  // Enough TG allowance to Pay commission with TG
+  const enoughTGAllowance = BigNumber(Web3.utils.fromWei(userBalanceStats.mocAllowance)).gt(0) &&
+      BigNumber(Web3.utils.fromWei(userBalanceStats.mocAllowance)).gte(commissionInTG)
 
   // add commission to value send
   let valueToSend
 
-  if (enoughMOCBalance && enoughMOCAllowance) {
+  if (enoughTGBalance && enoughTGAllowance) {
     valueToSend = reserveAmount
-    console.log(`Paying commission with MoC Tokens: ${commissionInMoc} MOC`)
+    console.log(`Paying commission with ${configProject.tokens.TG.name} Tokens: ${commissionInTG} ${configProject.tokens.TG.name}`)
   } else {
     valueToSend = reserveAmount.plus(commissionInReserve)
-    console.log(`Paying commission with RBTC: ${commissionInReserve} RBTC`)
+    console.log(`Paying commission with ${configProject.tokens.RESERVE.name}: ${commissionInReserve} ${configProject.tokens.RESERVE.name}`)
   }
 
   return valueToSend
 }
 
-const AllowPayingCommissionMoC = async (web3, dContracts, allow) => {
+const AllowPayingCommissionTG = async (web3, dContracts, allow) => {
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
-  const moctoken = dContracts.contracts.moctoken
+  const tg = dContracts.contracts.tg
 
   let amountAllowance = '0'
   const valueToSend = null
@@ -53,17 +54,17 @@ const AllowPayingCommissionMoC = async (web3, dContracts, allow) => {
   }
 
   // Calculate estimate gas cost
-  const estimateGas = await moctoken.methods
+  const estimateGas = await tg.methods
     .approve(dContracts.contracts.moc._address, web3.utils.toWei(amountAllowance))
     .estimateGas({ from: userAddress, value: '0x' })
 
   // encode function
-  const encodedCall = moctoken.methods
+  const encodedCall = tg.methods
     .approve(dContracts.contracts.moc._address, web3.utils.toWei(amountAllowance))
     .encodeABI()
 
   // send transaction to the blockchain and get receipt
-  const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, moctoken._address)
+  const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, tg._address)
 
   console.log(`Transaction hash: ${receipt.transactionHash}`)
 
@@ -78,6 +79,6 @@ const calcMintInterest = async (dContracts, amount) => {
 
 export {
   addCommissions,
-  AllowPayingCommissionMoC,
+  AllowPayingCommissionTG,
   calcMintInterest
 }

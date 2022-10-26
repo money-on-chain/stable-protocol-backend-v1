@@ -452,15 +452,15 @@ const userBalance = async (web3, dContracts, userAddress, configProject) => {
   const multicall = dContracts.contracts.multicall
   const moc = dContracts.contracts.moc
   const mocinrate = dContracts.contracts.mocinrate
-  const moctoken = dContracts.contracts.moctoken
+  const tg = dContracts.contracts.tg
   const tc = dContracts.contracts.tc
   const tp = dContracts.contracts.tp
 
   console.log(`Reading user balance ... account: ${userAddress}`)
 
   const listMethods = [
-    [moctoken.options.address, moctoken.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 0
-    [moctoken.options.address, moctoken.methods.allowance(userAddress, moc.options.address).encodeABI(), 'uint256'], // 1
+    [tg.options.address, tg.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 0
+    [tg.options.address, tg.methods.allowance(userAddress, moc.options.address).encodeABI(), 'uint256'], // 1
     [tp.options.address, tp.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 2
     [tc.options.address, tc.methods.balanceOf(userAddress).encodeABI(), 'uint256'] // 3
   ]

@@ -1,16 +1,27 @@
-# Money on Chain Integration - Nodejs
+# Money on Chain Integration
 
-Money on chain stable token operations with multi collateral (coinbase or RRC20). Version v0 and v1.
+Money on chain token operations with multi collateral (coinbase or RRC20). Version v0 and v1.
 
-* Mint / Redeem Pegged Token: DoC or RDOC
-* Mint / Redeem Collateral Token: BPro or RIFP
-* Mint / Redeem Token X: BTCx or RIFx
-* Allowance to use RIF
-* Enable / Disable Paying Commissions with MoC Token
+* Mint / Redeem Pegged Token (TP): Ex.: DoC or RDOC
+* Mint / Redeem Collateral Token (TC): Ex.: BPro or RIFP
+* Mint / Redeem Token X (TX): Ex.: BTCx or RIFx
+* Allowance to use Reserve Token: RIF
+* Enable / Disable Paying Commissions with Govern Token (TG): Ex.: MOC
 * Status of Main MoC Contracts
 * Admin: Vendor information
 * Admin: Vendor add stake
 * Admin: Vendor remove stake
+* "Governanza" operations
+
+**Tokens**
+
+| Token | Name             | Ex.        |                           |
+|-------|------------------|------------|---------------------------|
+| TP    | Token Pegged     | DOC, RDOC  | Pegged token 1:1 with USD |
+| TC    | Collateral Token | BPRO, RIFP | HODL + Earn Token         |
+| TX    | Token X          | BTCX, RIF  | Leveraged long position   |
+| TG    | Govern Token     | MOC        | Govern + Stake token      |
+
 
 ### Setup
 
@@ -28,12 +39,12 @@ CONTRACT_MULTICALL2=0xaf7be1ef9537018feda5397d9e3bb9a1e4e27ac8
 CONTRACT_IREGISTRY=0xf078375a3dD89dDF4D9dA460352199C6769b5f10
 VENDOR_ADDRESS=0xf69287F5Ca3cC3C6d3981f2412109110cB8af076
 GAS_MULTIPLIER=2
-OPERATION_AMOUNT_MINT_STABLE=10
-OPERATION_AMOUNT_REDEEM_STABLE=10
-OPERATION_AMOUNT_MINT_RISKPRO=0.0001
-OPERATION_AMOUNT_REDEEM_RISKPRO=0.0001
-OPERATION_AMOUNT_MINT_RISKPROX=0.0001
-OPERATION_AMOUNT_REDEEM_RISKPROX=0.00001
+OPERATION_AMOUNT_MINT_TP=10
+OPERATION_AMOUNT_REDEEM_TP=10
+OPERATION_AMOUNT_MINT_TC=0.0001
+OPERATION_AMOUNT_REDEEM_TC=0.0001
+OPERATION_AMOUNT_MINT_TX=0.0001
+OPERATION_AMOUNT_REDEEM_TX=0.00001
 MINT_SLIPPAGE=0.2
 ADMIN_VENDORS_ADD_STAKE_AMOUNT=10
 ADMIN_VENDORS_REMOVE_STAKE_AMOUNT=10
@@ -41,15 +52,16 @@ ADMIN_VENDORS_REMOVE_STAKE_AMOUNT=10
 
 #### Money on Chain projects and tokens 
 
-| Token generic   | Project | Token Name  | Collateral   |
-|-----------------|---------|-------------|--------------|
-| Pegged (TP)     | MOC     | DOC         | RBTC         |
-| Collateral (TC) | MOC     | BPRO        | RBTC         |
-| X (TX)          | MOC     | BTCX        | RBTC         |
-| Pegged (TP)     | ROC     | RDOC        | RIF          |
-| Collateral (TC) | ROC     | RIFP        | RIF          |
-| X (TX)          | ROC     | RIFX        | RIF          |
-
+| Token | Token name       | Project | Token Name | Collateral |
+|-------|------------------|---------|------------|------------|
+| TP    | Pegged Token 1:1 | MOC     | DOC        | RBTC       |
+| TC    | Collateral Token | MOC     | BPRO       | RBTC       |
+| TX    | Leverage Token X | MOC     | BTCX       | RBTC       |
+| TG    | Govern Token     | MOC     | MOC        | -          |
+| TP    | Pegged Token 1:1 | ROC     | RDOC       | RIF        |
+| TC    | Collateral Token | ROC     | RIFP       | RIF        |
+| TX    | Leverage Token X | ROC     | RIFX       | RIF        |
+| TG    | Govern Token     | ROC     | MOC        | -          |
 
 #### Environment table
 

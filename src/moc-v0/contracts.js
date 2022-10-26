@@ -39,8 +39,8 @@ const readContracts = async (web3, configProject) => {
   dContracts.json.TP = TP
   const TC = readJsonFile(`./abis/${appProject}/BProToken.json`)
   dContracts.json.TC = TC
-  const MoCToken = readJsonFile(`./abis/${appProject}/MoCToken.json`)
-  dContracts.json.MoCToken = MoCToken
+  const TG = readJsonFile(`./abis/${appProject}/MoCToken.json`)
+  dContracts.json.TG = TG
   const ReserveToken = readJsonFile(`./abis/${appProject}/ReserveToken.json`)
   dContracts.json.ReserveToken = ReserveToken
   const MoCVendors = readJsonFile(`./abis/${appProject}/MoCVendors.json`)
@@ -101,12 +101,13 @@ const readContracts = async (web3, configProject) => {
     dContracts.contracts.reservetoken = reservetoken
   }
 
-  const mocTokenAddress = await mocstate.methods.getMoCToken().call()
+  const tgAddress = await mocstate.methods.getMoCToken().call()
   const mocVendorsAddress = await mocstate.methods.getMoCVendors().call()
 
-  console.log(`Reading ${configProject.tokens.MOC.name} Token Contract... address: `, mocTokenAddress)
-  const moctoken = new web3.eth.Contract(MoCToken.abi, mocTokenAddress)
-  dContracts.contracts.moctoken = moctoken
+  // Read govern Token
+  console.log(`Reading ${configProject.tokens.TG.name} Token Contract... address: `, tgAddress)
+  const tg = new web3.eth.Contract(TG.abi, tgAddress)
+  dContracts.contracts.tg = tg
 
   console.log('Reading MoC Vendors Contract... address: ', mocVendorsAddress)
   const mocvendors = new web3.eth.Contract(MoCVendors.abi, mocVendorsAddress)
@@ -122,7 +123,7 @@ const renderContractStatus = (contracStatus, config) => {
   const render = `
 ${config.tokens.RESERVE.name} Price: ${Web3.utils.fromWei(contracStatus.bitcoinPrice)} USD
 ${config.tokens.RESERVE.name} EMA Price: ${Web3.utils.fromWei(contracStatus.bitcoinMovingAverage)} USD
-${config.tokens.MOC.name} Price: ${Web3.utils.fromWei(contracStatus.mocPrice)} USD
+${config.tokens.TG.name} Price: ${Web3.utils.fromWei(contracStatus.mocPrice)} USD
 ${config.tokens.TC.name} Available to redeem: ${Web3.utils.fromWei(contracStatus.bproAvailableToRedeem)} ${config.tokens.TC.name}
 ${config.tokens.TX.name} Available to mint: ${Web3.utils.fromWei(contracStatus.bprox2AvailableToMint)} ${config.tokens.TX.name}
 ${config.tokens.TP.name} Available to mint: ${Web3.utils.fromWei(contracStatus.docAvailableToMint)} ${config.tokens.TP.name}
@@ -151,8 +152,8 @@ ${config.tokens.RESERVE.name} Balance: ${Web3.utils.fromWei(userBalance.rbtcBala
 ${config.tokens.TP.name} Balance: ${Web3.utils.fromWei(userBalance.docBalance)} ${config.tokens.TP.name}
 ${config.tokens.TC.name} Balance: ${Web3.utils.fromWei(userBalance.bproBalance)} ${config.tokens.TC.name}
 ${config.tokens.TX.name} Balance: ${Web3.utils.fromWei(userBalance.bprox2Balance)} ${config.tokens.TX.name}
-${config.tokens.MOC.name} Balance: ${Web3.utils.fromWei(userBalance.mocBalance)} ${config.tokens.MOC.name}
-${config.tokens.MOC.name} Allowance: ${Web3.utils.fromWei(userBalance.mocAllowance)} ${config.tokens.MOC.name}
+${config.tokens.TG.name} Balance: ${Web3.utils.fromWei(userBalance.mocBalance)} ${config.tokens.TG.name}
+${config.tokens.TG.name} Allowance: ${Web3.utils.fromWei(userBalance.mocAllowance)} ${config.tokens.TG.name}
 ${config.tokens.TP.name} queue to redeem: ${Web3.utils.fromWei(userBalance.docToRedeem)} ${config.tokens.TP.name}
     `
 

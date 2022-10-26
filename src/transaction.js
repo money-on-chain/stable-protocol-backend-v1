@@ -12,7 +12,7 @@ const addABI = (dContracts, appMode) => {
   abiDecoder.addABI(dContracts.json.MoCSettlement.abi)
   abiDecoder.addABI(dContracts.json.TP.abi)
   abiDecoder.addABI(dContracts.json.TC.abi)
-  abiDecoder.addABI(dContracts.json.MoCToken.abi)
+  abiDecoder.addABI(dContracts.json.TG.abi)
   abiDecoder.addABI(dContracts.json.MoCVendors.abi)
   if (appMode === 'RRC20') {
     abiDecoder.addABI(dContracts.json.ReserveToken.abi)

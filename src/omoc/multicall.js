@@ -30,7 +30,7 @@ const omocInfoAddress = async (web3, dContracts, userAddress, vestingAddress) =>
   const isupporters = dContracts.contracts.isupporters
   const ivestingmachine = dContracts.contracts.ivestingmachine
   const ivestingfactory = dContracts.contracts.ivestingfactory
-  const moctoken = dContracts.contracts.moctoken
+  const tg = dContracts.contracts.tg
 
   const listMethods = [
     [istakingmachine.options.address, istakingmachine.methods.getBalance(userAddress).encodeABI(), 'uint256'], // 0
@@ -50,8 +50,8 @@ const omocInfoAddress = async (web3, dContracts, userAddress, vestingAddress) =>
     [isupporters.options.address, isupporters.methods.period().encodeABI(), 'uint256'], // 13
     [isupporters.options.address, isupporters.methods.totalMoc().encodeABI(), 'uint256'], // 14
     [isupporters.options.address, isupporters.methods.totalToken().encodeABI(), 'uint256'], // 15
-    [moctoken.options.address, moctoken.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 16
-    [moctoken.options.address, moctoken.methods.allowance(userAddress, istakingmachine.options.address).encodeABI(), 'uint256'], // 17
+    [tg.options.address, tg.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 16
+    [tg.options.address, tg.methods.allowance(userAddress, istakingmachine.options.address).encodeABI(), 'uint256'], // 17
     [ivestingfactory.options.address, ivestingfactory.methods.isTGEConfigured().encodeABI(), 'bool'], // 18
     [ivestingfactory.options.address, ivestingfactory.methods.getTGETimestamp().encodeABI(), 'uint256'] // 19
   ]
@@ -63,7 +63,7 @@ const omocInfoAddress = async (web3, dContracts, userAddress, vestingAddress) =>
     listMethods.push([ivestingmachine.options.address, ivestingmachine.methods.getAvailable().encodeABI(), 'uint256']) // 23
     listMethods.push([ivestingmachine.options.address, ivestingmachine.methods.isVerified().encodeABI(), 'bool']) // 24
     listMethods.push([ivestingmachine.options.address, ivestingmachine.methods.getTotal().encodeABI(), 'uint256']) // 25
-    listMethods.push([moctoken.options.address, moctoken.methods.balanceOf(ivestingmachine.options.address).encodeABI(), 'uint256']) // 26
+    listMethods.push([tg.options.address, tg.methods.balanceOf(ivestingmachine.options.address).encodeABI(), 'uint256']) // 26
   }
 
   // Remove decode result parameter
