@@ -1,30 +1,15 @@
 {
-  "name": "moneyonchain-example-integration",
-  "version": "1.0.1",
+  "name": "moc-integration-js",
+  "version": "1.1.0",
   "description": "Money On Chain Integration",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "stable-mint-stable": "node src/stable-mint-stable.js",
-    "stable-redeem-stable": "node src/stable-redeem-stable.js",
-    "stable-mint-riskpro": "node src/stable-mint-riskpro.js",
-    "stable-redeem-riskpro": "node src/stable-redeem-riskpro.js",
-    "stable-mint-riskprox": "node src/stable-mint-riskprox.js",
-    "stable-redeem-riskprox": "node src/stable-redeem-riskprox.js",
-    "stable-commission-moc-enable": "node src/stable-commission-moc-enable.js",
-    "stable-commission-moc-disable": "node src/stable-commission-moc-disable.js",
-    "stable-allowance-use-reserve-token": "node src/stable-allowance-reserve-token.js",
-    "admin-vendor-info": "node src/admin-vendor-info.js",
-    "admin-vendor-allowance": "node src/admin-vendor-allowance.js",
-    "admin-vendor-add-stake": "node src/admin-vendor-add-stake.js",
-    "admin-vendor-remove-stake": "node src/admin-vendor-remove-stake.js",
-    "omoc-info": "node src/omoc-info.js",
-    "omoc-vesting-verify": "node src/omoc-vesting-verify.js",
-    "stable-mint-stable-calc-commission": "node src/stable-mint-stable-calc-commission.js",
-    "eslint": "eslint . --ext .jsx --ext .js"    
+    "eslint": "eslint . --ext .jsx --ext .js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/money-on-chain/example-moc-integration-js.git"
+    "url": "git+https://github.com/money-on-chain/moc-integration-js.git"
   },
   "keywords": [
     "Web3"
@@ -32,9 +17,9 @@
   "author": "Martin Mulone",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/money-on-chain/example-moc-integration-js/issues"
+    "url": "https://github.com/money-on-chain/moc-integration-js/issues"
   },
-  "homepage": "https://github.com/money-on-chain/example-moc-integration-js#readme",
+  "homepage": "https://github.com/money-on-chain/moc-integration-js#readme",
   "dependencies": {
     "abi-decoder": "^2.4.0",
     "bignumber.js": "^9.0.2",
