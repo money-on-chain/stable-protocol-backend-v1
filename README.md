@@ -89,27 +89,26 @@ In testnet you may need some test tRIF o tRBTC
 ### How to run scripts
 
 
-| Command                                           | Action                                        | Obs                                              | 
-|---------------------------------------------------|-----------------------------------------------|--------------------------------------------------|
-| node scripts/stable-v0/commission-moc-enable.js   | Enable paying commission MoC                  |                                                  |
-| node scripts/stable-v0/commission-moc-disable.js  | Disable paying commission MoC                 |                                                  |
-| node scripts/stable-v0/tp-mint.js                 | Mint DoC or Rdoc depend of the environment    | In rdoc environment before make allowance action |
-| node scripts/stable-v0/tp-redeem.js               | Redeem DoC or Rdoc depend of the environment  |                                                  |
-| node scripts/stable-v0/tc-mint.js                 | Mint BPro or RIFP depend of the environment   | In rdoc environment before make allowance action |
-| node scripts/stable-v0/tc-redeem.js               | Redeem BPro or RIFP depend of the environment |                                                  |
-| node scripts/stable-v0/tx-mint.js                 | Mint BTCx or RIFx depend of the environment   | In rdoc environment before make allowance action |
-| node scripts/stable-v0/tx-redeem.js               | Redeem BTCx or RIFx depend of the environment | In rdoc environment before make allowance action |
-| node scripts/stable-v0/allowance-reserve-token.js | Allowance to use Reserve Token in MoC         |                                                  |
+| Command                                        | Action                                        | Obs                                              | 
+|------------------------------------------------|-----------------------------------------------|--------------------------------------------------|
+| node scripts/moc-v0/commission-tg-enable.js    | Enable paying commission MoC                  |                                                  |
+| node scripts/moc-v0/commission-tg-disable.js   | Disable paying commission MoC                 |                                                  |
+| node scripts/moc-v0/tp-mint.js                 | Mint DoC or Rdoc depend of the environment    | In rdoc environment before make allowance action |
+| node scripts/moc-v0/tp-redeem.js               | Redeem DoC or Rdoc depend of the environment  |                                                  |
+| node scripts/moc-v0/tc-mint.js                 | Mint BPro or RIFP depend of the environment   | In rdoc environment before make allowance action |
+| node scripts/moc-v0/tc-redeem.js               | Redeem BPro or RIFP depend of the environment |                                                  |
+| node scripts/moc-v0/tx-mint.js                 | Mint BTCx or RIFx depend of the environment   | In rdoc environment before make allowance action |
+| node scripts/moc-v0/tx-redeem.js               | Redeem BTCx or RIFx depend of the environment | In rdoc environment before make allowance action |
+| node scripts/moc-v0/allowance-reserve-token.js | Allowance to use Reserve Token in MoC         |                                                  |
 
-Example:
+Example Contract status:
 
-`node scripts/stable-v0/contract-status.js`
+`node scripts/moc-v0/contract-status.js`
 
 Result:
 
 ```
-node scripts/stable-v0/contract-status.js
-
+node scripts/moc-v0/contract-status.js
 
 Reading Multicall2 Contract... address:  0xaf7be1ef9537018feda5397d9e3bb9a1e4e27ac8
 Reading MoC Contract... address:  0x2820f6d4D199B8D8838A4B26F9917754B86a0c1F
@@ -157,5 +156,118 @@ BTCX Balance: 0.007079287509122713 BTCX
 MOC Balance: 31358.982677120417617073 MOC
 MOC Allowance: 9007199254740990.671389927501977624 MOC
 DOC queue to redeem: 0 DOC
+
+```
+
+
+Example Mint Pegged Token:
+
+`node scripts/moc-v0/tp-mint.js `
+
+Result:
+
+```
+node scripts/moc-v0/tp-mint.js 
+Reading Multicall2 Contract... address:  0xaf7be1ef9537018feda5397d9e3bb9a1e4e27ac8
+Reading MoC Contract... address:  0x2820f6d4D199B8D8838A4B26F9917754B86a0c1F
+Reading MoCConnector... address:  0xABB405e01Da6212E2d6fc87bbc460c73201cF6b0
+Reading MoC State Contract... address:  0x0adb40132cB0ffcEf6ED81c26A1881e214100555
+Reading MoC Inrate Contract... address:  0x76790f846FAAf44cf1B2D717d0A6c5f6f5152B60
+Reading MoC Exchange Contract... address:  0xc03Ac60eBbc01A1f4e9b5bb989F359e5D8348919
+Reading MoC Settlement  Contract... address:  0x367D283c53f8F10e47424e2AeB102F45eCC49FEa
+Reading DOC Token Contract... address:  0xCB46c0ddc60D18eFEB0E586C17Af6ea36452Dae0
+Reading BPRO Token Contract... address:  0x4dA7997A819bb46B6758B9102234c289dD2Ad3bf
+Reading MOC Token Contract... address:  0x45a97b54021a3F99827641AFe1BFAE574431e6ab
+Reading MoC Vendors Contract... address:  0x84b895A1b7be8fAc64d43757479281Bf0b5E3719
+Reading contract status ...
+Contract Status
+
+
+RBTC Price: 20589.14 USD
+RBTC EMA Price: 21889.656344189960467318 USD
+MOC Price: 0.5 USD
+BPRO Available to redeem: 14.595636140134689731 BPRO
+BTCX Available to mint: 30.332701472969623252 BTCX
+DOC Available to mint: 105278.82362137741582602 DOC
+DOC Available to redeem: 584116.832264976018166095 DOC
+BPRO Leverage: 1.282305051914530634
+BPRO Target Coverage: 1.282305051914530634
+Total RBTC in contract: 128.896348936219223067 
+Total RBTC inrate Bag: 0.000033364465093186 
+Global Coverage: 4.540426724778309605 
+BTCX Coverage: 2.138353845354938639
+BTCX Leverage: 1.87846147670208825
+BPRO Price: 21639.102799750781025749 USD
+BTCX Price: 1.064701099705964054 RBTC
+Contract State: 3 
+Contract Paused: false 
+Contract Protected: 1500000000000000000 
+    
+Reading user balance ... account: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+
+
+User: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+RBTC Balance: 0.128883811086135203 RBTC
+DOC Balance: 4010.341130829353720593 DOC
+BPRO Balance: 41.982780218139322315 BPRO
+BTCX Balance: 0.007169287509122712 BTCX
+MOC Balance: 31358.889479611078575745 MOC
+MOC Allowance: 9007199254740991 MOC
+DOC queue to redeem: 0 DOC
+    
+Paying commission with MOC Tokens: 0.01999999999997211784 MOC
+Mint Slippage using 0.2 %. Slippage amount: 9.713858859573542e-7 Total to send: 0.0004866643288646344542
+To mint 10 DOC you need > 0.0004866643288646344542 RBTC in your balance
+Please wait... sending transaction... Wait until blockchain mine transaction!
+
+Event: Transfer
+
+from: 0x0000000000000000000000000000000000000000
+to: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+value: 9.989926728362620006
+
+Event: StableTokenMint
+
+account: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+amount: 9.989926728362620006
+reserveTotal: 0.000485692942978677
+commission: 0
+reservePrice: 20568.4
+mocCommissionValue: 0.009989926728348695
+mocPrice: 0.5
+btcMarkup: 0
+mocMarkup: 0.009989926728348695
+vendorAccount: 0xf69287f5ca3cc3c6d3981f2412109110cb8af076
+
+Event: VendorReceivedMarkup
+
+vendorAdress: 0xf69287f5ca3cc3c6d3981f2412109110cb8af076
+paidMoC: 0.009989926728348695
+paidRBTC: 0
+
+Event: Transfer
+
+from: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+to: 0xf69287f5ca3cc3c6d3981f2412109110cb8af076
+value: 0.009989926728348695
+
+Event: Approval
+
+owner: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+spender: 0x2820f6d4d199b8d8838a4b26f9917754b86a0c1f
+value: 9007199254740990.990010073271651305
+
+Event: Transfer
+
+from: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+to: 0xc003a2e210fa3e2fbddcf564fe0e1bbcd93e3b40
+value: 0.009989926728348695
+
+Event: Approval
+
+owner: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+spender: 0x2820f6d4d199b8d8838a4b26f9917754b86a0c1f
+value: 9007199254740990.98002014654330261
+Transaction hash: 0x26223b391eecbb7576a7ba031b9dbaf8e0559097727371eeb7063b1de22c130f
 
 ```

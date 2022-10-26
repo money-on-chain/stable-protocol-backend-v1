@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 import * as dotenv from 'dotenv'

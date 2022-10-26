@@ -1,3 +1,5 @@
+// Mint Token X
+
 import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'

@@ -6,7 +6,6 @@ import { toContractPrecision, BUCKET_X2 } from '../utils.js'
 import { calcCommission } from './multicall.js'
 
 const addCommissions = async (web3, dContracts, configProject, dataContractStatus, userBalanceStats, reserveAmount, token, action) => {
-
   // get reserve price from contract
   const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.bitcoinPrice))
 
