@@ -101,7 +101,7 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, qTC) => {
 
     // User have sufficient TC in balance?
     console.log(`Redeeming ${qTC} ${configProject.tokens.TC.name} ... getting aprox: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
-    const userTCBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CollateralToken))
+    const userTCBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.TC.balance))
     if (new BigNumber(qTC).gt(userTCBalance)) throw new Error(`Insufficient ${configProject.tokens.TC.name} user balance`)
 
     // There are sufficient TC in the contracts to redeem?

@@ -25,13 +25,11 @@ const main = async () => {
   const dataContractStatus = await contractStatus(web3, dContracts, configProject)
 
   console.log('\x1b[35m%s\x1b[0m', 'Contract Status')
-  console.log(dataContractStatus)
   console.log('\x1b[32m%s\x1b[0m', renderContractStatus(dataContractStatus, configProject))
   //
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
   // Get user balance
   const userBalanceStats = await userBalance(web3, dContracts, userAddress, configProject)
-  console.log(userBalanceStats)
 
   console.log('\x1b[35m%s\x1b[0m', `User Balance: ${userAddress}`)
   console.log()

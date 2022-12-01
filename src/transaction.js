@@ -56,7 +56,14 @@ const renderEventField = (eveName, eveValue) => {
     'paidMoC',
     'paidReserveToken',
     'paidRBTC',
-    'staking'])
+    'staking',
+    'qTC_',
+    'qAsset_',
+    'qACfee_',
+    'qAC_',
+    'oldTPema_',
+    'newTPema_'
+  ])
 
   if (formatItemsWei.has(eveName)) { eveValue = Web3.utils.fromWei(eveValue) }
 

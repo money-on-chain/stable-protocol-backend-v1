@@ -183,7 +183,8 @@ ${config.tokens.CA[1].name} Balance: ${Web3.utils.fromWei(userBalance.CA[1].bala
 ${config.tokens.CA[1].name} Allowance: ${Web3.utils.fromWei(userBalance.CA[1].allowance)} ${config.tokens.CA[1].name}
 ${config.tokens.TP[0].name} Balance: ${Web3.utils.fromWei(userBalance.TP[0])} ${config.tokens.TP[0].name}
 ${config.tokens.TP[1].name} Balance: ${Web3.utils.fromWei(userBalance.TP[1])} ${config.tokens.TP[1].name}
-${config.tokens.TC.name} Balance: ${Web3.utils.fromWei(userBalance.CollateralToken)} ${config.tokens.TC.name}
+${config.tokens.TC.name} Balance: ${Web3.utils.fromWei(userBalance.TC.balance)} ${config.tokens.TC.name}
+${config.tokens.TC.name} Allowance: ${Web3.utils.fromWei(userBalance.TC.allowance)} ${config.tokens.TC.name}
     `
 
   return render
