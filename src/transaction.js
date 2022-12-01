@@ -62,7 +62,8 @@ const renderEventField = (eveName, eveValue) => {
     'qACfee_',
     'qAC_',
     'oldTPema_',
-    'newTPema_'
+    'newTPema_',
+    'qTP_'
   ])
 
   if (formatItemsWei.has(eveName)) { eveValue = Web3.utils.fromWei(eveValue) }

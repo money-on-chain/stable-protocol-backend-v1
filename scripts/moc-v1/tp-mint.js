@@ -21,7 +21,7 @@ const main = async () => {
     // Get amount from environment
     const amountTP = `${process.env.OPERATION_AMOUNT_MINT_TP}`
 
-    const { receipt, filteredEvents } = await mintTP(web3, dContracts, configProject, 0, 0, amountTP)
+    const { receipt, filteredEvents } = await mintTP(web3, dContracts, configProject, 0, 1, amountTP)
 
 }
 
