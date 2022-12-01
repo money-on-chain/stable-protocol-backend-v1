@@ -28,6 +28,16 @@ const addABIOMoC = (dContracts) => {
   abiDecoder.addABI(dContracts.json.IVotingMachine.abi)
 }
 
+const addABIv1 = (dContracts) => {
+  // Abi decoder
+  abiDecoder.addABI(dContracts.json.TokenCollateralAsset.abi)
+  abiDecoder.addABI(dContracts.json.TokenPegged.abi)
+  abiDecoder.addABI(dContracts.json.CollateralTokenCARBag.abi)
+  abiDecoder.addABI(dContracts.json.MocCABag.abi)
+  abiDecoder.addABI(dContracts.json.MocCAWrapper.abi)
+  abiDecoder.addABI(dContracts.json.MocSettlementCABag.abi)
+}
+
 const renderEventField = (eveName, eveValue) => {
   const formatItemsWei = new Set([
     'amount',
@@ -76,7 +86,28 @@ const decodeEvents = (receipt) => {
     'Approval',
     'VendorReceivedMarkup',
     'VendorStakeAdded',
-    'VendorStakeRemoved'
+    'VendorStakeRemoved',
+    'TCMinted',
+    'TCRedeemed',
+    'TPMinted',
+    'TPRedeemed',
+    'TPSwappedForTP',
+    'TPSwappedForTC',
+    'TCSwappedForTP',
+    'TCandTPRedeemed',
+    'TCandTPMinted',
+    'PeggedTokenChange',
+    'SuccessFeeDistributed',
+    'TPemaUpdated',
+    'TCMintedWithWrapper',
+    'TCRedeemedWithWrapper',
+    'TPMintedWithWrapper',
+    'TPRedeemedWithWrapper',
+    'TCandTPMintedWithWrapper',
+    'TCandTPRedeemedWithWrapper',
+    'TPSwappedForTPWithWrapper',
+    'TPSwappedForTCWithWrapper',
+    'TCSwappedForTPWithWrapper'
   ]
 
   const filteredEvents = decodedLogs.filter(event =>
@@ -133,5 +164,6 @@ const sendTransaction = async (web3, value, estimateGas, encodedCall, toContract
 export {
   sendTransaction,
   addABI,
-  addABIOMoC
+  addABIOMoC,
+  addABIv1
 }

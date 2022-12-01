@@ -92,6 +92,45 @@
                 "decimals": "2"
             }
         }
+    },
+    "flipago": {
+      "collateral": "bag",
+      "appMode": "v1",
+      "appProject": "flipago",
+      "tokens": {
+        "COINBASE": {
+          "name": "RBTC",
+          "decimals": "6"
+        },
+        "CA": [
+          {
+            "name": "DOC",
+            "decimals": "2"
+          },
+          {
+            "name": "RDOC",
+            "decimals": "2"
+          }
+        ],
+        "TP": [
+          {
+            "name": "FARS",
+            "decimals": "2"
+          },
+          {
+            "name": "FMXN",
+            "decimals": "2"
+          }
+        ],
+        "TC": {
+          "name": "FMEGA",
+          "decimals": "6"
+        },
+        "TG": {
+          "name": "FLIP",
+          "decimals": "2"
+        }
+      }
     }
   }
 }
