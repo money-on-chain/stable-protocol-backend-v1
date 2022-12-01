@@ -5,11 +5,12 @@ import {statusFromContracts, userBalanceFromContracts} from "./contracts.js";
 import {toContractPrecision} from "../utils.js";
 import {sendTransaction} from "../transaction.js";
 
-const mintTC = async (web3, dContracts, configProject, caIndex, tcAmount) => {
+
+const mintTC = async (web3, dContracts, configProject, caIndex, qTC) => {
     // Mint Collateral token with CA
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
-    const mintSlippage = `${process.env.MINT_SLIPPAGE}`
+    const slippage = `${process.env.MINT_SLIPPAGE}`
 
     const MocCAWrapper = dContracts.contracts.MocCAWrapper
     const MocCAWrapperAddress = MocCAWrapper.options.address
@@ -26,35 +27,35 @@ const mintTC = async (web3, dContracts, configProject, caIndex, tcAmount) => {
     const tcPriceInReserve = new BigNumber(Web3.utils.fromWei(dataContractStatus.getPTCac))
 
     // TC amount in reserve
-    const reserveAmount = new BigNumber(tcAmount).times(tcPriceInReserve)
+    const reserveAmount = new BigNumber(qTC).times(tcPriceInReserve)
 
     // Add Slippage plus %
-    const mintSlippageAmount = new BigNumber(mintSlippage).div(100).times(reserveAmount).plus(new BigNumber(tcAmount))
+    const qAssetMax = new BigNumber(slippage).div(100).times(reserveAmount).plus(reserveAmount)
 
-    console.log(`Mint Slippage using ${mintSlippage} %. Total to send: ${mintSlippageAmount.toString()}`)
+    console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()}`)
 
     // Verifications
 
     // User have sufficient reserve to pay?
-    console.log(`To mint ${tcAmount} ${configProject.tokens.TC.name} you need > ${mintSlippageAmount.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
+    console.log(`To mint ${qTC} ${configProject.tokens.TC.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
     const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CA[caIndex].balance))
-    if (mintSlippageAmount.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
+    if (qAssetMax.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
 
     // Allowance    reserveAllowance
-    console.log(`Allowance: To mint ${tcAmount} ${configProject.tokens.TC.name} you need > ${mintSlippageAmount.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
+    console.log(`Allowance: To mint ${qTC} ${configProject.tokens.TC.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
     const userSpendableBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CA[0].allowance))
-    if (mintSlippageAmount.gt(userSpendableBalance)) throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
+    if (qAssetMax.gt(userSpendableBalance)) throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
 
     const valueToSend = null
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
-        .mintTC(caAddress, toContractPrecision(new BigNumber(tcAmount)), toContractPrecision(mintSlippageAmount))
+        .mintTC(caAddress, toContractPrecision(new BigNumber(qTC)), toContractPrecision(qAssetMax))
         .estimateGas({ from: userAddress, value: '0x' })
 
     // encode function
     const encodedCall = MocCAWrapper.methods
-        .mintTC(caAddress, toContractPrecision(new BigNumber(tcAmount)), toContractPrecision(mintSlippageAmount))
+        .mintTC(caAddress, toContractPrecision(new BigNumber(qTC)), toContractPrecision(qAssetMax))
         .encodeABI()
 
     // send transaction to the blockchain and get receipt
@@ -65,11 +66,11 @@ const mintTC = async (web3, dContracts, configProject, caIndex, tcAmount) => {
     return { receipt, filteredEvents }
 }
 
-const redeemTC = async (web3, dContracts, configProject, caIndex, tcAmount) => {
+const redeemTC = async (web3, dContracts, configProject, caIndex, qTC) => {
     // Redeem Collateral token receiving CA
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
-    const mintSlippage = `${process.env.MINT_SLIPPAGE}`
+    const slippage = `${process.env.REDEEM_SLIPPAGE}`
 
     const MocCAWrapper = dContracts.contracts.MocCAWrapper
     const MocCAWrapperAddress = MocCAWrapper.options.address
@@ -86,37 +87,99 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, tcAmount) => {
     const tcPriceInReserve = new BigNumber(Web3.utils.fromWei(dataContractStatus.getPTCac))
 
     // TC amount in reserve
-    const reserveAmount = new BigNumber(tcAmount).times(tcPriceInReserve)
+    const reserveAmount = new BigNumber(qTC).times(tcPriceInReserve)
 
     // Redeem function... no values sent
     const valueToSend = null
 
     // Minimum AC to receive, or fail the tx
-    const mintSlippageAmount = new BigNumber(mintSlippage).div(100).times(reserveAmount)
+    const qAssetMin = new BigNumber(qTC).minus(new BigNumber(slippage).div(100).times(reserveAmount))
 
-    const minqAC = new BigNumber(tcAmount).minus(mintSlippageAmount)
-
-    console.log(`Mint Slippage using ${mintSlippage} %. Minimum limit to receive: ${minqAC.toString()}`)
+    console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qAssetMin.toString()}`)
 
     // Verifications
 
     // User have sufficient TC in balance?
-    console.log(`Redeeming ${tcAmount} ${configProject.tokens.TC.name} ... getting aprox: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
+    console.log(`Redeeming ${qTC} ${configProject.tokens.TC.name} ... getting aprox: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
     const userTCBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CollateralToken))
-    if (new BigNumber(tcAmount).gt(userTCBalance)) throw new Error(`Insufficient ${configProject.tokens.TC.name} user balance`)
+    if (new BigNumber(qTC).gt(userTCBalance)) throw new Error(`Insufficient ${configProject.tokens.TC.name} user balance`)
 
     // There are sufficient TC in the contracts to redeem?
     const tcAvailableToRedeem = new BigNumber(Web3.utils.fromWei(dataContractStatus.getTCAvailableToRedeem))
-    if (new BigNumber(tcAmount).gt(tcAvailableToRedeem)) throw new Error(`Insufficient ${configProject.tokens.TC.name} available to redeem in contract`)
+    if (new BigNumber(qTC).gt(tcAvailableToRedeem)) throw new Error(`Insufficient ${configProject.tokens.TC.name} available to redeem in contract`)
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
-        .redeemTC(caAddress, toContractPrecision(new BigNumber(1)), toContractPrecision(new BigNumber(0)))
+        .redeemTC(caAddress, toContractPrecision(new BigNumber(qTC)), toContractPrecision(qAssetMin))
         .estimateGas({ from: userAddress, value: '0x' })
 
     // encode function
     const encodedCall = MocCAWrapper.methods
-        .redeemTC(caAddress, toContractPrecision(new BigNumber(1)), toContractPrecision(new BigNumber(0)))
+        .redeemTC(caAddress, toContractPrecision(new BigNumber(qTC)), toContractPrecision(qAssetMin))
+        .encodeABI()
+
+    // send transaction to the blockchain and get receipt
+    const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, MocCAWrapperAddress)
+
+    console.log(`Transaction hash: ${receipt.transactionHash}`)
+
+    return { receipt, filteredEvents }
+}
+
+const mintTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) => {
+    // Mint pegged token with collateral CA BAG
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
+    const slippage = `${process.env.MINT_SLIPPAGE}`
+
+    const MocCAWrapper = dContracts.contracts.MocCAWrapper
+    const MocCAWrapperAddress = MocCAWrapper.options.address
+    const caToken = dContracts.contracts.CA[caIndex]
+    const caAddress = caToken.options.address
+
+    // Get information from contracts
+    const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
+
+    // Get user balance address
+    const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
+
+    // get reserve price from contract
+    const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.PP_TP[0]))
+
+    // Pegged amount in reserve
+    const reserveAmount = new BigNumber(qTP).div(reservePrice)
+
+    // Add Slippage plus %
+    const qAssetMax = new BigNumber(slippage).div(100).times(reserveAmount).plus(reserveAmount)
+
+    console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()}`)
+
+    // Verifications
+
+    // User have sufficient reserve to pay?
+    console.log(`To mint ${qTP} ${configProject.tokens.TP.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
+    const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CA[caIndex].balance))
+    if (qAssetMax.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
+
+    // Allowance
+    console.log(`Allowance: To mint ${qTP} ${configProject.tokens.TP.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
+    const userSpendableBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CA[caIndex].allowance))
+    if (qAssetMax.gt(userSpendableBalance)) throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
+
+    // There are sufficient PEGGED in the contracts to mint?
+    const tpAvailableToMint = new BigNumber(Web3.utils.fromWei(dataContractStatus.getTPAvailableToMint[tpIndex]))
+    if (new BigNumber(qAssetMax).gt(tpAvailableToMint)) throw new Error(`Insufficient ${configProject.tokens.TP.name} available to mint`)
+
+    const valueToSend = null
+
+    // Calculate estimate gas cost
+    const estimateGas = await MocCAWrapper.methods
+        .mintTP(caAddress, tpIndex, toContractPrecision(new BigNumber(qTP)), toContractPrecision(qAssetMax))
+        .estimateGas({ from: userAddress, value: '0x' })
+
+    // encode function
+    const encodedCall = MocCAWrapper.methods
+        .mintTP(caAddress, tpIndex, toContractPrecision(new BigNumber(qTP)), toContractPrecision(qAssetMax))
         .encodeABI()
 
     // send transaction to the blockchain and get receipt
@@ -128,7 +191,9 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, tcAmount) => {
 }
 
 
+
 export {
     mintTC,
-    redeemTC
+    redeemTC,
+    mintTP
 }
