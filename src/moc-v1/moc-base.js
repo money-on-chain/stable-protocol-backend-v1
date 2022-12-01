@@ -1,10 +1,9 @@
 import {sendTransaction} from "../transaction.js";
 
-const AllowanceUseCA = async (web3, dContracts, caIndex, allow, configProject) => {
+const AllowanceUseWrapper = async (web3, dContracts, token, allow, configProject) => {
 
     const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
-    const caToken = dContracts.contracts.CA[caIndex]
-    const caAddress = caToken.options.address
+    const tokenAddress = token.options.address
     const MocCAWrapperAddress = dContracts.contracts.MocCAWrapper.options.address
 
     let amountAllowance = '0'
@@ -14,17 +13,17 @@ const AllowanceUseCA = async (web3, dContracts, caIndex, allow, configProject) =
     }
 
     // Calculate estimate gas cost
-    const estimateGas = await caToken.methods
+    const estimateGas = await token.methods
         .approve(MocCAWrapperAddress, web3.utils.toWei(amountAllowance))
         .estimateGas({ from: userAddress, value: '0x' })
 
     // encode function
-    const encodedCall = caToken.methods
+    const encodedCall = token.methods
         .approve(MocCAWrapperAddress, web3.utils.toWei(amountAllowance))
         .encodeABI()
 
     // send transaction to the blockchain and get receipt
-    const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, caAddress)
+    const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, tokenAddress)
 
     console.log(`Transaction hash: ${receipt.transactionHash}`)
 
@@ -32,5 +31,5 @@ const AllowanceUseCA = async (web3, dContracts, caIndex, allow, configProject) =
 }
 
 export {
-    AllowanceUseCA
+    AllowanceUseWrapper
 }

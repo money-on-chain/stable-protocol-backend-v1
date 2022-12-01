@@ -144,7 +144,7 @@ const mintTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) =>
     const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
 
     // get reserve price from contract
-    const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.PP_TP[0]))
+    const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.PP_TP[tpIndex]))
 
     // Pegged amount in reserve
     const reserveAmount = new BigNumber(qTP).div(reservePrice)
@@ -190,10 +190,71 @@ const mintTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) =>
     return { receipt, filteredEvents }
 }
 
+const redeemTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) => {
+    // Redeem pegged token receiving CA
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
+    const slippage = `${process.env.REDEEM_SLIPPAGE}`
+
+    const MocCAWrapper = dContracts.contracts.MocCAWrapper
+    const MocCAWrapperAddress = MocCAWrapper.options.address
+    const caToken = dContracts.contracts.CA[caIndex]
+    const caAddress = caToken.options.address
+
+
+    // Get information from contracts
+    const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
+
+    // Get user balance address
+    const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
+
+    // get reserve price from contract
+    const reservePrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.PP_TP[tpIndex]))
+
+    // Pegged amount in reserve
+    const reserveAmount = new BigNumber(qTP).div(reservePrice)
+
+    // Minimum AC to receive, or fail the tx
+    const qAssetMin = new BigNumber(qTP).minus(new BigNumber(slippage).div(100).times(reserveAmount))
+
+    console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qAssetMin.toString()}`)
+
+    // Redeem function... no values sent
+    const valueToSend = null
+
+    // Verifications
+
+    // User have sufficient PEGGED Token in balance?
+    console.log(`Redeeming ${qTP} ${configProject.tokens.TP[tpIndex].name} ... getting approx: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
+    const userTPBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.TP[tpIndex]))
+    if (new BigNumber(qTP).gt(userTPBalance)) throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  user balance`)
+
+    // There are sufficient Free Pegged Token in the contracts to redeem?
+    const tpAvailableToRedeem = new BigNumber(Web3.utils.fromWei(dataContractStatus.getTPAvailableToMint[tpIndex]))
+    if (new BigNumber(qTP).gt(tpAvailableToRedeem)) throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  available to redeem in contract`)
+
+    // Calculate estimate gas cost
+    const estimateGas = await MocCAWrapper.methods
+        .redeemTP(caAddress, tpIndex, toContractPrecision(new BigNumber(qTP)), toContractPrecision(qAssetMin))
+        .estimateGas({ from: userAddress, value: '0x' })
+
+    // encode function
+    const encodedCall = MocCAWrapper.methods
+        .redeemTP(caAddress, tpIndex, toContractPrecision(new BigNumber(qTP)), toContractPrecision(qAssetMin))
+        .encodeABI()
+
+    // send transaction to the blockchain and get receipt
+    const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, MocCAWrapperAddress)
+
+    console.log(`Transaction hash: ${receipt.transactionHash}`)
+
+    return { receipt, filteredEvents }
+}
 
 
 export {
     mintTC,
     redeemTC,
-    mintTP
+    mintTP,
+    redeemTP
 }
