@@ -7,7 +7,6 @@ const contractStatus = async (web3, dContracts, configProject) => {
   const PP_TP_1 = dContracts.contracts.PP_TP[1]
   const PP_CA_0 = dContracts.contracts.PP_CA[0]
   const PP_CA_1 = dContracts.contracts.PP_CA[1]
-  const MocSettlementCABag = dContracts.contracts.MocSettlementCABag
   const MocCAWrapper = dContracts.contracts.MocCAWrapper
 
   console.log('Reading contract status ...')
@@ -36,35 +35,34 @@ const contractStatus = async (web3, dContracts, configProject) => {
     [MocCABag.options.address, MocCABag.methods.tpRedeemFee(1).encodeABI(), 'uint256'], // 20
     [MocCABag.options.address, MocCABag.methods.mocFeeFlowAddress().encodeABI(), 'address'], // 21
     [MocCABag.options.address, MocCABag.methods.mocAppreciationBeneficiaryAddress().encodeABI(), 'address'], // 22
-    [MocCABag.options.address, MocCABag.methods.mocSettlement().encodeABI(), 'address'], // 23
-    [MocCABag.options.address, MocCABag.methods.tpCtarg(0).encodeABI(), 'uint256'], // 24
-    [MocCABag.options.address, MocCABag.methods.tpCtarg(1).encodeABI(), 'uint256'], // 25
-    [MocCABag.options.address, MocCABag.methods.pegContainer(0).encodeABI(), 'uint256'], // 26
-    [MocCABag.options.address, MocCABag.methods.pegContainer(1).encodeABI(), 'uint256'], // 27
-    [PP_TP_0.options.address, PP_TP_0.methods.peek().encodeABI(), 'uint256'], // 28
-    [PP_TP_1.options.address, PP_TP_1.methods.peek().encodeABI(), 'uint256'], // 29
-    [PP_CA_0.options.address, PP_CA_0.methods.peek().encodeABI(), 'uint256'], // 30
-    [PP_CA_1.options.address, PP_CA_1.methods.peek().encodeABI(), 'uint256'], // 31
-    [MocCABag.options.address, MocCABag.methods.isLiquidationReached().encodeABI(), 'bool'], // 32
-    [MocCABag.options.address, MocCABag.methods.getPACtp(0).encodeABI(), 'uint256'], // 33
-    [MocCABag.options.address, MocCABag.methods.getPACtp(1).encodeABI(), 'uint256'], // 34
-    [MocCABag.options.address, MocCABag.methods.getPTCac().encodeABI(), 'uint256'], // 35
-    [MocCABag.options.address, MocCABag.methods.getCglb().encodeABI(), 'uint256'], // 36
-    [MocCABag.options.address, MocCABag.methods.getTCAvailableToRedeem().encodeABI(), 'uint256'], // 37
-    [MocCABag.options.address, MocCABag.methods.getTPAvailableToMint(0).encodeABI(), 'uint256'], // 38
-    [MocCABag.options.address, MocCABag.methods.getTPAvailableToMint(1).encodeABI(), 'uint256'], // 39
-    [MocCABag.options.address, MocCABag.methods.getTotalACavailable().encodeABI(), 'uint256'], // 40
-    [MocCABag.options.address, MocCABag.methods.getLeverageTC().encodeABI(), 'uint256'], // 41
-    [MocCABag.options.address, MocCABag.methods.tpEma(0).encodeABI(), 'uint256'], // 42
-    [MocCABag.options.address, MocCABag.methods.tpEma(1).encodeABI(), 'uint256'], // 43
-    [MocCABag.options.address, MocCABag.methods.nextEmaCalculation().encodeABI(), 'uint256'], // 44
-    [MocCABag.options.address, MocCABag.methods.emaCalculationBlockSpan().encodeABI(), 'uint256'], // 45
-    [MocCABag.options.address, MocCABag.methods.calcCtargemaCA().encodeABI(), 'uint256'], // 46
-    [MocCABag.options.address, MocCABag.methods.shouldCalculateEma().encodeABI(), 'bool'], // 47
-    [MocSettlementCABag.options.address, MocSettlementCABag.methods.bes().encodeABI(), 'uint256'], // 48
-    [MocSettlementCABag.options.address, MocSettlementCABag.methods.bns().encodeABI(), 'uint256'], // 49
-    [MocSettlementCABag.options.address, MocSettlementCABag.methods.getBts().encodeABI(), 'uint256'], // 50
-    [MocCAWrapper.options.address, MocCAWrapper.methods.getTokenPrice().encodeABI(), 'uint256'], // 51
+    [MocCABag.options.address, MocCABag.methods.tpCtarg(0).encodeABI(), 'uint256'], // 23
+    [MocCABag.options.address, MocCABag.methods.tpCtarg(1).encodeABI(), 'uint256'], // 24
+    [MocCABag.options.address, MocCABag.methods.pegContainer(0).encodeABI(), 'uint256'], // 25
+    [MocCABag.options.address, MocCABag.methods.pegContainer(1).encodeABI(), 'uint256'], // 26
+    [PP_TP_0.options.address, PP_TP_0.methods.peek().encodeABI(), 'uint256'], // 27
+    [PP_TP_1.options.address, PP_TP_1.methods.peek().encodeABI(), 'uint256'], // 28
+    [PP_CA_0.options.address, PP_CA_0.methods.peek().encodeABI(), 'uint256'], // 29
+    [PP_CA_1.options.address, PP_CA_1.methods.peek().encodeABI(), 'uint256'], // 30
+    [MocCABag.options.address, MocCABag.methods.isLiquidationReached().encodeABI(), 'bool'], // 31
+    [MocCABag.options.address, MocCABag.methods.getPACtp(0).encodeABI(), 'uint256'], // 32
+    [MocCABag.options.address, MocCABag.methods.getPACtp(1).encodeABI(), 'uint256'], // 33
+    [MocCABag.options.address, MocCABag.methods.getPTCac().encodeABI(), 'uint256'], // 34
+    [MocCABag.options.address, MocCABag.methods.getCglb().encodeABI(), 'uint256'], // 35
+    [MocCABag.options.address, MocCABag.methods.getTCAvailableToRedeem().encodeABI(), 'uint256'], // 36
+    [MocCABag.options.address, MocCABag.methods.getTPAvailableToMint(0).encodeABI(), 'uint256'], // 37
+    [MocCABag.options.address, MocCABag.methods.getTPAvailableToMint(1).encodeABI(), 'uint256'], // 38
+    [MocCABag.options.address, MocCABag.methods.getTotalACavailable().encodeABI(), 'uint256'], // 39
+    [MocCABag.options.address, MocCABag.methods.getLeverageTC().encodeABI(), 'uint256'], // 40
+    [MocCABag.options.address, MocCABag.methods.tpEma(0).encodeABI(), 'uint256'], // 41
+    [MocCABag.options.address, MocCABag.methods.tpEma(1).encodeABI(), 'uint256'], // 42
+    [MocCABag.options.address, MocCABag.methods.nextEmaCalculation().encodeABI(), 'uint256'], // 43
+    [MocCABag.options.address, MocCABag.methods.emaCalculationBlockSpan().encodeABI(), 'uint256'], // 44
+    [MocCABag.options.address, MocCABag.methods.calcCtargemaCA().encodeABI(), 'uint256'], // 45
+    [MocCABag.options.address, MocCABag.methods.shouldCalculateEma().encodeABI(), 'bool'], // 46
+    [MocCABag.options.address, MocCABag.methods.bes().encodeABI(), 'uint256'], // 47
+    [MocCABag.options.address, MocCABag.methods.bns().encodeABI(), 'uint256'], // 48
+    [MocCABag.options.address, MocCABag.methods.getBts().encodeABI(), 'uint256'], // 49
+    [MocCAWrapper.options.address, MocCAWrapper.methods.getTokenPrice().encodeABI(), 'uint256'], // 50
   ]
 
   // Remove decode result parameter
@@ -97,28 +95,27 @@ const contractStatus = async (web3, dContracts, configProject) => {
   status.tpRedeemFee = [listReturnData[19], listReturnData[20]]
   status.mocFeeFlowAddress = listReturnData[21]
   status.mocAppreciationBeneficiaryAddress = listReturnData[22]
-  status.mocSettlement = listReturnData[23]
-  status.tpCtarg = [listReturnData[24], listReturnData[25]]
-  status.pegContainer = [listReturnData[26], listReturnData[27]]
-  status.PP_TP = [listReturnData[28], listReturnData[29]]
-  status.PP_CA = [listReturnData[30], listReturnData[31]]
-  status.isLiquidationReached = listReturnData[32]
-  status.getPACtp = [listReturnData[33], listReturnData[34]]
-  status.getPTCac = listReturnData[35]
-  status.getCglb = listReturnData[36]
-  status.getTCAvailableToRedeem = listReturnData[37]
-  status.getTPAvailableToMint = [listReturnData[38], listReturnData[39]]
-  status.getTotalACavailable = listReturnData[40]
-  status.getLeverageTC = listReturnData[41]
-  status.tpEma = [listReturnData[42], listReturnData[43]]
-  status.nextEmaCalculation = listReturnData[44]
-  status.emaCalculationBlockSpan = listReturnData[45]
-  status.calcCtargemaCA = listReturnData[46]
-  status.shouldCalculateEma = listReturnData[47]
-  status.bes = listReturnData[48]
-  status.bns = listReturnData[49]
-  status.getBts = listReturnData[50]
-  status.getTokenPrice = listReturnData[51]
+  status.tpCtarg = [listReturnData[23], listReturnData[24]]
+  status.pegContainer = [listReturnData[25], listReturnData[26]]
+  status.PP_TP = [listReturnData[27], listReturnData[28]]
+  status.PP_CA = [listReturnData[29], listReturnData[30]]
+  status.isLiquidationReached = listReturnData[31]
+  status.getPACtp = [listReturnData[32], listReturnData[33]]
+  status.getPTCac = listReturnData[34]
+  status.getCglb = listReturnData[35]
+  status.getTCAvailableToRedeem = listReturnData[36]
+  status.getTPAvailableToMint = [listReturnData[37], listReturnData[38]]
+  status.getTotalACavailable = listReturnData[39]
+  status.getLeverageTC = listReturnData[40]
+  status.tpEma = [listReturnData[41], listReturnData[42]]
+  status.nextEmaCalculation = listReturnData[43]
+  status.emaCalculationBlockSpan = listReturnData[44]
+  status.calcCtargemaCA = listReturnData[45]
+  status.shouldCalculateEma = listReturnData[46]
+  status.bes = listReturnData[47]
+  status.bns = listReturnData[48]
+  status.getBts = listReturnData[49]
+  status.getTokenPrice = listReturnData[50]
 
   return status
 }
@@ -131,7 +128,7 @@ const userBalance = async (web3, dContracts, userAddress, configProject) => {
   const CA_1 = dContracts.contracts.CA[1]
   const TP_0 = dContracts.contracts.TP[0]
   const TP_1 = dContracts.contracts.TP[1]
-  const CollateralTokenCARBag = dContracts.contracts.CollateralTokenCARBag
+  const CollateralTokenCABag = dContracts.contracts.CollateralTokenCABag
 
   console.log(`Reading user balance ... account: ${userAddress}`)
 
@@ -143,8 +140,8 @@ const userBalance = async (web3, dContracts, userAddress, configProject) => {
     [CA_1.options.address, CA_1.methods.allowance(userAddress, MocCAWrapper.options.address).encodeABI(), 'uint256'], // 4
     [TP_0.options.address, TP_0.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 5
     [TP_1.options.address, TP_1.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 6
-    [CollateralTokenCARBag.options.address, CollateralTokenCARBag.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 7
-    [CollateralTokenCARBag.options.address, CollateralTokenCARBag.methods.allowance(userAddress, MocCAWrapper.options.address).encodeABI(), 'uint256'] // 8
+    [CollateralTokenCABag.options.address, CollateralTokenCABag.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 7
+    [CollateralTokenCABag.options.address, CollateralTokenCABag.methods.allowance(userAddress, MocCAWrapper.options.address).encodeABI(), 'uint256'] // 8
   ]
 
   // Remove decode result parameter

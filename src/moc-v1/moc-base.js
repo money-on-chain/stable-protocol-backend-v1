@@ -1,4 +1,6 @@
 import {sendTransaction} from "../transaction.js";
+import {toContractPrecisionDecimals} from "../utils.js";
+import BigNumber from "bignumber.js";
 
 const AllowanceUseWrapper = async (web3, dContracts, token, allow, configProject) => {
 
@@ -6,20 +8,20 @@ const AllowanceUseWrapper = async (web3, dContracts, token, allow, configProject
     const tokenAddress = token.options.address
     const MocCAWrapperAddress = dContracts.contracts.MocCAWrapper.options.address
 
-    let amountAllowance = '0'
+    let amountAllowance = new BigNumber('0')
     const valueToSend = null
     if (allow) {
-        amountAllowance = Number.MAX_SAFE_INTEGER.toString()
+        amountAllowance = new BigNumber(1000) //Number.MAX_SAFE_INTEGER.toString()
     }
 
     // Calculate estimate gas cost
     const estimateGas = await token.methods
-        .approve(MocCAWrapperAddress, web3.utils.toWei(amountAllowance))
+        .approve(MocCAWrapperAddress, toContractPrecisionDecimals(amountAllowance, 6))
         .estimateGas({ from: userAddress, value: '0x' })
 
     // encode function
     const encodedCall = token.methods
-        .approve(MocCAWrapperAddress, web3.utils.toWei(amountAllowance))
+        .approve(MocCAWrapperAddress, toContractPrecisionDecimals(amountAllowance, 6))
         .encodeABI()
 
     // send transaction to the blockchain and get receipt

@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js'
 import Web3 from 'web3'
 import * as dotenv from 'dotenv'
 
-import { readJsonFile } from '../utils.js'
+import { readJsonFile, fromContractPrecisionDecimals } from '../utils.js'
 import { addABIv1 } from '../transaction.js'
 
 import { contractStatus, userBalance } from './multicall.js'
@@ -21,13 +21,12 @@ const readContracts = async (web3, configProject) => {
   dContracts.contractsAddresses = {}
 
   dContracts.json.Multicall2 = readJsonFile(`./abis/${appProject}/Multicall2.json`)
-  dContracts.json.TokenCollateralAsset = readJsonFile(`./abis/${appProject}/TokenCollateralAsset.json`)
+  dContracts.json.WrappedCollateralAsset = readJsonFile(`./abis/${appProject}/WrappedCollateralAsset.json`)
   dContracts.json.TokenPegged = readJsonFile(`./abis/${appProject}/TokenPegged.json`)
-  dContracts.json.CollateralTokenCARBag = readJsonFile(`./abis/${appProject}/CollateralTokenCARBag.json`)
+  dContracts.json.CollateralTokenCABag = readJsonFile(`./abis/${appProject}/CollateralTokenCABag.json`)
   dContracts.json.IPriceProvider = readJsonFile(`./abis/${appProject}/IPriceProvider.json`)
   dContracts.json.MocCABag = readJsonFile(`./abis/${appProject}/MocCABag.json`)
   dContracts.json.MocCAWrapper = readJsonFile(`./abis/${appProject}/MocCAWrapper.json`)
-  dContracts.json.MocSettlementCABag = readJsonFile(`./abis/${appProject}/MocSettlementCABag.json`)
 
   console.log('Reading Multicall2 Contract... address: ', process.env.CONTRACT_MULTICALL2)
   dContracts.contracts.multicall = new web3.eth.Contract(dContracts.json.Multicall2.abi, process.env.CONTRACT_MULTICALL2)
@@ -41,10 +40,10 @@ const readContracts = async (web3, configProject) => {
   dContracts.contracts.TP = [TP_0, TP_1]
 
   console.log(`Reading ${configProject.tokens.CA[0].name} Token Contract... address: `, process.env.CONTRACT_CA_0)
-  const CA_0 = new web3.eth.Contract(dContracts.json.TokenCollateralAsset.abi, process.env.CONTRACT_CA_0)
+  const CA_0 = new web3.eth.Contract(dContracts.json.WrappedCollateralAsset.abi, process.env.CONTRACT_CA_0)
 
   console.log(`Reading ${configProject.tokens.CA[1].name} Token Contract... address: `, process.env.CONTRACT_CA_1)
-  const CA_1 = new web3.eth.Contract(dContracts.json.TokenCollateralAsset.abi, process.env.CONTRACT_CA_1)
+  const CA_1 = new web3.eth.Contract(dContracts.json.WrappedCollateralAsset.abi, process.env.CONTRACT_CA_1)
 
   dContracts.contracts.CA = [CA_0, CA_1]
 
@@ -70,11 +69,8 @@ const readContracts = async (web3, configProject) => {
   console.log('Reading MocCAWrapper Contract... address: ', process.env.CONTRACT_MOC_CA_WRAPPER)
   dContracts.contracts.MocCAWrapper = new web3.eth.Contract(dContracts.json.MocCAWrapper.abi, process.env.CONTRACT_MOC_CA_WRAPPER)
 
-  console.log('Reading MocSettlementCABag Contract... address: ', process.env.CONTRACT_MOC_SETTLEMENT)
-  dContracts.contracts.MocSettlementCABag = new web3.eth.Contract(dContracts.json.MocSettlementCABag.abi, process.env.CONTRACT_MOC_SETTLEMENT)
-
-  console.log('Reading CollateralTokenCARBag Contract... address: ', process.env.CONTRACT_TC)
-  dContracts.contracts.CollateralTokenCARBag = new web3.eth.Contract(dContracts.json.CollateralTokenCARBag.abi, process.env.CONTRACT_TC)
+  console.log('Reading CollateralTokenCABag Contract... address: ', process.env.CONTRACT_TC)
+  dContracts.contracts.CollateralTokenCABag = new web3.eth.Contract(dContracts.json.CollateralTokenCABag.abi, process.env.CONTRACT_TC)
 
   // Add to abi decoder
   addABIv1(dContracts)
@@ -176,23 +172,22 @@ const renderUserBalance = (userBalance, config) => {
   const render = `
 User: ${userBalance.userAddress}
 
-${config.tokens.COINBASE.name} Balance: ${Web3.utils.fromWei(userBalance.coinbase)} ${config.tokens.COINBASE.name}
-${config.tokens.CA[0].name} Balance: ${Web3.utils.fromWei(userBalance.CA[0].balance)} ${config.tokens.CA[0].name}
-${config.tokens.CA[0].name} Allowance: ${Web3.utils.fromWei(userBalance.CA[0].allowance)} ${config.tokens.CA[0].name}
-${config.tokens.CA[1].name} Balance: ${Web3.utils.fromWei(userBalance.CA[1].balance)} ${config.tokens.CA[1].name}
-${config.tokens.CA[1].name} Allowance: ${Web3.utils.fromWei(userBalance.CA[1].allowance)} ${config.tokens.CA[1].name}
-${config.tokens.TP[0].name} Balance: ${Web3.utils.fromWei(userBalance.TP[0])} ${config.tokens.TP[0].name}
-${config.tokens.TP[1].name} Balance: ${Web3.utils.fromWei(userBalance.TP[1])} ${config.tokens.TP[1].name}
-${config.tokens.TC.name} Balance: ${Web3.utils.fromWei(userBalance.TC.balance)} ${config.tokens.TC.name}
-${config.tokens.TC.name} Allowance: ${Web3.utils.fromWei(userBalance.TC.allowance)} ${config.tokens.TC.name}
+${config.tokens.COINBASE.name} Balance: ${fromContractPrecisionDecimals(userBalance.coinbase, config.tokens.COINBASE.decimals).toString()} ${config.tokens.COINBASE.name}
+${config.tokens.CA[0].name} Balance: ${fromContractPrecisionDecimals(userBalance.CA[0].balance, config.tokens.CA[0].decimals).toString()} ${config.tokens.CA[0].name}
+${config.tokens.CA[0].name} Allowance: ${fromContractPrecisionDecimals(userBalance.CA[0].allowance, config.tokens.CA[0].decimals).toString()} ${config.tokens.CA[0].name}
+${config.tokens.CA[1].name} Balance: ${fromContractPrecisionDecimals(userBalance.CA[1].balance, config.tokens.CA[1].decimals).toString()} ${config.tokens.CA[1].name}
+${config.tokens.CA[1].name} Allowance: ${fromContractPrecisionDecimals(userBalance.CA[1].allowance, config.tokens.CA[1].decimals).toString()} ${config.tokens.CA[1].name}
+${config.tokens.TP[0].name} Balance: ${fromContractPrecisionDecimals(userBalance.TP[0], config.tokens.TP[0].decimals).toString()} ${config.tokens.TP[0].name}
+${config.tokens.TP[1].name} Balance: ${fromContractPrecisionDecimals(userBalance.TP[1], config.tokens.TP[1].decimals).toString()} ${config.tokens.TP[1].name}
+${config.tokens.TC.name} Balance: ${fromContractPrecisionDecimals(userBalance.TC.balance, config.tokens.TC.decimals).toString()} ${config.tokens.TC.name}
+${config.tokens.TC.name} Allowance: ${fromContractPrecisionDecimals(userBalance.TC.allowance, config.tokens.TC.decimals).toString()} ${config.tokens.TC.name}
     `
 
   return render
 }
 
 const statusFromContracts = async (web3, dContracts, configProject) => {
-  // Read current status info from different contract MoCState.sol MoCInrate.sol
-  // MoCSettlement.sol MoC.sol in one call throught Multicall
+  // Read current status info from different
   const dataContractStatus = await contractStatus(web3, dContracts, configProject)
 
   console.log('\x1b[35m%s\x1b[0m', 'Contract Status')

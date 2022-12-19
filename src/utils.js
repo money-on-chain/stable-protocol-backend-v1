@@ -44,6 +44,22 @@ const toContractPrecision = (amount) => {
 
 const precision = (contractDecimals) => new BigNumber(10).exponentiatedBy(contractDecimals)
 
+const fromContractPrecisionDecimals = (amount, decimals) => {
+  return new BigNumber(amount).div(precision(decimals))
+}
+
+const toContractPrecisionDecimals = (amount, decimals) => {
+  //return Web3.utils.toWei(amount.toFormat(decimals, BigNumber.ROUND_DOWN), 'ether')
+  //.toFormat(decimals, BigNumber.ROUND_DOWN)
+  //const result = new BigNumber(amount).times(precision(decimals)).toFormat(decimals, BigNumber.ROUND_DOWN)
+  const result = new BigNumber(amount.toFormat(decimals, BigNumber.ROUND_DOWN)).times(precision(decimals)).toFixed(0)
+  console.log("RESULT>>>")
+  console.log(result)
+  //console.log(Web3.utils.toWei(amount.toFormat(decimals, BigNumber.ROUND_DOWN), '1000000'))
+  return result
+}
+
+
 const formatVisibleValue = (amount, decimals) => {
   return BigNumber(amount).div(precision(18)).toFormat(decimals, BigNumber.ROUND_UP, {
     decimalSeparator: '.',
@@ -69,6 +85,8 @@ export {
   toContractPrecision,
   formatVisibleValue,
   formatTimestamp,
+  fromContractPrecisionDecimals,
+  toContractPrecisionDecimals,
   BUCKET_X2,
   BUCKET_C0
 }

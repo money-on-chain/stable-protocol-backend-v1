@@ -30,12 +30,11 @@ const addABIOMoC = (dContracts) => {
 
 const addABIv1 = (dContracts) => {
   // Abi decoder
-  abiDecoder.addABI(dContracts.json.TokenCollateralAsset.abi)
+  abiDecoder.addABI(dContracts.json.WrappedCollateralAsset.abi)
   abiDecoder.addABI(dContracts.json.TokenPegged.abi)
-  abiDecoder.addABI(dContracts.json.CollateralTokenCARBag.abi)
+  abiDecoder.addABI(dContracts.json.CollateralTokenCABag.abi)
   abiDecoder.addABI(dContracts.json.MocCABag.abi)
   abiDecoder.addABI(dContracts.json.MocCAWrapper.abi)
-  abiDecoder.addABI(dContracts.json.MocSettlementCABag.abi)
 }
 
 const renderEventField = (eveName, eveValue) => {
@@ -143,6 +142,18 @@ const sendTransaction = async (web3, value, estimateGas, encodedCall, toContract
 
   // Get gas price from node
   const gasPrice = await web3.eth.getGasPrice()
+
+  console.log("userAddress")
+  console.log(userAddress)
+  console.log("gasPrice")
+  console.log(gasPrice)
+  console.log("toContract")
+  console.log(toContract)
+  console.log("valueToSend")
+  console.log(valueToSend)
+  console.log("estimateGas")
+  console.log(estimateGas)
+
 
   // Sign transaction need it PK
   const transaction = await web3.eth.accounts.signTransaction(

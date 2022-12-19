@@ -2,7 +2,7 @@ import BigNumber from "bignumber.js";
 import Web3 from "web3";
 
 import {statusFromContracts, userBalanceFromContracts} from "./contracts.js";
-import {toContractPrecision} from "../utils.js";
+import {toContractPrecision, fromContractPrecisionDecimals, toContractPrecisionDecimals} from "../utils.js";
 import {sendTransaction} from "../transaction.js";
 
 
@@ -38,24 +38,28 @@ const mintTC = async (web3, dContracts, configProject, caIndex, qTC) => {
 
     // User have sufficient reserve to pay?
     console.log(`To mint ${qTC} ${configProject.tokens.TC.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
-    const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CA[caIndex].balance))
+    const userReserveBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].balance, configProject.tokens.CA[caIndex].decimals))
     if (qAssetMax.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
 
     // Allowance    reserveAllowance
     console.log(`Allowance: To mint ${qTC} ${configProject.tokens.TC.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
-    const userSpendableBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CA[0].allowance))
+    const userSpendableBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].allowance, configProject.tokens.CA[caIndex].decimals))
     if (qAssetMax.gt(userSpendableBalance)) throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
 
     const valueToSend = null
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
-        .mintTC(caAddress, toContractPrecision(new BigNumber(qTC)), toContractPrecision(qAssetMax))
-        .estimateGas({ from: userAddress, value: '0x' })
+        .mintTC(caAddress,
+            toContractPrecision(new BigNumber(qTC)),
+            toContractPrecisionDecimals(qAssetMax, configProject.tokens.CA[caIndex].decimals)
+        ).estimateGas({ from: userAddress, value: '0x' })
 
     // encode function
     const encodedCall = MocCAWrapper.methods
-        .mintTC(caAddress, toContractPrecision(new BigNumber(qTC)), toContractPrecision(qAssetMax))
+        .mintTC(caAddress,
+            toContractPrecision(new BigNumber(qTC)),
+            toContractPrecisionDecimals(qAssetMax, configProject.tokens.CA[caIndex].decimals))
         .encodeABI()
 
     // send transaction to the blockchain and get receipt

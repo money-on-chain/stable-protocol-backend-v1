@@ -100,35 +100,74 @@
       "tokens": {
         "COINBASE": {
           "name": "RBTC",
-          "decimals": "6"
+          "decimals": "18"
         },
         "CA": [
           {
             "name": "DOC",
-            "decimals": "2"
+            "decimals": "18"
           },
           {
             "name": "RDOC",
-            "decimals": "2"
+            "decimals": "18"
           }
         ],
         "TP": [
           {
             "name": "FARS",
-            "decimals": "2"
+            "decimals": "18"
           },
           {
             "name": "FMXN",
-            "decimals": "2"
+            "decimals": "18"
           }
         ],
         "TC": {
           "name": "FMEGA",
-          "decimals": "6"
+          "decimals": "18"
         },
         "TG": {
           "name": "FLIP",
-          "decimals": "2"
+          "decimals": "18"
+        }
+      }
+    },
+    "flipago_polygon": {
+      "collateral": "bag",
+      "appMode": "v1",
+      "appProject": "flipago",
+      "tokens": {
+        "COINBASE": {
+          "name": "MATIC",
+          "decimals": "18"
+        },
+        "CA": [
+          {
+            "name": "USDC",
+            "decimals": "6"
+          },
+          {
+            "name": "USDT",
+            "decimals": "18"
+          }
+        ],
+        "TP": [
+          {
+            "name": "FARS",
+            "decimals": "18"
+          },
+          {
+            "name": "FMXN",
+            "decimals": "18"
+          }
+        ],
+        "TC": {
+          "name": "FMEGA",
+          "decimals": "18"
+        },
+        "TG": {
+          "name": "FLIP",
+          "decimals": "18"
         }
       }
     }
