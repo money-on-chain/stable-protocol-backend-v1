@@ -17,10 +17,11 @@ const main = async () => {
     const dContracts = await readContracts(web3, configProject)
 
     // Token to approve
-    const token = dContracts.contracts.CollateralTokenCARBag
+    const token = dContracts.contracts.CollateralTokenCABag
+    const tokenDecimals = configProject.tokens.CA[0].decimals
 
     // Send transaction and get receipt
-    const { receipt, filteredEvents } = await AllowanceUseWrapper(web3, dContracts, token, true, configProject)
+    const { receipt, filteredEvents } = await AllowanceUseWrapper(web3, dContracts, token, true, tokenDecimals)
 }
 
 main()

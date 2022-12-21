@@ -100,35 +100,35 @@
       "tokens": {
         "COINBASE": {
           "name": "RBTC",
-          "decimals": "18"
+          "decimals": 18
         },
         "CA": [
           {
             "name": "DOC",
-            "decimals": "18"
+            "decimals": 18
           },
           {
             "name": "RDOC",
-            "decimals": "18"
+            "decimals": 18
           }
         ],
         "TP": [
           {
-            "name": "FARS",
-            "decimals": "18"
+            "name": "GoARS",
+            "decimals": 18
           },
           {
-            "name": "FMXN",
-            "decimals": "18"
+            "name": "GoMXN",
+            "decimals": 18
           }
         ],
         "TC": {
-          "name": "FMEGA",
-          "decimals": "18"
+          "name": "GoTURBO",
+          "decimals": 18
         },
         "TG": {
           "name": "FLIP",
-          "decimals": "18"
+          "decimals": 18
         }
       }
     },
@@ -139,35 +139,35 @@
       "tokens": {
         "COINBASE": {
           "name": "MATIC",
-          "decimals": "18"
+          "decimals": 18
         },
         "CA": [
           {
             "name": "USDC",
-            "decimals": "6"
+            "decimals": 6
           },
           {
             "name": "USDT",
-            "decimals": "18"
+            "decimals": 18
           }
         ],
         "TP": [
           {
             "name": "FARS",
-            "decimals": "18"
+            "decimals": 18
           },
           {
             "name": "FMXN",
-            "decimals": "18"
+            "decimals": 18
           }
         ],
         "TC": {
           "name": "FMEGA",
-          "decimals": "18"
+          "decimals": 18
         },
         "TG": {
           "name": "FLIP",
-          "decimals": "18"
+          "decimals": 18
         }
       }
     }

@@ -32,7 +32,7 @@ const mintTC = async (web3, dContracts, configProject, caIndex, qTC) => {
     // Add Slippage plus %
     const qAssetMax = new BigNumber(slippage).div(100).times(reserveAmount).plus(reserveAmount)
 
-    console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()}`)
+    console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // Verifications
 
@@ -51,14 +51,14 @@ const mintTC = async (web3, dContracts, configProject, caIndex, qTC) => {
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
         .mintTC(caAddress,
-            toContractPrecision(new BigNumber(qTC)),
+            toContractPrecisionDecimals(new BigNumber(qTC), configProject.tokens.TC.decimals),
             toContractPrecisionDecimals(qAssetMax, configProject.tokens.CA[caIndex].decimals)
         ).estimateGas({ from: userAddress, value: '0x' })
 
     // encode function
     const encodedCall = MocCAWrapper.methods
         .mintTC(caAddress,
-            toContractPrecision(new BigNumber(qTC)),
+            toContractPrecisionDecimals(new BigNumber(qTC), configProject.tokens.TC.decimals),
             toContractPrecisionDecimals(qAssetMax, configProject.tokens.CA[caIndex].decimals))
         .encodeABI()
 
@@ -97,15 +97,15 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, qTC) => {
     const valueToSend = null
 
     // Minimum AC to receive, or fail the tx
-    const qAssetMin = new BigNumber(qTC).minus(new BigNumber(slippage).div(100).times(reserveAmount))
+    const qAssetMin = new BigNumber(reserveAmount).minus(new BigNumber(slippage).div(100).times(reserveAmount))
 
-    console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qAssetMin.toString()}`)
+    console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qAssetMin.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // Verifications
 
     // User have sufficient TC in balance?
     console.log(`Redeeming ${qTC} ${configProject.tokens.TC.name} ... getting aprox: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
-    const userTCBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.TC.balance))
+    const userTCBalance = new BigNumber(toContractPrecisionDecimals(userBalanceStats.TC.balance, configProject.tokens.TC.decimals))
     if (new BigNumber(qTC).gt(userTCBalance)) throw new Error(`Insufficient ${configProject.tokens.TC.name} user balance`)
 
     // There are sufficient TC in the contracts to redeem?
@@ -114,12 +114,18 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, qTC) => {
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
-        .redeemTC(caAddress, toContractPrecision(new BigNumber(qTC)), toContractPrecision(qAssetMin))
-        .estimateGas({ from: userAddress, value: '0x' })
+        .redeemTC(
+            caAddress,
+            toContractPrecisionDecimals(new BigNumber(qTC), configProject.tokens.TC.decimals),
+            toContractPrecisionDecimals(qAssetMin, configProject.tokens.CA[caIndex].decimals)
+        ).estimateGas({ from: userAddress, value: '0x' })
 
     // encode function
     const encodedCall = MocCAWrapper.methods
-        .redeemTC(caAddress, toContractPrecision(new BigNumber(qTC)), toContractPrecision(qAssetMin))
+        .redeemTC(
+            caAddress,
+            toContractPrecisionDecimals(new BigNumber(qTC), configProject.tokens.TC.decimals),
+            toContractPrecisionDecimals(qAssetMin, configProject.tokens.CA[caIndex].decimals))
         .encodeABI()
 
     // send transaction to the blockchain and get receipt
@@ -156,34 +162,43 @@ const mintTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) =>
     // Add Slippage plus %
     const qAssetMax = new BigNumber(slippage).div(100).times(reserveAmount).plus(reserveAmount)
 
-    console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()}`)
+    console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} `)
 
     // Verifications
 
     // User have sufficient reserve to pay?
     console.log(`To mint ${qTP} ${configProject.tokens.TP.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
-    const userReserveBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CA[caIndex].balance))
+    const userReserveBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].balance, configProject.tokens.CA[caIndex].decimals))
     if (qAssetMax.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
 
     // Allowance
     console.log(`Allowance: To mint ${qTP} ${configProject.tokens.TP.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
-    const userSpendableBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.CA[caIndex].allowance))
+    const userSpendableBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].allowance, configProject.tokens.CA[caIndex].decimals))
     if (qAssetMax.gt(userSpendableBalance)) throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
 
     // There are sufficient PEGGED in the contracts to mint?
-    const tpAvailableToMint = new BigNumber(Web3.utils.fromWei(dataContractStatus.getTPAvailableToMint[tpIndex]))
+    const tpAvailableToMint = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getTPAvailableToMint[tpIndex], configProject.tokens.TP[tpIndex].decimals))
     if (new BigNumber(qAssetMax).gt(tpAvailableToMint)) throw new Error(`Insufficient ${configProject.tokens.TP.name} available to mint`)
 
     const valueToSend = null
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
-        .mintTP(caAddress, tpIndex, toContractPrecision(new BigNumber(qTP)), toContractPrecision(qAssetMax))
-        .estimateGas({ from: userAddress, value: '0x' })
+        .mintTP(
+            caAddress,
+            tpIndex,
+            toContractPrecisionDecimals(new BigNumber(qTP), configProject.tokens.TP[tpIndex].decimals),
+            toContractPrecisionDecimals(qAssetMax, configProject.tokens.CA[caIndex].decimals)
+        ).estimateGas({ from: userAddress, value: '0x' })
 
     // encode function
     const encodedCall = MocCAWrapper.methods
-        .mintTP(caAddress, tpIndex, toContractPrecision(new BigNumber(qTP)), toContractPrecision(qAssetMax))
+        .mintTP(
+            caAddress,
+            tpIndex,
+            toContractPrecisionDecimals(new BigNumber(qTP), configProject.tokens.TP[tpIndex].decimals),
+            toContractPrecisionDecimals(qAssetMax, configProject.tokens.CA[caIndex].decimals)
+        )
         .encodeABI()
 
     // send transaction to the blockchain and get receipt
@@ -219,9 +234,9 @@ const redeemTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) 
     const reserveAmount = new BigNumber(qTP).div(reservePrice)
 
     // Minimum AC to receive, or fail the tx
-    const qAssetMin = new BigNumber(qTP).minus(new BigNumber(slippage).div(100).times(reserveAmount))
+    const qAssetMin = new BigNumber(reserveAmount).minus(new BigNumber(slippage).div(100).times(reserveAmount))
 
-    console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qAssetMin.toString()}`)
+    console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qAssetMin.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // Redeem function... no values sent
     const valueToSend = null
@@ -230,7 +245,7 @@ const redeemTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) 
 
     // User have sufficient PEGGED Token in balance?
     console.log(`Redeeming ${qTP} ${configProject.tokens.TP[tpIndex].name} ... getting approx: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
-    const userTPBalance = new BigNumber(Web3.utils.fromWei(userBalanceStats.TP[tpIndex]))
+    const userTPBalance = new BigNumber(toContractPrecisionDecimals(userBalanceStats.TP[tpIndex], configProject.tokens.TP[tpIndex].decimals))
     if (new BigNumber(qTP).gt(userTPBalance)) throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  user balance`)
 
     // There are sufficient Free Pegged Token in the contracts to redeem?
@@ -239,12 +254,22 @@ const redeemTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) 
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
-        .redeemTP(caAddress, tpIndex, toContractPrecision(new BigNumber(qTP)), toContractPrecision(qAssetMin))
+        .redeemTP(
+            caAddress,
+            tpIndex,
+            toContractPrecisionDecimals(new BigNumber(qTP), configProject.tokens.TP[tpIndex].decimals),
+            toContractPrecisionDecimals(qAssetMin, configProject.tokens.CA[caIndex].decimals)
+        )
         .estimateGas({ from: userAddress, value: '0x' })
 
     // encode function
     const encodedCall = MocCAWrapper.methods
-        .redeemTP(caAddress, tpIndex, toContractPrecision(new BigNumber(qTP)), toContractPrecision(qAssetMin))
+        .redeemTP(
+            caAddress,
+            tpIndex,
+            toContractPrecision(new BigNumber(qTP), configProject.tokens.TP[tpIndex].decimals),
+            toContractPrecision(qAssetMin, configProject.tokens.CA[caIndex].decimals)
+        )
         .encodeABI()
 
     // send transaction to the blockchain and get receipt
