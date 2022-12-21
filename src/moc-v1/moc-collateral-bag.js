@@ -304,10 +304,102 @@ const redeemTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) 
     return { receipt, filteredEvents }
 }
 
+const swapTPforTP = async (web3, dContracts, configProject, iFromTP, iToTP, qTP, caIndex) => {
+    // caller sends a Pegged Token and receives another one
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
+    const slippage = `${process.env.REDEEM_SLIPPAGE}`
+
+    const MocCAWrapper = dContracts.contracts.MocCAWrapper
+    const MocCAWrapperAddress = MocCAWrapper.options.address
+    const caToken = dContracts.contracts.CA[caIndex]
+    const caAddress = caToken.options.address
+
+    // Get information from contracts
+    const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
+
+    // Get user balance address
+    const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
+
+    // get reserve price from contract
+    const reservePriceFrom = new BigNumber(Web3.utils.fromWei(dataContractStatus.PP_TP[iFromTP]))
+    const reservePriceTo = new BigNumber(Web3.utils.fromWei(dataContractStatus.PP_TP[iToTP]))
+    const SwapFees = new BigNumber(Web3.utils.fromWei(dataContractStatus.swapTPforTPFee))
+
+    // Pegged amount in reserve [From]
+    const reserveAmountFrom = new BigNumber(qTP).div(reservePriceFrom)
+
+    // Pegged amount [To]
+    const amountToTP = reserveAmountFrom.times(reservePriceTo)
+
+    // minimum amount of target Pegged Token that the sender expects to receive
+    const qTPMin = new BigNumber(amountToTP).minus(new BigNumber(slippage).div(100).times(amountToTP))
+
+    console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qTPMin.toString()} ${configProject.tokens.TP[iToTP].name}`)
+
+    // maximum amount of Asset that can be spent in fees
+    const qAssetMaxFees = new BigNumber(slippage).div(100).times(reserveAmountFrom).plus(reserveAmountFrom).times(SwapFees)
+
+    console.log(`Slippage using ${slippage} %. Maximum amount of asset can be spent in fees: ${qAssetMaxFees.toString()} ${configProject.tokens.CA[caIndex].name} `)
+
+    // Verifications
+
+    // User have sufficient PEGGED Token in balance?
+    console.log(`Swap ${qTP} ${configProject.tokens.TP[iFromTP].name} ... getting approx: ${amountToTP} ${configProject.tokens.TP[iToTP].name}... `)
+    const userTPBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.TP[iFromTP], configProject.tokens.TP[iFromTP].decimals))
+    if (new BigNumber(qTP).gt(userTPBalance))
+        throw new Error(`Insufficient ${configProject.tokens.TP[iFromTP].name}  user balance`)
+
+    // Fees user have sufficient reserve to pay?
+    console.log(`To pay fees you need > ${qAssetMaxFees.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
+    const userReserveBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].balance, configProject.tokens.CA[caIndex].decimals))
+    if (qAssetMaxFees.gt(userReserveBalance))
+        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
+
+    // Fees Allowance
+    console.log(`Allowance: To pay fees you need > ${qAssetMaxFees.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
+    const userSpendableBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].allowance, configProject.tokens.CA[caIndex].decimals))
+    if (qAssetMaxFees.gt(userSpendableBalance))
+        throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
+
+    const valueToSend = null
+
+    // Calculate estimate gas cost
+    const estimateGas = await MocCAWrapper.methods
+        .swapTPforTP(
+            caAddress,
+            iFromTP,
+            iToTP,
+            toContractPrecisionDecimals(new BigNumber(qTP), configProject.tokens.TP[iFromTP].decimals),
+            toContractPrecisionDecimals(new BigNumber(qTPMin), configProject.tokens.TP[iToTP].decimals),
+            toContractPrecisionDecimals(qAssetMaxFees, configProject.tokens.CA[caIndex].decimals)
+        ).estimateGas({ from: userAddress, value: '0x' })
+
+    // encode function
+    const encodedCall = MocCAWrapper.methods
+        .swapTPforTP(
+            caAddress,
+            iFromTP,
+            iToTP,
+            toContractPrecisionDecimals(new BigNumber(qTP), configProject.tokens.TP[iFromTP].decimals),
+            toContractPrecisionDecimals(new BigNumber(qTPMin), configProject.tokens.TP[iToTP].decimals),
+            toContractPrecisionDecimals(qAssetMaxFees, configProject.tokens.CA[caIndex].decimals)
+        )
+        .encodeABI()
+
+    // send transaction to the blockchain and get receipt
+    const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, MocCAWrapperAddress)
+
+    console.log(`Transaction hash: ${receipt.transactionHash}`)
+
+    return { receipt, filteredEvents }
+}
+
 
 export {
     mintTC,
     redeemTC,
     mintTP,
-    redeemTP
+    redeemTP,
+    swapTPforTP
 }
