@@ -49,13 +49,7 @@ const fromContractPrecisionDecimals = (amount, decimals) => {
 }
 
 const toContractPrecisionDecimals = (amount, decimals) => {
-  //return Web3.utils.toWei(amount.toFormat(decimals, BigNumber.ROUND_DOWN), 'ether')
-  //.toFormat(decimals, BigNumber.ROUND_DOWN)
-  //const result = new BigNumber(amount).times(precision(decimals)).toFormat(decimals, BigNumber.ROUND_DOWN)
   const result = new BigNumber(amount.toFormat(decimals, BigNumber.ROUND_DOWN)).times(precision(decimals)).toFixed(0)
-  console.log("RESULT>>>")
-  console.log(result)
-  //console.log(Web3.utils.toWei(amount.toFormat(decimals, BigNumber.ROUND_DOWN), '1000000'))
   return result
 }
 

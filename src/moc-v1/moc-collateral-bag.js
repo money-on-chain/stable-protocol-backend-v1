@@ -105,7 +105,7 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, qTC) => {
 
     // User have sufficient TC in balance?
     console.log(`Redeeming ${qTC} ${configProject.tokens.TC.name} ... getting aprox: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
-    const userTCBalance = new BigNumber(toContractPrecisionDecimals(userBalanceStats.TC.balance, configProject.tokens.TC.decimals))
+    const userTCBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.TC.balance, configProject.tokens.TC.decimals))
     if (new BigNumber(qTC).gt(userTCBalance)) throw new Error(`Insufficient ${configProject.tokens.TC.name} user balance`)
 
     // There are sufficient TC in the contracts to redeem?
@@ -167,12 +167,12 @@ const mintTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) =>
     // Verifications
 
     // User have sufficient reserve to pay?
-    console.log(`To mint ${qTP} ${configProject.tokens.TP.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
+    console.log(`To mint ${qTP} ${configProject.tokens.TP[tpIndex].name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
     const userReserveBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].balance, configProject.tokens.CA[caIndex].decimals))
     if (qAssetMax.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
 
     // Allowance
-    console.log(`Allowance: To mint ${qTP} ${configProject.tokens.TP.name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
+    console.log(`Allowance: To mint ${qTP} ${configProject.tokens.TP[tpIndex].name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
     const userSpendableBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].allowance, configProject.tokens.CA[caIndex].decimals))
     if (qAssetMax.gt(userSpendableBalance)) throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
 
@@ -245,7 +245,7 @@ const redeemTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) 
 
     // User have sufficient PEGGED Token in balance?
     console.log(`Redeeming ${qTP} ${configProject.tokens.TP[tpIndex].name} ... getting approx: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
-    const userTPBalance = new BigNumber(toContractPrecisionDecimals(userBalanceStats.TP[tpIndex], configProject.tokens.TP[tpIndex].decimals))
+    const userTPBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.TP[tpIndex], configProject.tokens.TP[tpIndex].decimals))
     if (new BigNumber(qTP).gt(userTPBalance)) throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  user balance`)
 
     // There are sufficient Free Pegged Token in the contracts to redeem?
