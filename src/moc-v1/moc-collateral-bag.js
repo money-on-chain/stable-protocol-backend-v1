@@ -104,13 +104,22 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, qTC) => {
     // Verifications
 
     // User have sufficient TC in balance?
-    console.log(`Redeeming ${qTC} ${configProject.tokens.TC.name} ... getting aprox: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
-    const userTCBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.TC.balance, configProject.tokens.TC.decimals))
-    if (new BigNumber(qTC).gt(userTCBalance)) throw new Error(`Insufficient ${configProject.tokens.TC.name} user balance`)
+    console.log(`Redeeming ${qTC} ${configProject.tokens.TC.name} ... getting approx: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
+    const userTCBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.TC.balance,
+                                                                      configProject.tokens.TC.decimals))
+    if (new BigNumber(qTC).gt(userTCBalance))
+        throw new Error(`Insufficient ${configProject.tokens.TC.name} user balance`)
 
     // There are sufficient TC in the contracts to redeem?
     const tcAvailableToRedeem = new BigNumber(Web3.utils.fromWei(dataContractStatus.getTCAvailableToRedeem))
-    if (new BigNumber(qTC).gt(tcAvailableToRedeem)) throw new Error(`Insufficient ${configProject.tokens.TC.name} available to redeem in contract`)
+    if (new BigNumber(qTC).gt(tcAvailableToRedeem))
+        throw new Error(`Insufficient ${configProject.tokens.TC.name}available to redeem in contract`)
+
+    // There are sufficient CA in the contract
+    const acBalance = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getACBalance[caIndex],
+                                                                  configProject.tokens.CA[caIndex].decimals))
+    if (new BigNumber(reserveAmount).gt(acBalance))
+        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} in the contract. Balance: ${acBalance} ${configProject.tokens.CA[caIndex].name}`)
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
@@ -129,7 +138,12 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, qTC) => {
         .encodeABI()
 
     // send transaction to the blockchain and get receipt
-    const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, MocCAWrapperAddress)
+    const { receipt, filteredEvents } = await sendTransaction(
+        web3,
+        valueToSend,
+        estimateGas,
+        encodedCall,
+        MocCAWrapperAddress)
 
     console.log(`Transaction hash: ${receipt.transactionHash}`)
 
@@ -169,16 +183,19 @@ const mintTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) =>
     // User have sufficient reserve to pay?
     console.log(`To mint ${qTP} ${configProject.tokens.TP[tpIndex].name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
     const userReserveBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].balance, configProject.tokens.CA[caIndex].decimals))
-    if (qAssetMax.gt(userReserveBalance)) throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
+    if (qAssetMax.gt(userReserveBalance))
+        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
 
     // Allowance
     console.log(`Allowance: To mint ${qTP} ${configProject.tokens.TP[tpIndex].name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
     const userSpendableBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].allowance, configProject.tokens.CA[caIndex].decimals))
-    if (qAssetMax.gt(userSpendableBalance)) throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
+    if (qAssetMax.gt(userSpendableBalance))
+        throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
 
     // There are sufficient PEGGED in the contracts to mint?
     const tpAvailableToMint = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getTPAvailableToMint[tpIndex], configProject.tokens.TP[tpIndex].decimals))
-    if (new BigNumber(qAssetMax).gt(tpAvailableToMint)) throw new Error(`Insufficient ${configProject.tokens.TP.name} available to mint`)
+    if (new BigNumber(qAssetMax).gt(tpAvailableToMint))
+        throw new Error(`Insufficient ${configProject.tokens.TP.name} available to mint`)
 
     const valueToSend = null
 
@@ -246,11 +263,18 @@ const redeemTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) 
     // User have sufficient PEGGED Token in balance?
     console.log(`Redeeming ${qTP} ${configProject.tokens.TP[tpIndex].name} ... getting approx: ${reserveAmount} ${configProject.tokens.CA[caIndex].name}... `)
     const userTPBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.TP[tpIndex], configProject.tokens.TP[tpIndex].decimals))
-    if (new BigNumber(qTP).gt(userTPBalance)) throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  user balance`)
+    if (new BigNumber(qTP).gt(userTPBalance))
+        throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  user balance`)
 
     // There are sufficient Free Pegged Token in the contracts to redeem?
     const tpAvailableToRedeem = new BigNumber(Web3.utils.fromWei(dataContractStatus.getTPAvailableToMint[tpIndex]))
-    if (new BigNumber(qTP).gt(tpAvailableToRedeem)) throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  available to redeem in contract`)
+    if (new BigNumber(qTP).gt(tpAvailableToRedeem))
+        throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  available to redeem in contract`)
+
+    // There are sufficient CA in the contract
+    const acBalance = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getACBalance[caIndex], configProject.tokens.CA[caIndex].decimals))
+    if (new BigNumber(reserveAmount).gt(acBalance))
+        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} in the contract. Balance: ${acBalance} ${configProject.tokens.CA[caIndex].name}`)
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
