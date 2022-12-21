@@ -87,6 +87,8 @@ Total amount of Collateral Asset held in the Collateral Bag (nACcb): ${Web3.util
 Collateral Token in the Collateral Bag (nTCcb): ${Web3.utils.fromWei(contractStatus.nTCcb)}
 Total supply of ${config.tokens.TP[0].name}:  ${Web3.utils.fromWei(contractStatus.pegContainer[0])}
 Total supply of ${config.tokens.TP[1].name}:  ${Web3.utils.fromWei(contractStatus.pegContainer[1])}
+Total supply of ${config.tokens.CA[0].name}:  ${fromContractPrecisionDecimals(contractStatus.getACBalance[0], config.tokens.CA[0].decimals).toString()}
+Total supply of ${config.tokens.CA[1].name}:  ${fromContractPrecisionDecimals(contractStatus.getACBalance[1], config.tokens.CA[1].decimals).toString()}
 
 
 Prices

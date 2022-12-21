@@ -8,6 +8,8 @@ const contractStatus = async (web3, dContracts, configProject) => {
   const PP_CA_0 = dContracts.contracts.PP_CA[0]
   const PP_CA_1 = dContracts.contracts.PP_CA[1]
   const MocCAWrapper = dContracts.contracts.MocCAWrapper
+  const CA_0 = dContracts.contracts.CA[0]
+  const CA_1 = dContracts.contracts.CA[1]
 
   console.log('Reading contract status ...')
 
@@ -63,6 +65,8 @@ const contractStatus = async (web3, dContracts, configProject) => {
     [MocCABag.options.address, MocCABag.methods.bns().encodeABI(), 'uint256'], // 48
     [MocCABag.options.address, MocCABag.methods.getBts().encodeABI(), 'uint256'], // 49
     [MocCAWrapper.options.address, MocCAWrapper.methods.getTokenPrice().encodeABI(), 'uint256'], // 50
+    [CA_0.options.address, CA_0.methods.balanceOf(MocCAWrapper.options.address).encodeABI(), 'uint256'], // 51
+    [CA_1.options.address, CA_1.methods.balanceOf(MocCAWrapper.options.address).encodeABI(), 'uint256'], // 52
   ]
 
   // Remove decode result parameter
@@ -116,6 +120,7 @@ const contractStatus = async (web3, dContracts, configProject) => {
   status.bns = listReturnData[48]
   status.getBts = listReturnData[49]
   status.getTokenPrice = listReturnData[50]
+  status.getACBalance = [listReturnData[51], listReturnData[52]]
 
   return status
 }
