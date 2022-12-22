@@ -19,9 +19,11 @@ const main = async () => {
     const dContracts = await readContracts(web3, configProject)
 
     // Get amount from environment
-    const amountTP = `${process.env.OPERATION_AMOUNT_MINT_TP}`
+    const qTP = `${process.env.OPERATION_AMOUNT_MINT_TP}`
+    const caIndex = 0
+    const tpIndex = 0
 
-    const { receipt, filteredEvents } = await mintTP(web3, dContracts, configProject, 1, 0, amountTP)
+    const { receipt, filteredEvents } = await mintTP(web3, dContracts, configProject, caIndex, tpIndex, qTP)
 
 }
 
