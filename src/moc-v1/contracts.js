@@ -158,12 +158,12 @@ Token Collateral Mint Fee: ${Web3.utils.fromWei(contractStatus.tcMintFee)}
 Token Collateral Redeem Fee: ${Web3.utils.fromWei(contractStatus.tcRedeemFee)}
 Swap TP x TP Fee: ${Web3.utils.fromWei(contractStatus.swapTPforTPFee)}
 Swap TP x TC Fee: ${Web3.utils.fromWei(contractStatus.swapTPforTCFee)}
-Redeem TC & TP Fee: ${contractStatus.redeemTCandTPFee}
-Mint TC & TP Fee: ${contractStatus.mintTCandTPFee}
-Mint ${config.tokens.TP[0].name} Fee:  ${contractStatus.tpMintFee[0]}
-Mint ${config.tokens.TP[1].name} Fee:  ${contractStatus.tpMintFee[1]}
-Redeem ${config.tokens.TP[0].name} Fee:  ${contractStatus.tpRedeemFee[0]}
-Redeem ${config.tokens.TP[1].name} Fee:  ${contractStatus.tpRedeemFee[1]}
+Redeem TC & TP Fee: ${Web3.utils.fromWei(contractStatus.redeemTCandTPFee)}
+Mint TC & TP Fee: ${Web3.utils.fromWei(contractStatus.mintTCandTPFee)}
+Mint ${config.tokens.TP[0].name} Fee:  ${Web3.utils.fromWei(contractStatus.tpMintFee[0])}
+Mint ${config.tokens.TP[1].name} Fee:  ${Web3.utils.fromWei(contractStatus.tpMintFee[1])}
+Redeem ${config.tokens.TP[0].name} Fee:  ${Web3.utils.fromWei(contractStatus.tpRedeemFee[0])}
+Redeem ${config.tokens.TP[1].name} Fee:  ${Web3.utils.fromWei(contractStatus.tpRedeemFee[1])}
 Blockheight: ${contractStatus.blockHeight}  
     `
 
