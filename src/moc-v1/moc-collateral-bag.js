@@ -614,6 +614,87 @@ const swapTCforTP = async (web3, dContracts, configProject, caIndex, tpIndex, qT
 }
 
 
+const mintTCandTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) => {
+    // caller sends Asset and receives Collateral Token and Pegged Token
+
+    const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
+    const slippage = `${process.env.MINT_SLIPPAGE}`
+
+    const MocCAWrapper = dContracts.contracts.MocCAWrapper
+    const MocCAWrapperAddress = MocCAWrapper.options.address
+    const caToken = dContracts.contracts.CA[caIndex]
+    const caAddress = caToken.options.address
+
+    // Get information from contracts
+    const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
+
+    // Get user balance address
+    const userBalanceStats = await userBalanceFromContracts(web3, dContracts, configProject, userAddress)
+
+    // Price of TC
+    const SwapFees = new BigNumber(Web3.utils.fromWei(dataContractStatus.mintTCandTPFee))
+    const getPACtp = new BigNumber(Web3.utils.fromWei(dataContractStatus.getPACtp[tpIndex]))
+    const calcCtargemaCA = new BigNumber(Web3.utils.fromWei(dataContractStatus.calcCtargemaCA))
+
+    // qAC = qTP / getPACtp + ((qTP * (calcCtargemaCA - 1) / getPACtp))
+    const n1 = new BigNumber(qTP).div(getPACtp)
+    const n2 = calcCtargemaCA.minus(1).times(qTP).div(getPACtp)
+    const qAC = n1.plus(n2)
+
+    const feeOperation = qAC.times(SwapFees)
+
+    const caAmountTCwFee = qAC.plus(feeOperation)
+
+    console.log(`Operation w/commissions: ${caAmountTCwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
+    console.log(`Commissions: ${feeOperation.toString()} ${configProject.tokens.CA[caIndex].name}`)
+
+    // Add Slippage plus %
+    const qAssetMax = new BigNumber(slippage).div(100).times(caAmountTCwFee).plus(caAmountTCwFee)
+
+    console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name}`)
+
+    // Verifications
+
+    // User have sufficient reserve to pay?
+    console.log(`To mint ${qTP} ${configProject.tokens.TP[tpIndex].name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your balance`)
+    const userReserveBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].balance, configProject.tokens.CA[caIndex].decimals))
+    if (qAssetMax.gt(userReserveBalance))
+        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} balance`)
+
+    // Allowance
+    console.log(`Allowance: To mint ${qTP} ${configProject.tokens.TP[tpIndex].name} you need > ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} in your spendable balance`)
+    const userSpendableBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].allowance, configProject.tokens.CA[caIndex].decimals))
+    if (qAssetMax.gt(userSpendableBalance))
+        throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
+
+    const valueToSend = null
+
+    // Calculate estimate gas cost
+    const estimateGas = await MocCAWrapper.methods
+        .mintTCandTP(
+            caAddress,
+            tpIndex,
+            toContractPrecisionDecimals(new BigNumber(qTP), configProject.tokens.TP[tpIndex].decimals),
+            toContractPrecisionDecimals(qAssetMax, configProject.tokens.CA[caIndex].decimals)
+        ).estimateGas({ from: userAddress, value: '0x' })
+
+    // encode function
+    const encodedCall = MocCAWrapper.methods
+        .mintTCandTP(
+            caAddress,
+            tpIndex,
+            toContractPrecisionDecimals(new BigNumber(qTP), configProject.tokens.TP[tpIndex].decimals),
+            toContractPrecisionDecimals(qAssetMax, configProject.tokens.CA[caIndex].decimals)
+        ).encodeABI()
+
+    // send transaction to the blockchain and get receipt
+    const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, MocCAWrapperAddress)
+
+    console.log(`Transaction hash: ${receipt.transactionHash}`)
+
+    return { receipt, filteredEvents }
+}
+
 
 export {
     mintTC,
@@ -622,5 +703,6 @@ export {
     redeemTP,
     swapTPforTP,
     swapTPforTC,
-    swapTCforTP
+    swapTCforTP,
+    mintTCandTP
 }
