@@ -28,17 +28,16 @@ const mintTC = async (web3, dContracts, configProject, caIndex, qTC) => {
     const feeParam = new BigNumber(Web3.utils.fromWei(dataContractStatus.tcMintFee))
 
     // TC amount in CA
-    const caAmountTC = new BigNumber(qTC).times(tcPrice)
+    const qCAtc = new BigNumber(qTC).times(tcPrice)
 
-    const feeOperation = caAmountTC.times(feeParam)
+    const feeOperation = qCAtc.times(feeParam)
+    const qCAtcwFee = qCAtc.plus(feeOperation)
 
-    const caAmountTCwFee = caAmountTC.plus(feeOperation)
-
-    console.log(`Operation w/commissions: ${caAmountTCwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
+    console.log(`Operation w/commissions: ${qCAtcwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
     console.log(`Commissions: ${feeOperation.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // Add Slippage plus %
-    const qAssetMax = new BigNumber(slippage).div(100).times(caAmountTCwFee).plus(caAmountTCwFee)
+    const qAssetMax = new BigNumber(slippage).div(100).times(qCAtcwFee).plus(qCAtcwFee)
 
     console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
@@ -100,27 +99,23 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, qTC) => {
     const feeParam = new BigNumber(Web3.utils.fromWei(dataContractStatus.tcRedeemFee))
 
     // TC amount in reserve
-    const caAmountTC = new BigNumber(qTC).times(tcPrice)
+    const qCAtc = new BigNumber(qTC).times(tcPrice)
 
-    // Redeem function... no values sent
-    const valueToSend = null
+    const feeOperation = qCAtc.times(feeParam)
+    const qCAtcwFee = qCAtc.minus(feeOperation)
 
-    const feeOperation = caAmountTC.times(feeParam)
-
-    const caAmountTCwFee = caAmountTC.minus(feeOperation)
-
-    console.log(`Operation w/commissions: ${caAmountTCwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
+    console.log(`Operation w/commissions: ${qCAtcwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
     console.log(`Commissions: ${feeOperation.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // Minimum AC to receive, or fail the tx
-    const qAssetMin = new BigNumber(caAmountTCwFee).minus(new BigNumber(slippage).div(100).times(caAmountTCwFee))
+    const qAssetMin = new BigNumber(qCAtcwFee).minus(new BigNumber(slippage).div(100).times(qCAtcwFee))
 
     console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qAssetMin.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // Verifications
 
     // User have sufficient TC in balance?
-    console.log(`Redeeming ${qTC} ${configProject.tokens.TC.name} ... getting approx: ${caAmountTCwFee} ${configProject.tokens.CA[caIndex].name}... `)
+    console.log(`Redeeming ${qTC} ${configProject.tokens.TC.name} ... getting approx: ${qCAtcwFee} ${configProject.tokens.CA[caIndex].name}... `)
     const userTCBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.TC.balance,
                                                                       configProject.tokens.TC.decimals))
     if (new BigNumber(qTC).gt(userTCBalance))
@@ -132,10 +127,13 @@ const redeemTC = async (web3, dContracts, configProject, caIndex, qTC) => {
         throw new Error(`Insufficient ${configProject.tokens.TC.name}available to redeem in contract`)
 
     // There are sufficient CA in the contract
-    const acBalance = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getACBalance[caIndex],
+    const caBalance = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getACBalance[caIndex],
                                                                   configProject.tokens.CA[caIndex].decimals))
-    if (new BigNumber(caAmountTCwFee).gt(acBalance))
-        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} in the contract. Balance: ${acBalance} ${configProject.tokens.CA[caIndex].name}`)
+    if (new BigNumber(qCAtcwFee).gt(caBalance))
+        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} in the contract. Balance: ${caBalance} ${configProject.tokens.CA[caIndex].name}`)
+
+    // Redeem function... no values sent
+    const valueToSend = null
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
@@ -188,17 +186,16 @@ const mintTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) =>
     const feeParam = new BigNumber(Web3.utils.fromWei(dataContractStatus.tpMintFee[tpIndex]))
 
     // Pegged amount in CA
-    const caAmountTP = new BigNumber(qTP).div(tpPrice)
+    const qCAtp = new BigNumber(qTP).div(tpPrice)
 
-    const feeOperation = caAmountTP.times(feeParam)
+    const feeOperation = qCAtp.times(feeParam)
+    const qCAtpwFee = qCAtp.plus(feeOperation)
 
-    const caAmountTPwFee = caAmountTP.plus(feeOperation)
-
-    console.log(`Operation w/commissions: ${caAmountTPwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
+    console.log(`Operation w/commissions: ${qCAtpwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
     console.log(`Commissions: ${feeOperation.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // Add Slippage plus %
-    const qAssetMax = new BigNumber(slippage).div(100).times(caAmountTPwFee).plus(caAmountTPwFee)
+    const qAssetMax = new BigNumber(slippage).div(100).times(qCAtpwFee).plus(qCAtpwFee)
 
     console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name} `)
 
@@ -272,27 +269,23 @@ const redeemTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) 
     const feeParam = new BigNumber(Web3.utils.fromWei(dataContractStatus.tpRedeemFee[tpIndex]))
 
     // TP amount in CA
-    const caAmountTP = new BigNumber(qTP).div(tpPrice)
+    const qCAtp = new BigNumber(qTP).div(tpPrice)
 
-    const feeOperation = caAmountTP.times(feeParam)
+    const feeOperation = qCAtp.times(feeParam)
+    const qCAtpwFee = qCAtp.minus(feeOperation)
 
-    const caAmountTPwFee = caAmountTP.minus(feeOperation)
-
-    console.log(`Operation w/commissions: ${caAmountTPwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
+    console.log(`Operation w/commissions: ${qCAtpwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
     console.log(`Commissions: ${feeOperation.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // Minimum AC to receive, or fail the tx
-    const qAssetMin = new BigNumber(caAmountTPwFee).minus(new BigNumber(slippage).div(100).times(caAmountTPwFee))
+    const qAssetMin = new BigNumber(qCAtpwFee).minus(new BigNumber(slippage).div(100).times(qCAtpwFee))
 
     console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qAssetMin.toString()} ${configProject.tokens.CA[caIndex].name}`)
-
-    // Redeem function... no values sent
-    const valueToSend = null
 
     // Verifications
 
     // User have sufficient PEGGED Token in balance?
-    console.log(`Redeeming ${qTP} ${configProject.tokens.TP[tpIndex].name} ... getting approx: ${caAmountTPwFee} ${configProject.tokens.CA[caIndex].name}... `)
+    console.log(`Redeeming ${qTP} ${configProject.tokens.TP[tpIndex].name} ... getting approx: ${qCAtpwFee} ${configProject.tokens.CA[caIndex].name}... `)
     const userTPBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.TP[tpIndex], configProject.tokens.TP[tpIndex].decimals))
     if (new BigNumber(qTP).gt(userTPBalance))
         throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  user balance`)
@@ -303,9 +296,12 @@ const redeemTP = async (web3, dContracts, configProject, caIndex, tpIndex, qTP) 
         throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  available to redeem in contract`)
 
     // There are sufficient CA in the contract
-    const acBalance = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getACBalance[caIndex], configProject.tokens.CA[caIndex].decimals))
-    if (new BigNumber(caAmountTPwFee).gt(acBalance))
-        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} in the contract. Balance: ${acBalance} ${configProject.tokens.CA[caIndex].name}`)
+    const caBalance = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getACBalance[caIndex], configProject.tokens.CA[caIndex].decimals))
+    if (new BigNumber(qCAtpwFee).gt(caBalance))
+        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} in the contract. Balance: ${caBalance} ${configProject.tokens.CA[caIndex].name}`)
+
+    // Redeem function... no values sent
+    const valueToSend = null
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
@@ -357,26 +353,24 @@ const swapTPforTP = async (web3, dContracts, configProject, iFromTP, iToTP, qTP,
     const tpPriceTo = new BigNumber(Web3.utils.fromWei(dataContractStatus.PP_TP[iToTP]))
     const SwapFees = new BigNumber(Web3.utils.fromWei(dataContractStatus.swapTPforTPFee))
 
-    const caAmountTP_From = new BigNumber(qTP).div(tpPriceFrom)
-    const caAmountTP_To = caAmountTP_From.times(tpPriceTo)
+    const qCAtp_From = new BigNumber(qTP).div(tpPriceFrom)
+    const qCAtp_To = qCAtp_From.times(tpPriceTo)
 
-    const feeOperation = caAmountTP_From.times(SwapFees)
+    const feeOperation = qCAtp_From.times(SwapFees)
     console.log(`Commissions: ${feeOperation.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // minimum amount of target Pegged Token that the sender expects to receive
-    const qTPMin = new BigNumber(caAmountTP_To).minus(new BigNumber(slippage).div(100).times(caAmountTP_To))
-
+    const qTPMin = new BigNumber(qCAtp_To).minus(new BigNumber(slippage).div(100).times(qCAtp_To))
     console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qTPMin.toString()} ${configProject.tokens.TP[iToTP].name}`)
 
     // maximum amount of Asset that can be spent in fees
-    const qAssetMaxFees = new BigNumber(slippage).div(100).times(caAmountTP_From).plus(caAmountTP_From).times(SwapFees)
-
+    const qAssetMaxFees = new BigNumber(slippage).div(100).times(qCAtp_From).plus(qCAtp_From).times(SwapFees)
     console.log(`Slippage using ${slippage} %. Maximum amount of asset can be spent in fees: ${qAssetMaxFees.toString()} ${configProject.tokens.CA[caIndex].name} `)
 
     // Verifications
 
     // User have sufficient PEGGED Token in balance?
-    console.log(`Swap ${qTP} ${configProject.tokens.TP[iFromTP].name} ... getting approx: ${caAmountTP_To} ${configProject.tokens.TP[iToTP].name}... `)
+    console.log(`Swap ${qTP} ${configProject.tokens.TP[iFromTP].name} ... getting approx: ${qCAtp_To} ${configProject.tokens.TP[iToTP].name}... `)
     const userTPBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.TP[iFromTP], configProject.tokens.TP[iFromTP].decimals))
     if (new BigNumber(qTP).gt(userTPBalance))
         throw new Error(`Insufficient ${configProject.tokens.TP[iFromTP].name}  user balance`)
@@ -437,7 +431,6 @@ const swapTPforTC = async (web3, dContracts, configProject, caIndex, tpIndex, qT
     const caToken = dContracts.contracts.CA[caIndex]
     const caAddress = caToken.options.address
 
-
     // Get information from contracts
     const dataContractStatus = await statusFromContracts(web3, dContracts, configProject)
 
@@ -448,11 +441,10 @@ const swapTPforTC = async (web3, dContracts, configProject, caIndex, tpIndex, qT
     const tcPrice = new BigNumber(Web3.utils.fromWei(dataContractStatus.getPTCac))
     const SwapFees = new BigNumber(Web3.utils.fromWei(dataContractStatus.swapTPforTCFee))
 
-    const caAmountTP = new BigNumber(qTP).div(tpPrice)
+    const qCAtp = new BigNumber(qTP).div(tpPrice)
+    const qTC = new BigNumber(qCAtp).times(tcPrice)
 
-    const qTC = new BigNumber(caAmountTP).times(tcPrice)
-
-    const feeOperation = caAmountTP.times(SwapFees)
+    const feeOperation = qCAtp.times(SwapFees)
     console.log(`Commissions: ${feeOperation.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // minimum amount of target Pegged Token that the sender expects to receive
@@ -461,7 +453,7 @@ const swapTPforTC = async (web3, dContracts, configProject, caIndex, tpIndex, qT
     console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qTCMin.toString()} ${configProject.tokens.TC.name}`)
 
     // maximum amount of Asset that can be spent in fees
-    const qAssetMaxFees = new BigNumber(slippage).div(100).times(caAmountTP).plus(caAmountTP).times(SwapFees)
+    const qAssetMaxFees = new BigNumber(slippage).div(100).times(qCAtp).plus(qCAtp).times(SwapFees)
 
     console.log(`Slippage using ${slippage} %. Maximum amount of asset can be spent in fees: ${qAssetMaxFees.toString()} ${configProject.tokens.CA[caIndex].name} `)
 
@@ -541,10 +533,10 @@ const swapTCforTP = async (web3, dContracts, configProject, caIndex, tpIndex, qT
     const SwapFees = new BigNumber(Web3.utils.fromWei(dataContractStatus.redeemTCandTPFee))
 
     // Conversions
-    const caAmountTC = new BigNumber(qTC).times(tcPrice)
-    const qTP = new BigNumber(caAmountTC).times(tpPrice)
+    const qCAtc = new BigNumber(qTC).times(tcPrice)
+    const qTP = new BigNumber(qCAtc).times(tpPrice)
 
-    const feeOperation = caAmountTC.times(SwapFees)
+    const feeOperation = qCAtc.times(SwapFees)
     console.log(`Commissions: ${feeOperation.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // minimum amount of Pegged Token that the sender expects to receive
@@ -553,12 +545,9 @@ const swapTCforTP = async (web3, dContracts, configProject, caIndex, tpIndex, qT
     console.log(`Slippage using ${slippage} %. Minimum limit to receive: ${qTPMin.toString()} ${configProject.tokens.TP[tpIndex].name}`)
 
     // maximum amount of Asset that can be spent in fees
-    const qAssetMaxFees = new BigNumber(slippage).div(100).times(caAmountTC).plus(caAmountTC).times(SwapFees)
+    const qAssetMaxFees = new BigNumber(slippage).div(100).times(qCAtc).plus(qCAtc).times(SwapFees)
 
     console.log(`Slippage using ${slippage} %. Maximum amount of asset can be spent in fees: ${qAssetMaxFees.toString()} ${configProject.tokens.CA[caIndex].name} `)
-
-    // Redeem function... no values sent
-    const valueToSend = null
 
     // Verifications
 
@@ -579,6 +568,9 @@ const swapTCforTP = async (web3, dContracts, configProject, caIndex, tpIndex, qT
     const userSpendableBalance = new BigNumber(fromContractPrecisionDecimals(userBalanceStats.CA[caIndex].allowance, configProject.tokens.CA[caIndex].decimals))
     if (qAssetMaxFees.gt(userSpendableBalance))
         throw new Error('Insufficient spendable balance... please make an allowance to the MoC contract')
+
+    // Redeem function... no values sent
+    const valueToSend = null
 
     // Calculate estimate gas cost
     const estimateGas = await MocCAWrapper.methods
@@ -636,20 +628,19 @@ const mintTCandTP = async (web3, dContracts, configProject, caIndex, tpIndex, qT
     const getPACtp = new BigNumber(Web3.utils.fromWei(dataContractStatus.getPACtp[tpIndex]))
     const calcCtargemaCA = new BigNumber(Web3.utils.fromWei(dataContractStatus.calcCtargemaCA))
 
-    // qAC = qTP / getPACtp + ((qTP * (calcCtargemaCA - 1) / getPACtp))
+    // qCA = qTP / getPACtp + ((qTP * (calcCtargemaCA - 1) / getPACtp))
     const n1 = new BigNumber(qTP).div(getPACtp)
     const n2 = calcCtargemaCA.minus(1).times(qTP).div(getPACtp)
-    const qAC = n1.plus(n2)
+    const qCA = n1.plus(n2)
 
-    const feeOperation = qAC.times(SwapFees)
+    const feeOperation = qCA.times(SwapFees)
+    const qCAwFee = qCA.plus(feeOperation)
 
-    const caAmountTCwFee = qAC.plus(feeOperation)
-
-    console.log(`Operation w/commissions: ${caAmountTCwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
+    console.log(`Operation w/commissions: ${qCAwFee.toString()} ${configProject.tokens.CA[caIndex].name}`)
     console.log(`Commissions: ${feeOperation.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
     // Add Slippage plus %
-    const qAssetMax = new BigNumber(slippage).div(100).times(caAmountTCwFee).plus(caAmountTCwFee)
+    const qAssetMax = new BigNumber(slippage).div(100).times(qCAwFee).plus(qCAwFee)
 
     console.log(`Slippage using ${slippage} %. Total to send: ${qAssetMax.toString()} ${configProject.tokens.CA[caIndex].name}`)
 
@@ -756,10 +747,10 @@ const redeemTCandTP = async (web3, dContracts, configProject, caIndex, tpIndex, 
         throw new Error(`Insufficient ${configProject.tokens.TP[tpIndex].name}  user balance`)
 
     // There are sufficient CA in the contract
-    const acBalance = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getACBalance[caIndex],
+    const caBalance = new BigNumber(fromContractPrecisionDecimals(dataContractStatus.getACBalance[caIndex],
         configProject.tokens.CA[caIndex].decimals))
-    if (new BigNumber(qCAwFee).gt(acBalance))
-        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} in the contract. Balance: ${acBalance} ${configProject.tokens.CA[caIndex].name}`)
+    if (new BigNumber(qCAwFee).gt(caBalance))
+        throw new Error(`Insufficient ${configProject.tokens.CA[caIndex].name} in the contract. Balance: ${caBalance} ${configProject.tokens.CA[caIndex].name}`)
 
     // Redeem function... no values sent
     const valueToSend = null
