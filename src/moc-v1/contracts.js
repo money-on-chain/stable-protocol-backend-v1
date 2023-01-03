@@ -99,12 +99,14 @@ Price ${config.tokens.TP[1].name}:  ${Web3.utils.fromWei(contractStatus.PP_TP[1]
 Price ${config.tokens.CA[0].name}:  ${Web3.utils.fromWei(contractStatus.PP_CA[0])}
 Price ${config.tokens.CA[1].name}:  ${Web3.utils.fromWei(contractStatus.PP_CA[1])}
 Price ${config.tokens.TC.name}:  ${Web3.utils.fromWei(contractStatus.getPTCac)}
+Price Wrapped Token:  ${Web3.utils.fromWei(contractStatus.getTokenPrice)}
 
 
 Coverage & Leverage
 ===================
 
 Bucket global coverage: ${Web3.utils.fromWei(contractStatus.getCglb)}
+Target coverage adjusted by all Pegged Token's to Collateral Asset rate moving average (CtargemaCA): ${Web3.utils.fromWei(contractStatus.calcCtargemaCA)}
 ${config.tokens.TP[0].name} Target Coverage:  ${Web3.utils.fromWei(contractStatus.tpCtarg[0])}
 ${config.tokens.TP[1].name} Target Coverage:  ${Web3.utils.fromWei(contractStatus.tpCtarg[1])}
 ${config.tokens.TC.name} Leverage:  ${Web3.utils.fromWei(contractStatus.getLeverageTC)}
@@ -126,7 +128,6 @@ ${config.tokens.TP[0].name} EMA:  ${Web3.utils.fromWei(contractStatus.tpEma[0])}
 ${config.tokens.TP[1].name} EMA:  ${Web3.utils.fromWei(contractStatus.tpEma[1])}
 Block next calculation: ${contractStatus.nextEmaCalculation}
 EMA Block Span: ${contractStatus.emaCalculationBlockSpan}
-Ctargema: ${Web3.utils.fromWei(contractStatus.calcCtargemaCA)}
 Should Calculate EMA: ${contractStatus.shouldCalculateEma}
 
 

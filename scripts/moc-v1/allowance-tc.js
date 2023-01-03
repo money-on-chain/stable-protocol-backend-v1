@@ -18,7 +18,7 @@ const main = async () => {
 
     // Token to approve
     const token = dContracts.contracts.CollateralTokenCABag
-    const tokenDecimals = configProject.tokens.CA[0].decimals
+    const tokenDecimals = configProject.tokens.TC.decimals
 
     // Send transaction and get receipt
     const { receipt, filteredEvents } = await AllowanceUseWrapper(web3, dContracts, token, true, tokenDecimals)
