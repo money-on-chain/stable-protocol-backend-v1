@@ -608,6 +608,11 @@
           "internalType": "contract IPriceProvider",
           "name": "priceProvider_",
           "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "assetDecimals_",
+          "type": "uint8"
         }
       ],
       "name": "addOrEditAsset",
