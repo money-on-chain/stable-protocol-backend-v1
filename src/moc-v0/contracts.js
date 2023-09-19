@@ -112,6 +112,21 @@ const readContracts = async (web3, configProject) => {
   const mocvendors = new web3.eth.Contract(MoCVendors.abi, mocVendorsAddress)
   dContracts.contracts.mocvendors = mocvendors
 
+  // Token migrator & Legacy token
+  if (process.env.CONTRACT_LEGACY_TP) {
+
+    const TokenMigrator = readJsonFile(`./abis/${appProject}/TokenMigrator.json`)
+    dContracts.json.TokenMigrator = TokenMigrator
+
+    const tpLegacy = new web3.eth.Contract(TP.abi, process.env.CONTRACT_LEGACY_TP)
+    dContracts.contracts.tp_legacy = tpLegacy
+
+    if (!process.env.CONTRACT_TOKEN_MIGRATOR) console.log("Error: Please set token migrator address!")
+
+    const tokenMigrator = new web3.eth.Contract(TokenMigrator.abi, process.env.CONTRACT_TOKEN_MIGRATOR)
+    dContracts.contracts.token_migrator = tokenMigrator
+  }
+
   // Add to abi decoder
   addABI(dContracts, appMode)
 
@@ -145,7 +160,7 @@ Contract Protected: ${contracStatus.protected}
 }
 
 const renderUserBalance = (userBalance, config) => {
-  const render = `
+  let render = `
 User: ${userBalance.userAddress}
 ${config.tokens.RESERVE.name} Balance: ${Web3.utils.fromWei(userBalance.rbtcBalance)} ${config.tokens.RESERVE.name}
 ${config.tokens.TP.name} Balance: ${Web3.utils.fromWei(userBalance.docBalance)} ${config.tokens.TP.name}
@@ -155,6 +170,16 @@ ${config.tokens.TG.name} Balance: ${Web3.utils.fromWei(userBalance.mocBalance)} 
 ${config.tokens.TG.name} Allowance: ${Web3.utils.fromWei(userBalance.mocAllowance)} ${config.tokens.TG.name}
 ${config.tokens.TP.name} queue to redeem: ${Web3.utils.fromWei(userBalance.docToRedeem)} ${config.tokens.TP.name}
     `
+
+  // Token migrator
+  if (process.env.CONTRACT_LEGACY_TP) {
+
+    const tokenMigratorBalance = `
+TP Legacy Balance: ${Web3.utils.fromWei(userBalance.tpLegacyBalance)} ${config.tokens.TP.name}
+TP Legacy Allowance: ${Web3.utils.fromWei(userBalance.tpLegacyAllowance)} ${config.tokens.TP.name}
+    `
+    render += tokenMigratorBalance
+  }
 
   return render
 }
