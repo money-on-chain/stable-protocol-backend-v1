@@ -17,6 +17,8 @@ const addABI = (dContracts, appMode) => {
   if (appMode === 'RRC20') {
     abiDecoder.addABI(dContracts.json.ReserveToken.abi)
   }
+
+  if (process.env.CONTRACT_TOKEN_MIGRATOR) abiDecoder.addABI(dContracts.json.TokenMigrator.abi)
 }
 
 const addABIOMoC = (dContracts) => {
@@ -62,7 +64,8 @@ const renderEventField = (eveName, eveValue) => {
     'qAC_',
     'oldTPema_',
     'newTPema_',
-    'qTP_'
+    'qTP_',
+    'TokenMigrated'
   ])
 
   if (formatItemsWei.has(eveName)) { eveValue = Web3.utils.fromWei(eveValue) }

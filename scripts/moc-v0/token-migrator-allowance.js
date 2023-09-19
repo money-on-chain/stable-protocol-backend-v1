@@ -1,8 +1,8 @@
 import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'
-import { readContracts } from '../../src/moc-v1/contracts.js'
-import { AllowanceUseWrapper } from '../../src/moc-v1/moc-base.js'
+import { readContracts } from '../../src/moc-v0/contracts.js'
+import { AllowUseTokenMigrator } from '../../src/moc-v0/moc-base.js'
 
 dotenv.config()
 
@@ -13,15 +13,11 @@ const main = async () => {
     // get web3 connection
     const web3 = getWeb3(process.env.HOST_URI)
 
-    // Obtain all contracts
+    // Obtain all contracts from one address of the MoC.sol
     const dContracts = await readContracts(web3, configProject)
 
-    // Token to approve
-    const token = dContracts.contracts.TP[0]
-    const tokenDecimals = configProject.tokens.TP[0].decimals
-
     // Send transaction and get receipt
-    const { receipt, filteredEvents } = await AllowanceUseWrapper(web3, dContracts, token, false, tokenDecimals)
+    const { receipt, filteredEvents } = await AllowUseTokenMigrator(web3, dContracts, true)
 }
 
 main()

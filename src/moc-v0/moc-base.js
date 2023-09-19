@@ -76,8 +76,70 @@ const calcMintInterest = async (dContracts, amount) => {
   return calcMintInterest
 }
 
+const AllowUseTokenMigrator = async (web3, dContracts, allow) => {
+  const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
+
+  if (!dContracts.contracts.tp_legacy) console.log("Error: Please set token migrator address!")
+
+  const tp_legacy = dContracts.contracts.tp_legacy
+  const tokenMigrator = dContracts.contracts.token_migrator
+
+  let amountAllowance = '0'
+  const valueToSend = null
+  if (allow) {
+    amountAllowance = Number.MAX_SAFE_INTEGER.toString()
+  }
+
+  // Calculate estimate gas cost
+  const estimateGas = await tp_legacy.methods
+      .approve(tokenMigrator._address, web3.utils.toWei(amountAllowance))
+      .estimateGas({ from: userAddress, value: '0x' })
+
+  // encode function
+  const encodedCall = tp_legacy.methods
+      .approve(tokenMigrator._address, web3.utils.toWei(amountAllowance))
+      .encodeABI()
+
+  // send transaction to the blockchain and get receipt
+  const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, tp_legacy._address)
+
+  console.log(`Transaction hash: ${receipt.transactionHash}`)
+
+  return { receipt, filteredEvents }
+}
+
+const MigrateToken = async (web3, dContracts) => {
+
+  const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
+
+  if (!dContracts.contracts.token_migrator) console.log("Error: Please set token migrator address!")
+
+  const tokenMigrator = dContracts.contracts.token_migrator
+
+  // Calculate estimate gas cost
+  const estimateGas = await tokenMigrator.methods
+      .migrateToken()
+      .estimateGas({ from: userAddress, value: '0x' })
+
+  // encode function
+  const encodedCall = tokenMigrator.methods
+      .migrateToken()
+      .encodeABI()
+
+  const valueToSend = null
+
+  // send transaction to the blockchain and get receipt
+  const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, tokenMigrator._address)
+
+  console.log(`Transaction hash: ${receipt.transactionHash}`)
+
+  return { receipt, filteredEvents }
+}
+
 export {
   addCommissions,
   AllowPayingCommissionTG,
-  calcMintInterest
+  calcMintInterest,
+  AllowUseTokenMigrator,
+  MigrateToken
 }

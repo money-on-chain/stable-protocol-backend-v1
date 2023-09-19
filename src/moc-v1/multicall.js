@@ -72,6 +72,7 @@ const contractStatus = async (web3, dContracts, configProject) => {
   // Remove decode result parameter
   const cleanListMethods = listMethods.map(x => [x[0], x[1]])
 
+  //const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call({}, 3807699)
   const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call()
 
   const listReturnData = multicallResult[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData))
