@@ -266,3 +266,101 @@ value: 9007199254740990.98002014654330261
 Transaction hash: 0x26223b391eecbb7576a7ba031b9dbaf8e0559097727371eeb7063b1de22c130f
 
 ```
+
+
+### Vendors
+
+To start using protocol as vendor in V1 of the contract protocol:
+
+1) You need to be added as a vendor, please contact MoC Team and give the address of an account you control and the markup you want to use. For example: 0xCD8A1c9aCc980ae031456573e34dC05cD7daE6e3 and markup like 0.1%
+2) After added your account as vendor, you need to stake MoC in the same amount you want to receive as a collection of fee markup.
+
+**Stake MoC in Vendors**
+
+Please fill in .env you user address, PK and vendor (the same as user address): (replace the example) from the account you added as vendor 
+
+```
+USER_ADDRESS=0xCD8A1c9aCc980ae031456573e34dC05cD7daE6e3
+USER_PK=...
+VENDOR_ADDRESS=0xCD8A1c9aCc980ae031456573e34dC05cD7daE6e3
+```
+
+also fill the amount to stake:
+
+```
+ADMIN_VENDORS_ADD_STAKE_AMOUNT=1000
+```
+
+Run the script to know information about staking account
+
+`node scripts/moc-v1/admin-vendor-info.js`
+
+Result
+
+```
+Vendor Account: 0xCD8A1c9aCc980ae031456573e34dC05cD7daE6e3
+Is Active: true
+Markup: 0.001
+Total Paid in MOC: 0
+Staking: 0
+```
+
+Now you need to make and allowance to use MoC in Vendor Contract
+
+`node scripts/moc-v1/admin-vendor-allowance.js`
+
+Result:
+
+```
+Please wait... sending transaction... Wait until blockchain mine transaction!
+
+Event: Approval
+
+owner: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+spender: 0x84b895a1b7be8fac64d43757479281bf0b5e3719
+value: 9007199254740991
+Transaction hash: 0xbd478b28bb8d7ee01ce242a839d94191f37665f3776a7e57ff0af6723ddeac5b
+```
+
+Then you have to run the transaction to add stake:
+
+`node scripts/moc-v1/admin-vendor-add-stake.js`
+
+Result:
+
+```
+Please wait... sending transaction... Wait until blockchain mine transaction!
+
+Event: Transfer
+
+from: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+to: 0x84b895a1b7be8fac64d43757479281bf0b5e3719
+value: 10
+
+Event: Approval
+
+owner: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+spender: 0x84b895a1b7be8fac64d43757479281bf0b5e3719
+value: 9007199254740981
+
+Event: VendorStakeAdded
+
+account: 0xcd8a1c9acc980ae031456573e34dc05cd7dae6e3
+staking: 10
+Transaction hash: 0xe1b4a8d2c95b1dccdade06400425ea1de697b01361b2fe773fcde831685e6ea5
+```
+
+Verify the information:
+
+
+`node scripts/moc-v1/admin-vendor-info.js`
+
+Result:
+
+```
+Vendor Account: 0xCD8A1c9aCc980ae031456573e34dC05cD7daE6e3
+Is Active: true
+Markup: 0.001
+Total Paid in MOC: 0
+Staking: 10
+```
