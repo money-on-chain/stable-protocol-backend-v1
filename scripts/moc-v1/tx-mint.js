@@ -1,11 +1,11 @@
-// Mint Pegged Token
+// Mint Token X
 
 import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'
-import { readContracts } from '../../src/moc-v0/contracts.js'
-import { mintTP } from '../../src/moc-v0/moc-coinbase.js'
-import { mintTPRRC20 } from '../../src/moc-v0/moc-rrc20.js'
+import { readContracts } from '../../src/moc-v1/contracts.js'
+import { mintTX } from '../../src/moc-v1/moc-coinbase.js'
+import { mintTXRRC20 } from '../../src/moc-v1/moc-rrc20.js'
 
 dotenv.config()
 
@@ -20,14 +20,14 @@ const main = async () => {
   const dContracts = await readContracts(web3, configProject)
 
   // Get amount from environment
-  const amountTP = `${process.env.OPERATION_AMOUNT_MINT_TP}`
+  const amountTX = `${process.env.OPERATION_AMOUNT_MINT_TX}`
 
   if (configProject.appMode === 'MoC') {
     // Collateral Coinbase
-    const { receipt, filteredEvents } = await mintTP(web3, dContracts, configProject, amountTP)
+    const { receipt, filteredEvents } = await mintTX(web3, dContracts, configProject, amountTX)
   } else {
     // Collateral RRC20
-    const { receipt, filteredEvents } = await mintTPRRC20(web3, dContracts, configProject, amountTP)
+    const { receipt, filteredEvents } = await mintTXRRC20(web3, dContracts, configProject, amountTX)
   }
 }
 

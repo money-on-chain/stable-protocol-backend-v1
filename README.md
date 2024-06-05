@@ -1,11 +1,13 @@
-# Money on Chain Integration
+# Money on Chain Integration for V1 Contracts
 
-Money on chain token operations with multi collateral (coinbase or RRC20). Version v0 and v1.
+## Warning: This is only for version 1 of the main contracts.
+## Warning: RoC Project now has version 2 of the contract use this repo instead: [https://github.com/money-on-chain/stable-protocol-backend-v2](https://github.com/money-on-chain/stable-protocol-backend-v2) 
 
-* Mint / Redeem Pegged Token (TP): Ex.: DoC or RDOC
+Money on chain token operations with multi collateral (coinbase or RRC20).
+
+* Mint / Redeem Pegged Token (TP): Ex.: DoC
 * Mint / Redeem Collateral Token (TC): Ex.: BPro or RIFP
-* Mint / Redeem Token X (TX): Ex.: BTCx or RIFx
-* Allowance to use Reserve Token: RIF
+* Mint / Redeem Token X (TX): Ex.: BTCx (Disabled)
 * Enable / Disable Paying Commissions with Govern Token (TG): Ex.: MOC
 * Status of Main MoC Contracts
 * Admin: Vendor information
@@ -15,12 +17,14 @@ Money on chain token operations with multi collateral (coinbase or RRC20). Versi
 
 **Tokens**
 
-| Token | Name             | Ex.        |                           |
-|-------|------------------|------------|---------------------------|
-| TP    | Token Pegged     | DOC, RDOC  | Pegged token 1:1 with USD |
-| TC    | Collateral Token | BPRO, RIFP | HODL + Earn Token         |
-| TX    | Token X          | BTCX, RIF  | Leveraged long position   |
-| TG    | Govern Token     | MOC        | Govern + Stake token      |
+Note: TX Token is not available anymore.
+
+| Token   | Name             | Ex.   |                           |
+|---------|------------------|-------|---------------------------|
+| TP      | Token Pegged     | DOC   | Pegged token 1:1 with USD |
+| TC      | Collateral Token | BPRO  | HODL + Earn Token         |
+| TX (NA) | Token X          | BTCX  | Leveraged long position   |
+| TG      | Govern Token     | MOC   | Govern + Stake token      |
 
 
 ### Setup
@@ -52,30 +56,23 @@ ADMIN_VENDORS_REMOVE_STAKE_AMOUNT=10
 
 #### Money on Chain projects and tokens 
 
-| Token | Token name       | Project | Token Name | Collateral |
-|-------|------------------|---------|------------|------------|
-| TP    | Pegged Token 1:1 | MOC     | DOC        | RBTC       |
-| TC    | Collateral Token | MOC     | BPRO       | RBTC       |
-| TX    | Leverage Token X | MOC     | BTCX       | RBTC       |
-| TG    | Govern Token     | MOC     | MOC        | -          |
-| TP    | Pegged Token 1:1 | ROC     | RDOC       | RIF        |
-| TC    | Collateral Token | ROC     | RIFP       | RIF        |
-| TX    | Leverage Token X | ROC     | RIFX       | RIF        |
-| TG    | Govern Token     | ROC     | MOC        | -          |
+| Token   | Token name       | Project | Token Name | Collateral |
+|---------|------------------|---------|------------|------------|
+| TP      | Pegged Token 1:1 | MOC     | DOC        | RBTC       |
+| TC      | Collateral Token | MOC     | BPRO       | RBTC       |
+| TX (NA) | Leverage Token X | MOC     | BTCX       | RBTC       |
+| TG      | Govern Token     | MOC     | MOC        | -          |
+
 
 #### Environment table
 
-Environment is our already deployed contracts. For example **mocMainnet2** is our MOC current production enviroment.
+Environment is our already deployed contracts. For example **mocMainnet2** is our MOC current production environment.
 
-| Network Name      | Project | Enviroment                       | Network    |
-|-------------------|---------|----------------------------------|------------|
-| mocTestnetAlpha   | MOC     |                                  | Testnet    |
-| mocTestnet        | MOC     | moc-testnet.moneyonchain.com     | Testnet    |
-| mocMainnet2       | MOC     | alpha.moneyonchain.com           | Mainnet    |
-| rdocTestnetAlpha  | RIF     |                                  | Testnet    |
-| rdocTestnet       | RIF     | rif-testnet.moneyonchain.com     | Testnet    |
-| rdocMainnet       | RIF     | rif.moneyonchain.com             | Mainnet    |
-
+| Network Name      | Project | Environment           | Network    |
+|-------------------|---------|-----------------------|------------|
+| mocTestnetAlpha   | MOC     |                       | Testnet    |
+| mocTestnet        | MOC     | -                     | Testnet    |
+| mocMainnet2       | MOC     | dapp.moneyonchain.com | Mainnet    |
 
 ### Faucets
 
@@ -89,26 +86,24 @@ In testnet you may need some test tRIF o tRBTC
 ### How to run scripts
 
 
-| Command                                        | Action                                        | Obs                                              | 
-|------------------------------------------------|-----------------------------------------------|--------------------------------------------------|
-| node scripts/moc-v0/commission-tg-enable.js    | Enable paying commission MoC                  |                                                  |
-| node scripts/moc-v0/commission-tg-disable.js   | Disable paying commission MoC                 |                                                  |
-| node scripts/moc-v0/tp-mint.js                 | Mint DoC or Rdoc depend of the environment    | In rdoc environment before make allowance action |
-| node scripts/moc-v0/tp-redeem.js               | Redeem DoC or Rdoc depend of the environment  |                                                  |
-| node scripts/moc-v0/tc-mint.js                 | Mint BPro or RIFP depend of the environment   | In rdoc environment before make allowance action |
-| node scripts/moc-v0/tc-redeem.js               | Redeem BPro or RIFP depend of the environment |                                                  |
-| node scripts/moc-v0/tx-mint.js                 | Mint BTCx or RIFx depend of the environment   | In rdoc environment before make allowance action |
-| node scripts/moc-v0/tx-redeem.js               | Redeem BTCx or RIFx depend of the environment | In rdoc environment before make allowance action |
-| node scripts/moc-v0/allowance-reserve-token.js | Allowance to use Reserve Token in MoC         |                                                  |
+| Command                                        | Action                                | Obs | 
+|------------------------------------------------|---------------------------------------|-----|
+| node scripts/moc-v1/commission-tg-enable.js    | Enable paying commission MoC          |     |
+| node scripts/moc-v1/commission-tg-disable.js   | Disable paying commission MoC         |     |
+| node scripts/moc-v1/tp-mint.js                 | Mint DoC                              |     |
+| node scripts/moc-v1/tp-redeem.js               | Redeem DoC                            |     |
+| node scripts/moc-v1/tc-mint.js                 | Mint BPro                             |     |
+| node scripts/moc-v1/tc-redeem.js               | Redeem BPro                           |     |
+| node scripts/moc-v1/allowance-reserve-token.js | Allowance to use Reserve Token in MoC |     |
 
 Example Contract status:
 
-`node scripts/moc-v0/contract-status.js`
+`node scripts/moc-v1/contract-status.js`
 
 Result:
 
 ```
-node scripts/moc-v0/contract-status.js
+node scripts/moc-v1/contract-status.js
 
 Reading Multicall2 Contract... address:  0xaf7be1ef9537018feda5397d9e3bb9a1e4e27ac8
 Reading MoC Contract... address:  0x2820f6d4D199B8D8838A4B26F9917754B86a0c1F
@@ -162,12 +157,12 @@ DOC queue to redeem: 0 DOC
 
 Example Mint Pegged Token:
 
-`node scripts/moc-v0/tp-mint.js `
+`node scripts/moc-v1/tp-mint.js `
 
 Result:
 
 ```
-node scripts/moc-v0/tp-mint.js 
+node scripts/moc-v1/tp-mint.js 
 Reading Multicall2 Contract... address:  0xaf7be1ef9537018feda5397d9e3bb9a1e4e27ac8
 Reading MoC Contract... address:  0x2820f6d4D199B8D8838A4B26F9917754B86a0c1F
 Reading MoCConnector... address:  0xABB405e01Da6212E2d6fc87bbc460c73201cF6b0

@@ -3,9 +3,9 @@ import Web3 from 'web3'
 import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3, toContractPrecision } from '../../src/utils.js'
-import { readContracts, statusFromContracts } from '../../src/moc-v0/contracts.js'
-import { mintTP } from '../../src/moc-v0/moc-coinbase.js'
-import { mintTPRRC20 } from '../../src/moc-v0/moc-rrc20.js'
+import { readContracts, statusFromContracts } from '../../src/moc-v1/contracts.js'
+import { mintTP } from '../../src/moc-v1/moc-coinbase.js'
+import { mintTPRRC20 } from '../../src/moc-v1/moc-rrc20.js'
 
 dotenv.config()
 

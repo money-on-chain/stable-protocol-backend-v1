@@ -1,154 +1,493 @@
+import { toContractPrecision, BUCKET_X2, BUCKET_C0 } from '../utils.js'
+
+const connectorAddresses = async (web3, dContracts, configProject) => {
+  const multicall = dContracts.contracts.multicall
+  const mocconnector = dContracts.contracts.mocconnector
+  const appMode = configProject.appMode
+
+  const listMethods = [
+    [mocconnector.options.address, mocconnector.methods.mocState().encodeABI()],
+    [mocconnector.options.address, mocconnector.methods.mocInrate().encodeABI()],
+    [mocconnector.options.address, mocconnector.methods.mocExchange().encodeABI()],
+    [mocconnector.options.address, mocconnector.methods.mocSettlement().encodeABI()]
+  ]
+
+  if (appMode === 'MoC') {
+    listMethods.push([mocconnector.options.address, mocconnector.methods.docToken().encodeABI()])
+    listMethods.push([mocconnector.options.address, mocconnector.methods.bproToken().encodeABI()])
+    listMethods.push([mocconnector.options.address, mocconnector.methods.bproToken().encodeABI()])
+  } else {
+    listMethods.push([mocconnector.options.address, mocconnector.methods.stableToken().encodeABI()])
+    listMethods.push([mocconnector.options.address, mocconnector.methods.riskProToken().encodeABI()])
+    listMethods.push([mocconnector.options.address, mocconnector.methods.reserveToken().encodeABI()])
+  }
+
+  const multicallResult = await multicall.methods.tryBlockAndAggregate(false, listMethods).call()
+
+  const listReturnData = multicallResult[2].map(x => web3.eth.abi.decodeParameter('address', x.returnData))
+
+  return listReturnData
+}
 
 const contractStatus = async (web3, dContracts, configProject) => {
+  const appMode = configProject.appMode
+  const appProject = configProject.appProject
 
   const multicall = dContracts.contracts.multicall
-  const MocCABag = dContracts.contracts.MocCABag
-  const PP_TP_0 = dContracts.contracts.PP_TP[0]
-  const PP_TP_1 = dContracts.contracts.PP_TP[1]
-  const PP_CA_0 = dContracts.contracts.PP_CA[0]
-  const PP_CA_1 = dContracts.contracts.PP_CA[1]
-  const MocCAWrapper = dContracts.contracts.MocCAWrapper
-  const CA_0 = dContracts.contracts.CA[0]
-  const CA_1 = dContracts.contracts.CA[1]
+  const moc = dContracts.contracts.moc
+  const mocstate = dContracts.contracts.mocstate
+  const mocinrate = dContracts.contracts.mocinrate
+  const mocsettlement = dContracts.contracts.mocsettlement
 
   console.log('Reading contract status ...')
 
-  const listMethods = [
-    [MocCABag.options.address, MocCABag.methods.protThrld().encodeABI(), 'uint256'], // 0
-    [MocCABag.options.address, MocCABag.methods.liqThrld().encodeABI(), 'uint256'], // 1
-    [MocCABag.options.address, MocCABag.methods.liqEnabled().encodeABI(), 'bool'], // 2
-    [MocCABag.options.address, MocCABag.methods.liquidated().encodeABI(), 'bool'], // 3
-    [MocCABag.options.address, MocCABag.methods.nACcb().encodeABI(), 'uint256'], // 4
-    [MocCABag.options.address, MocCABag.methods.tcToken().encodeABI(), 'address'], // 5
-    [MocCABag.options.address, MocCABag.methods.nTCcb().encodeABI(), 'uint256'], // 6
-    [MocCABag.options.address, MocCABag.methods.successFee().encodeABI(), 'uint256'], // 7
-    [MocCABag.options.address, MocCABag.methods.appreciationFactor().encodeABI(), 'uint256'], // 8
-    [MocCABag.options.address, MocCABag.methods.feeRetainer().encodeABI(), 'uint256'], // 9
-    [MocCABag.options.address, MocCABag.methods.tcMintFee().encodeABI(), 'uint256'], // 10
-    [MocCABag.options.address, MocCABag.methods.tcRedeemFee().encodeABI(), 'uint256'], // 11
-    [MocCABag.options.address, MocCABag.methods.swapTPforTPFee().encodeABI(), 'uint256'], // 12
-    [MocCABag.options.address, MocCABag.methods.swapTPforTCFee().encodeABI(), 'uint256'], // 13
-    [MocCABag.options.address, MocCABag.methods.swapTCforTPFee().encodeABI(), 'uint256'], // 14
-    [MocCABag.options.address, MocCABag.methods.redeemTCandTPFee().encodeABI(), 'uint256'], // 15
-    [MocCABag.options.address, MocCABag.methods.mintTCandTPFee().encodeABI(), 'uint256'], // 16
-    [MocCABag.options.address, MocCABag.methods.tpMintFee(0).encodeABI(), 'uint256'], // 17
-    [MocCABag.options.address, MocCABag.methods.tpMintFee(1).encodeABI(), 'uint256'], // 18
-    [MocCABag.options.address, MocCABag.methods.tpRedeemFee(0).encodeABI(), 'uint256'], // 19
-    [MocCABag.options.address, MocCABag.methods.tpRedeemFee(1).encodeABI(), 'uint256'], // 20
-    [MocCABag.options.address, MocCABag.methods.mocFeeFlowAddress().encodeABI(), 'address'], // 21
-    [MocCABag.options.address, MocCABag.methods.mocAppreciationBeneficiaryAddress().encodeABI(), 'address'], // 22
-    [MocCABag.options.address, MocCABag.methods.tpCtarg(0).encodeABI(), 'uint256'], // 23
-    [MocCABag.options.address, MocCABag.methods.tpCtarg(1).encodeABI(), 'uint256'], // 24
-    [MocCABag.options.address, MocCABag.methods.pegContainer(0).encodeABI(), 'uint256'], // 25
-    [MocCABag.options.address, MocCABag.methods.pegContainer(1).encodeABI(), 'uint256'], // 26
-    [PP_TP_0.options.address, PP_TP_0.methods.peek().encodeABI(), 'uint256'], // 27
-    [PP_TP_1.options.address, PP_TP_1.methods.peek().encodeABI(), 'uint256'], // 28
-    [PP_CA_0.options.address, PP_CA_0.methods.peek().encodeABI(), 'uint256'], // 29
-    [PP_CA_1.options.address, PP_CA_1.methods.peek().encodeABI(), 'uint256'], // 30
-    [MocCABag.options.address, MocCABag.methods.isLiquidationReached().encodeABI(), 'bool'], // 31
-    [MocCABag.options.address, MocCABag.methods.getPACtp(0).encodeABI(), 'uint256'], // 32
-    [MocCABag.options.address, MocCABag.methods.getPACtp(1).encodeABI(), 'uint256'], // 33
-    [MocCABag.options.address, MocCABag.methods.getPTCac().encodeABI(), 'uint256'], // 34
-    [MocCABag.options.address, MocCABag.methods.getCglb().encodeABI(), 'uint256'], // 35
-    [MocCABag.options.address, MocCABag.methods.getTCAvailableToRedeem().encodeABI(), 'uint256'], // 36
-    [MocCABag.options.address, MocCABag.methods.getTPAvailableToMint(0).encodeABI(), 'uint256'], // 37
-    [MocCABag.options.address, MocCABag.methods.getTPAvailableToMint(1).encodeABI(), 'uint256'], // 38
-    [MocCABag.options.address, MocCABag.methods.getTotalACavailable().encodeABI(), 'uint256'], // 39
-    [MocCABag.options.address, MocCABag.methods.getLeverageTC().encodeABI(), 'uint256'], // 40
-    [MocCABag.options.address, MocCABag.methods.tpEma(0).encodeABI(), 'uint256'], // 41
-    [MocCABag.options.address, MocCABag.methods.tpEma(1).encodeABI(), 'uint256'], // 42
-    [MocCABag.options.address, MocCABag.methods.nextEmaCalculation().encodeABI(), 'uint256'], // 43
-    [MocCABag.options.address, MocCABag.methods.emaCalculationBlockSpan().encodeABI(), 'uint256'], // 44
-    [MocCABag.options.address, MocCABag.methods.calcCtargemaCA().encodeABI(), 'uint256'], // 45
-    [MocCABag.options.address, MocCABag.methods.shouldCalculateEma().encodeABI(), 'bool'], // 46
-    [MocCABag.options.address, MocCABag.methods.bes().encodeABI(), 'uint256'], // 47
-    [MocCABag.options.address, MocCABag.methods.bns().encodeABI(), 'uint256'], // 48
-    [MocCABag.options.address, MocCABag.methods.getBts().encodeABI(), 'uint256'], // 49
-    [MocCAWrapper.options.address, MocCAWrapper.methods.getTokenPrice().encodeABI(), 'uint256'], // 50
-    [CA_0.options.address, CA_0.methods.balanceOf(MocCAWrapper.options.address).encodeABI(), 'uint256'], // 51
-    [CA_1.options.address, CA_1.methods.balanceOf(MocCAWrapper.options.address).encodeABI(), 'uint256'], // 52
-  ]
+  let listMethods
+
+  if (appMode === 'MoC') {
+    listMethods = [
+      [mocstate.options.address, mocstate.methods.getBitcoinPrice().encodeABI(), 'uint256'], // 0
+      [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
+      [mocstate.options.address, mocstate.methods.absoluteMaxBPro().encodeABI(), 'uint256'], // 2
+      [mocstate.options.address, mocstate.methods.maxBProx(BUCKET_X2).encodeABI(), 'uint256'], // 3
+      [mocstate.options.address, mocstate.methods.absoluteMaxDoc().encodeABI(), 'uint256'], // 4
+      [mocstate.options.address, mocstate.methods.freeDoc().encodeABI(), 'uint256'], // 5
+      [mocstate.options.address, mocstate.methods.leverage(BUCKET_C0).encodeABI(), 'uint256'], // 6
+      [mocstate.options.address, mocstate.methods.cobj().encodeABI(), 'uint256'], // 7
+      [mocstate.options.address, mocstate.methods.leverage(BUCKET_X2).encodeABI(), 'uint256'], // 8
+      [mocstate.options.address, mocstate.methods.rbtcInSystem().encodeABI(), 'uint256'], // 9
+      [mocstate.options.address, mocstate.methods.getBitcoinMovingAverage().encodeABI(), 'uint256'], // 10
+      [mocstate.options.address, mocstate.methods.getInrateBag(BUCKET_C0).encodeABI(), 'uint256'], // 11
+      [mocstate.options.address, mocstate.methods.getBucketNBTC(BUCKET_C0).encodeABI(), 'uint256'], // 12
+      [mocstate.options.address, mocstate.methods.getBucketNDoc(BUCKET_C0).encodeABI(), 'uint256'], // 13
+      [mocstate.options.address, mocstate.methods.getBucketNBPro(BUCKET_C0).encodeABI(), 'uint256'], // 14
+      [mocstate.options.address, mocstate.methods.getBucketNBTC(BUCKET_X2).encodeABI(), 'uint256'], // 15
+      [mocstate.options.address, mocstate.methods.getBucketNDoc(BUCKET_X2).encodeABI(), 'uint256'], // 16
+      [mocstate.options.address, mocstate.methods.getBucketNBPro(BUCKET_X2).encodeABI(), 'uint256'], // 17
+      [mocstate.options.address, mocstate.methods.globalCoverage().encodeABI(), 'uint256'], // 18
+      [moc.options.address, moc.methods.getReservePrecision().encodeABI(), 'uint256'], // 19
+      [moc.options.address, moc.methods.getMocPrecision().encodeABI(), 'uint256'], // 20
+      [mocstate.options.address, mocstate.methods.coverage(BUCKET_X2).encodeABI(), 'uint256'], // 21
+      [mocstate.options.address, mocstate.methods.bproTecPrice().encodeABI(), 'uint256'], // 22
+      [mocstate.options.address, mocstate.methods.bproUsdPrice().encodeABI(), 'uint256'], // 23
+      [mocstate.options.address, mocstate.methods.bproSpotDiscountRate().encodeABI(), 'uint256'], // 24
+      [mocstate.options.address, mocstate.methods.maxBProWithDiscount().encodeABI(), 'uint256'], // 25
+      [mocstate.options.address, mocstate.methods.bproDiscountPrice().encodeABI(), 'uint256'], // 26
+      [mocstate.options.address, mocstate.methods.bucketBProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 27
+      [mocstate.options.address, mocstate.methods.bproxBProPrice(BUCKET_X2).encodeABI(), 'uint256'], // 28
+      [mocinrate.options.address, mocinrate.methods.spotInrate().encodeABI(), 'uint256'], // 29
+      [mocinrate.options.address, mocinrate.methods.MINT_BPRO_FEES_RBTC().encodeABI(), 'uint256'], // 30
+      [mocinrate.options.address, mocinrate.methods.REDEEM_BPRO_FEES_RBTC().encodeABI(), 'uint256'], // 31
+      [mocinrate.options.address, mocinrate.methods.MINT_DOC_FEES_RBTC().encodeABI(), 'uint256'], // 32
+      [mocinrate.options.address, mocinrate.methods.REDEEM_DOC_FEES_RBTC().encodeABI(), 'uint256'], // 33
+      [mocinrate.options.address, mocinrate.methods.MINT_BTCX_FEES_RBTC().encodeABI(), 'uint256'], // 34
+      [mocinrate.options.address, mocinrate.methods.REDEEM_BTCX_FEES_RBTC().encodeABI(), 'uint256'], // 35
+      [mocinrate.options.address, mocinrate.methods.MINT_BPRO_FEES_MOC().encodeABI(), 'uint256'], // 36
+      [mocinrate.options.address, mocinrate.methods.REDEEM_BPRO_FEES_MOC().encodeABI(), 'uint256'], // 37
+      [mocinrate.options.address, mocinrate.methods.MINT_DOC_FEES_MOC().encodeABI(), 'uint256'], // 38
+      [mocinrate.options.address, mocinrate.methods.REDEEM_DOC_FEES_MOC().encodeABI(), 'uint256'], // 39
+      [mocinrate.options.address, mocinrate.methods.MINT_BTCX_FEES_MOC().encodeABI(), 'uint256'], // 40
+      [mocinrate.options.address, mocinrate.methods.REDEEM_BTCX_FEES_MOC().encodeABI(), 'uint256'], // 41
+      [mocstate.options.address, mocstate.methods.dayBlockSpan().encodeABI(), 'uint256'], // 42
+      [mocsettlement.options.address, mocsettlement.methods.getBlockSpan().encodeABI(), 'uint256'], // 43
+      [mocstate.options.address, mocstate.methods.blocksToSettlement().encodeABI(), 'uint256'], // 44
+      [mocstate.options.address, mocstate.methods.state().encodeABI(), 'uint256'], // 45
+      [moc.options.address, moc.methods.paused().encodeABI(), 'bool'], // 46
+      [mocstate.options.address, mocstate.methods.getLiquidationEnabled().encodeABI(), 'bool'], // 47
+      [mocstate.options.address, mocstate.methods.getProtected().encodeABI(), 'uint256'], // 48
+      [mocstate.options.address, mocstate.methods.getMoCToken().encodeABI(), 'address'], // 49
+      [mocstate.options.address, mocstate.methods.getMoCPriceProvider().encodeABI(), 'address'], // 50
+      [mocstate.options.address, mocstate.methods.getBtcPriceProvider().encodeABI(), 'address'], // 51
+      [mocstate.options.address, mocstate.methods.getMoCVendors().encodeABI(), 'address'] // 52
+    ]
+  } else {
+    listMethods = [
+      [mocstate.options.address, mocstate.methods.getReserveTokenPrice().encodeABI(), 'uint256'], // 0
+      [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
+      [mocstate.options.address, mocstate.methods.absoluteMaxRiskPro().encodeABI(), 'uint256'], // 2
+      [mocstate.options.address, mocstate.methods.maxRiskProx(BUCKET_X2).encodeABI(), 'uint256'], // 3
+      [mocstate.options.address, mocstate.methods.absoluteMaxStableToken().encodeABI(), 'uint256'], // 4
+      [mocstate.options.address, mocstate.methods.freeStableToken().encodeABI(), 'uint256'], // 5
+      [mocstate.options.address, mocstate.methods.leverage(BUCKET_C0).encodeABI(), 'uint256'], // 6
+      [mocstate.options.address, mocstate.methods.cobj().encodeABI(), 'uint256'], // 7
+      [mocstate.options.address, mocstate.methods.leverage(BUCKET_X2).encodeABI(), 'uint256'], // 8
+      [mocstate.options.address, mocstate.methods.reserves().encodeABI(), 'uint256'], // 9
+      [mocstate.options.address, mocstate.methods.getExponentalMovingAverage().encodeABI(), 'uint256'], // 10
+      [mocstate.options.address, mocstate.methods.getInrateBag(BUCKET_C0).encodeABI(), 'uint256'], // 11
+      [mocstate.options.address, mocstate.methods.getBucketNReserve(BUCKET_C0).encodeABI(), 'uint256'], // 12
+      [mocstate.options.address, mocstate.methods.getBucketNStableToken(BUCKET_C0).encodeABI(), 'uint256'], // 13
+      [mocstate.options.address, mocstate.methods.getBucketNRiskPro(BUCKET_C0).encodeABI(), 'uint256'], // 14
+      [mocstate.options.address, mocstate.methods.getBucketNReserve(BUCKET_X2).encodeABI(), 'uint256'], // 15
+      [mocstate.options.address, mocstate.methods.getBucketNStableToken(BUCKET_X2).encodeABI(), 'uint256'], // 16
+      [mocstate.options.address, mocstate.methods.getBucketNRiskPro(BUCKET_X2).encodeABI(), 'uint256'], // 17
+      [mocstate.options.address, mocstate.methods.globalCoverage().encodeABI(), 'uint256'], // 18
+      [moc.options.address, moc.methods.getReservePrecision().encodeABI(), 'uint256'], // 19
+      [moc.options.address, moc.methods.getMocPrecision().encodeABI(), 'uint256'], // 20
+      [mocstate.options.address, mocstate.methods.coverage(BUCKET_X2).encodeABI(), 'uint256'], // 21
+      [mocstate.options.address, mocstate.methods.riskProTecPrice().encodeABI(), 'uint256'], // 22
+      [mocstate.options.address, mocstate.methods.riskProUsdPrice().encodeABI(), 'uint256'], // 23
+      [mocstate.options.address, mocstate.methods.riskProSpotDiscountRate().encodeABI(), 'uint256'], // 24
+      [mocstate.options.address, mocstate.methods.maxRiskProWithDiscount().encodeABI(), 'uint256'], // 25
+      [mocstate.options.address, mocstate.methods.riskProDiscountPrice().encodeABI(), 'uint256'], // 26
+      [mocstate.options.address, mocstate.methods.bucketRiskProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 27
+      [mocstate.options.address, mocstate.methods.riskProxRiskProPrice(BUCKET_X2).encodeABI(), 'uint256'], // 28
+      [mocinrate.options.address, mocinrate.methods.spotInrate().encodeABI(), 'uint256'], // 29
+      [mocinrate.options.address, mocinrate.methods.MINT_RISKPRO_FEES_RESERVE().encodeABI(), 'uint256'], // 30
+      [mocinrate.options.address, mocinrate.methods.REDEEM_RISKPRO_FEES_RESERVE().encodeABI(), 'uint256'], // 31
+      [mocinrate.options.address, mocinrate.methods.MINT_STABLETOKEN_FEES_RESERVE().encodeABI(), 'uint256'], // 32
+      [mocinrate.options.address, mocinrate.methods.REDEEM_STABLETOKEN_FEES_RESERVE().encodeABI(), 'uint256'], // 33
+      [mocinrate.options.address, mocinrate.methods.MINT_RISKPROX_FEES_RESERVE().encodeABI(), 'uint256'], // 34
+      [mocinrate.options.address, mocinrate.methods.REDEEM_RISKPROX_FEES_RESERVE().encodeABI(), 'uint256'], // 35
+      [mocinrate.options.address, mocinrate.methods.MINT_RISKPRO_FEES_MOC().encodeABI(), 'uint256'], // 36
+      [mocinrate.options.address, mocinrate.methods.REDEEM_RISKPRO_FEES_MOC().encodeABI(), 'uint256'], // 37
+      [mocinrate.options.address, mocinrate.methods.MINT_STABLETOKEN_FEES_MOC().encodeABI(), 'uint256'], // 38
+      [mocinrate.options.address, mocinrate.methods.REDEEM_STABLETOKEN_FEES_MOC().encodeABI(), 'uint256'], // 39
+      [mocinrate.options.address, mocinrate.methods.MINT_RISKPROX_FEES_MOC().encodeABI(), 'uint256'], // 40
+      [mocinrate.options.address, mocinrate.methods.REDEEM_RISKPROX_FEES_MOC().encodeABI(), 'uint256'], // 41
+      [mocstate.options.address, mocstate.methods.dayBlockSpan().encodeABI(), 'uint256'], // 42
+      [mocsettlement.options.address, mocsettlement.methods.getBlockSpan().encodeABI(), 'uint256'], // 43
+      [mocstate.options.address, mocstate.methods.blocksToSettlement().encodeABI(), 'uint256'], // 44
+      [mocstate.options.address, mocstate.methods.state().encodeABI(), 'uint256'], // 45
+      [moc.options.address, moc.methods.paused().encodeABI(), 'bool'], // 46
+      [mocstate.options.address, mocstate.methods.getLiquidationEnabled().encodeABI(), 'bool'], // 47
+      [mocstate.options.address, mocstate.methods.getProtected().encodeABI(), 'uint256'], // 48
+      [mocstate.options.address, mocstate.methods.getMoCToken().encodeABI(), 'address'], // 49
+      [mocstate.options.address, mocstate.methods.getMoCPriceProvider().encodeABI(), 'address'], // 50
+      [mocstate.options.address, mocstate.methods.getPriceProvider().encodeABI(), 'address'], // 51
+      [mocstate.options.address, mocstate.methods.getMoCVendors().encodeABI(), 'address'] // 52
+    ]
+  }
 
   // Remove decode result parameter
   const cleanListMethods = listMethods.map(x => [x[0], x[1]])
 
-  //const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call({}, 3807699)
   const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call()
 
   const listReturnData = multicallResult[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData))
 
-  const status = {}
-  status.blockHeight = multicallResult[0]
-  status.protThrld = listReturnData[0]
-  status.liqThrld = listReturnData[1]
-  status.liqEnabled = listReturnData[2]
-  status.liquidated = listReturnData[3]
-  status.nACcb = listReturnData[4]
-  status.tcToken = listReturnData[5]
-  status.nTCcb = listReturnData[6]
-  status.successFee = listReturnData[7]
-  status.appreciationFactor = listReturnData[8]
-  status.feeRetainer = listReturnData[9]
-  status.tcMintFee = listReturnData[10]
-  status.tcRedeemFee = listReturnData[11]
-  status.swapTPforTPFee = listReturnData[12]
-  status.swapTPforTCFee = listReturnData[13]
-  status.swapTCforTPFee = listReturnData[14]
-  status.redeemTCandTPFee = listReturnData[15]
-  status.mintTCandTPFee = listReturnData[16]
-  status.tpMintFee = [listReturnData[17], listReturnData[18]]
-  status.tpRedeemFee = [listReturnData[19], listReturnData[20]]
-  status.mocFeeFlowAddress = listReturnData[21]
-  status.mocAppreciationBeneficiaryAddress = listReturnData[22]
-  status.tpCtarg = [listReturnData[23], listReturnData[24]]
-  status.pegContainer = [listReturnData[25], listReturnData[26]]
-  status.PP_TP = [listReturnData[27], listReturnData[28]]
-  status.PP_CA = [listReturnData[29], listReturnData[30]]
-  status.isLiquidationReached = listReturnData[31]
-  status.getPACtp = [listReturnData[32], listReturnData[33]]
-  status.getPTCac = listReturnData[34]
-  status.getCglb = listReturnData[35]
-  status.getTCAvailableToRedeem = listReturnData[36]
-  status.getTPAvailableToMint = [listReturnData[37], listReturnData[38]]
-  status.getTotalACavailable = listReturnData[39]
-  status.getLeverageTC = listReturnData[40]
-  status.tpEma = [listReturnData[41], listReturnData[42]]
-  status.nextEmaCalculation = listReturnData[43]
-  status.emaCalculationBlockSpan = listReturnData[44]
-  status.calcCtargemaCA = listReturnData[45]
-  status.shouldCalculateEma = listReturnData[46]
-  status.bes = listReturnData[47]
-  status.bns = listReturnData[48]
-  status.getBts = listReturnData[49]
-  status.getTokenPrice = listReturnData[50]
-  status.getACBalance = [listReturnData[51], listReturnData[52]]
+  const dMocState = {}
+  dMocState.blockHeight = multicallResult[0]
+  dMocState.bitcoinPrice = listReturnData[0]
+  dMocState.mocPrice = listReturnData[1]
+  dMocState.bproAvailableToRedeem = listReturnData[2]
+  dMocState.bprox2AvailableToMint = listReturnData[3]
+  dMocState.docAvailableToMint = listReturnData[4]
+  dMocState.docAvailableToRedeem = listReturnData[5]
+  dMocState.b0Leverage = listReturnData[6]
+  dMocState.b0TargetCoverage = listReturnData[7]
+  dMocState.x2Leverage = listReturnData[8]
+  dMocState.totalBTCAmount = listReturnData[9]
+  dMocState.bitcoinMovingAverage = listReturnData[10]
+  dMocState.b0BTCInrateBag = listReturnData[11]
+  dMocState.b0BTCAmount = listReturnData[12]
+  dMocState.b0DocAmount = listReturnData[13]
+  dMocState.b0BproAmount = listReturnData[14]
+  dMocState.x2BTCAmount = listReturnData[15]
+  dMocState.x2DocAmount = listReturnData[16]
+  dMocState.x2BproAmount = listReturnData[17]
+  dMocState.globalCoverage = listReturnData[18]
+  dMocState.reservePrecision = listReturnData[19]
+  dMocState.mocPrecision = listReturnData[20]
+  dMocState.x2Coverage = listReturnData[21]
+  dMocState.bproPriceInRbtc = listReturnData[22]
+  dMocState.bproPriceInUsd = listReturnData[23]
+  dMocState.bproDiscountRate = listReturnData[24]
+  dMocState.maxBproWithDiscount = listReturnData[25]
+  dMocState.bproDiscountPrice = listReturnData[26]
+  dMocState.bprox2PriceInRbtc = listReturnData[27]
+  dMocState.bprox2PriceInBpro = listReturnData[28]
+  dMocState.spotInrate = listReturnData[29]
 
-  return status
+  const commissionRatesTypes = {}
+
+  if (appMode === 'MoC') {
+    commissionRatesTypes.MINT_BPRO_FEES_RBTC = listReturnData[30]
+    commissionRatesTypes.REDEEM_BPRO_FEES_RBTC = listReturnData[31]
+    commissionRatesTypes.MINT_DOC_FEES_RBTC = listReturnData[32]
+    commissionRatesTypes.REDEEM_DOC_FEES_RBTC = listReturnData[33]
+    commissionRatesTypes.MINT_BTCX_FEES_RBTC = listReturnData[34]
+    commissionRatesTypes.REDEEM_BTCX_FEES_RBTC = listReturnData[35]
+    commissionRatesTypes.MINT_BPRO_FEES_MOC = listReturnData[36]
+    commissionRatesTypes.REDEEM_BPRO_FEES_MOC = listReturnData[37]
+    commissionRatesTypes.MINT_DOC_FEES_MOC = listReturnData[38]
+    commissionRatesTypes.REDEEM_DOC_FEES_MOC = listReturnData[39]
+    commissionRatesTypes.MINT_BTCX_FEES_MOC = listReturnData[40]
+    commissionRatesTypes.REDEEM_BTCX_FEES_MOC = listReturnData[41]
+  } else {
+    commissionRatesTypes.MINT_RISKPRO_FEES_RESERVE = listReturnData[30]
+    commissionRatesTypes.REDEEM_RISKPRO_FEES_RESERVE = listReturnData[31]
+    commissionRatesTypes.MINT_STABLETOKEN_FEES_RESERVE = listReturnData[32]
+    commissionRatesTypes.REDEEM_STABLETOKEN_FEES_RESERVE = listReturnData[33]
+    commissionRatesTypes.MINT_RISKPROX_FEES_RESERVE = listReturnData[34]
+    commissionRatesTypes.REDEEM_RISKPROX_FEES_RESERVE = listReturnData[35]
+    commissionRatesTypes.MINT_RISKPRO_FEES_MOC = listReturnData[36]
+    commissionRatesTypes.REDEEM_RISKPRO_FEES_MOC = listReturnData[37]
+    commissionRatesTypes.MINT_STABLETOKEN_FEES_MOC = listReturnData[38]
+    commissionRatesTypes.REDEEM_STABLETOKEN_FEES_MOC = listReturnData[39]
+    commissionRatesTypes.MINT_RISKPROX_FEES_MOC = listReturnData[40]
+    commissionRatesTypes.REDEEM_RISKPROX_FEES_MOC = listReturnData[41]
+  }
+
+  dMocState.commissionRatesTypes = commissionRatesTypes
+  dMocState.dayBlockSpan = listReturnData[42]
+  dMocState.blockSpan = listReturnData[43]
+  dMocState.blocksToSettlement = listReturnData[44]
+  dMocState.state = listReturnData[45]
+  dMocState.lastPriceUpdateHeight = 0
+  dMocState.paused = listReturnData[46]
+  dMocState.liquidationEnabled = listReturnData[47]
+  dMocState.protected = listReturnData[48]
+  dMocState.getMoCToken = listReturnData[49]
+  dMocState.getMoCPriceProvider = listReturnData[50]
+  dMocState.getBtcPriceProvider = listReturnData[51]
+  dMocState.getMoCVendors = listReturnData[52]
+
+  // Commission rates
+  let listMethodsRates
+  if (appMode === 'MoC') {
+    listMethodsRates = [
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_BPRO_FEES_RBTC).encodeABI(),
+        'uint256'
+      ], // 0
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_BPRO_FEES_RBTC).encodeABI(),
+        'uint256'
+      ], // 1
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_DOC_FEES_RBTC).encodeABI(),
+        'uint256'
+      ], // 2
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_DOC_FEES_RBTC).encodeABI(),
+        'uint256'
+      ], // 3
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_BTCX_FEES_RBTC).encodeABI(),
+        'uint256'
+      ], // 4
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_BTCX_FEES_RBTC).encodeABI(),
+        'uint256'
+      ], // 5
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_BPRO_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 6
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_BPRO_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 7
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_DOC_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 8
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_DOC_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 9
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_BTCX_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 10
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_BTCX_FEES_MOC).encodeABI(),
+        'uint256'
+      ] // 11
+    ]
+  } else {
+    listMethodsRates = [
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_RISKPRO_FEES_RESERVE).encodeABI(),
+        'uint256'
+      ], // 0
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_RISKPRO_FEES_RESERVE).encodeABI(),
+        'uint256'
+      ], // 1
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_STABLETOKEN_FEES_RESERVE).encodeABI(),
+        'uint256'
+      ], // 2
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_STABLETOKEN_FEES_RESERVE).encodeABI(),
+        'uint256'
+      ], // 3
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_RISKPROX_FEES_RESERVE).encodeABI(),
+        'uint256'
+      ], // 4
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_RISKPROX_FEES_RESERVE).encodeABI(),
+        'uint256'
+      ], // 5
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_RISKPRO_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 6
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_RISKPRO_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 7
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_STABLETOKEN_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 8
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_STABLETOKEN_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 9
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.MINT_RISKPROX_FEES_MOC).encodeABI(),
+        'uint256'
+      ], // 10
+      [
+        mocinrate.options.address,
+        mocinrate.methods.commissionRatesByTxType(dMocState.commissionRatesTypes.REDEEM_RISKPROX_FEES_MOC).encodeABI(),
+        'uint256'
+      ] // 11
+    ]
+  }
+
+  // Remove decode result parameter
+  const cleanListMethodsRates = listMethodsRates.map(x => [x[0], x[1]])
+
+  const multicallResultRates = await multicall.methods.tryBlockAndAggregate(false, cleanListMethodsRates).call()
+
+  const listReturnDataRates = multicallResultRates[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData))
+
+  const commissionRates = {}
+
+  if (appMode === 'MoC') {
+    commissionRates.MINT_BPRO_FEES_RBTC = listReturnDataRates[0]
+    commissionRates.REDEEM_BPRO_FEES_RBTC = listReturnDataRates[1]
+    commissionRates.MINT_DOC_FEES_RBTC = listReturnDataRates[2]
+    commissionRates.REDEEM_DOC_FEES_RBTC = listReturnDataRates[3]
+    commissionRates.MINT_BTCX_FEES_RBTC = listReturnDataRates[4]
+    commissionRates.REDEEM_BTCX_FEES_RBTC = listReturnDataRates[5]
+    commissionRates.MINT_BPRO_FEES_MOC = listReturnDataRates[6]
+    commissionRates.REDEEM_BPRO_FEES_MOC = listReturnDataRates[7]
+    commissionRates.MINT_DOC_FEES_MOC = listReturnDataRates[8]
+    commissionRates.REDEEM_DOC_FEES_MOC = listReturnDataRates[9]
+    commissionRates.MINT_BTCX_FEES_MOC = listReturnDataRates[10]
+    commissionRates.REDEEM_BTCX_FEES_MOC = listReturnDataRates[11]
+  } else {
+    commissionRates.MINT_RISKPRO_FEES_RESERVE = listReturnDataRates[0]
+    commissionRates.REDEEM_RISKPRO_FEES_RESERVE = listReturnDataRates[1]
+    commissionRates.MINT_STABLETOKEN_FEES_RESERVE = listReturnDataRates[2]
+    commissionRates.REDEEM_STABLETOKEN_FEES_RESERVE = listReturnDataRates[3]
+    commissionRates.MINT_RISKPROX_FEES_RESERVE = listReturnDataRates[4]
+    commissionRates.REDEEM_RISKPROX_FEES_RESERVE = listReturnDataRates[5]
+    commissionRates.MINT_RISKPRO_FEES_MOC = listReturnDataRates[6]
+    commissionRates.REDEEM_RISKPRO_FEES_MOC = listReturnDataRates[7]
+    commissionRates.MINT_STABLETOKEN_FEES_MOC = listReturnDataRates[8]
+    commissionRates.REDEEM_STABLETOKEN_FEES_MOC = listReturnDataRates[9]
+    commissionRates.MINT_RISKPROX_FEES_MOC = listReturnDataRates[10]
+    commissionRates.REDEEM_RISKPROX_FEES_MOC = listReturnDataRates[11]
+  }
+
+  dMocState.commissionRates = commissionRates
+
+  if (appProject === 'bnb') return dMocState  // need archive
+
+  // Historics Price 24hs ago
+  const d24BlockHeights = dMocState.blockHeight - dMocState.dayBlockSpan;
+  // Remove decode result parameter
+  if (appMode === 'MoC') {
+    listMethods = [
+      [mocstate.options.address, mocstate.methods.getBitcoinPrice().encodeABI(), 'uint256'], // 0
+      [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
+      [mocstate.options.address, mocstate.methods.bproUsdPrice().encodeABI(), 'uint256'], // 2
+      [mocstate.options.address, mocstate.methods.bucketBProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 3
+    ]
+  } else {
+    listMethods = [
+      [mocstate.options.address, mocstate.methods.getReserveTokenPrice().encodeABI(), 'uint256'], // 0
+      [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
+      [mocstate.options.address, mocstate.methods.riskProUsdPrice().encodeABI(), 'uint256'], // 2
+      [mocstate.options.address, mocstate.methods.bucketRiskProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 3
+    ]
+  }
+
+  const cleanListMethodsHistoric = listMethods.map(x => [x[0], x[1]])
+
+  const multicallResultHistoric = await multicall.methods.tryBlockAndAggregate(false, cleanListMethodsHistoric).call({}, d24BlockHeights)
+
+  const listReturnDataHistoric = multicallResultHistoric[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData))
+
+  const historic = {}
+  historic.bitcoinPrice = listReturnDataHistoric[0]
+  historic.mocPrice = listReturnDataHistoric[1]
+  historic.bproPriceInUsd = listReturnDataHistoric[2]
+  historic.bprox2PriceInRbtc = listReturnDataHistoric[3]
+  historic.blockHeight = d24BlockHeights
+
+  dMocState.historic = historic
+
+  return dMocState
 }
 
 const userBalance = async (web3, dContracts, userAddress, configProject) => {
+  const appMode = configProject.appMode
 
   const multicall = dContracts.contracts.multicall
-  const MocCAWrapper = dContracts.contracts.MocCAWrapper
-  const CA_0 = dContracts.contracts.CA[0]
-  const CA_1 = dContracts.contracts.CA[1]
-  const TP_0 = dContracts.contracts.TP[0]
-  const TP_1 = dContracts.contracts.TP[1]
-  const CollateralTokenCABag = dContracts.contracts.CollateralTokenCABag
+  const moc = dContracts.contracts.moc
+  const mocinrate = dContracts.contracts.mocinrate
+  const tg = dContracts.contracts.tg
+  const tc = dContracts.contracts.tc
+  const tp = dContracts.contracts.tp
 
   console.log(`Reading user balance ... account: ${userAddress}`)
 
   const listMethods = [
-    [multicall.options.address, multicall.methods.getEthBalance(userAddress).encodeABI(), 'uint256'], // 0
-    [CA_0.options.address, CA_0.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 1
-    [CA_0.options.address, CA_0.methods.allowance(userAddress, MocCAWrapper.options.address).encodeABI(), 'uint256'], // 2
-    [CA_1.options.address, CA_1.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 3
-    [CA_1.options.address, CA_1.methods.allowance(userAddress, MocCAWrapper.options.address).encodeABI(), 'uint256'], // 4
-    [TP_0.options.address, TP_0.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 5
-    [TP_1.options.address, TP_1.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 6
-    [CollateralTokenCABag.options.address, CollateralTokenCABag.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 7
-    [CollateralTokenCABag.options.address, CollateralTokenCABag.methods.allowance(userAddress, MocCAWrapper.options.address).encodeABI(), 'uint256'] // 8
+    [tg.options.address, tg.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 0
+    [tg.options.address, tg.methods.allowance(userAddress, moc.options.address).encodeABI(), 'uint256'], // 1
+    [tp.options.address, tp.methods.balanceOf(userAddress).encodeABI(), 'uint256'], // 2
+    [tc.options.address, tc.methods.balanceOf(userAddress).encodeABI(), 'uint256'] // 3
   ]
+
+  if (appMode === 'MoC') {
+    listMethods.push([multicall.options.address, multicall.methods.getEthBalance(userAddress).encodeABI(), 'uint256']) // 4
+    listMethods.push([moc.options.address, moc.methods.docAmountToRedeem(userAddress).encodeABI(), 'uint256']) // 5
+    listMethods.push([moc.options.address, moc.methods.bproxBalanceOf(BUCKET_X2, userAddress).encodeABI(), 'uint256']) // 6
+    listMethods.push([multicall.options.address, multicall.methods.getEthBalance(userAddress).encodeABI(), 'uint256']) // 7
+  } else {
+    const reservetoken = dContracts.contracts.reservetoken
+    listMethods.push([reservetoken.options.address, reservetoken.methods.balanceOf(userAddress).encodeABI(), 'uint256']) // 4
+    listMethods.push([moc.options.address, moc.methods.stableTokenAmountToRedeem(userAddress).encodeABI(), 'uint256']) // 5
+    listMethods.push([moc.options.address, moc.methods.riskProxBalanceOf(BUCKET_X2, userAddress).encodeABI(), 'uint256']) // 6
+    listMethods.push([reservetoken.options.address, reservetoken.methods.allowance(userAddress, dContracts.contracts.moc._address).encodeABI(), 'uint256']) // 7
+  }
+
+  // Token migrator
+  if (dContracts.contracts.tp_legacy) {
+    const tpLegacy = dContracts.contracts.tp_legacy
+    const tokenMigrator = dContracts.contracts.token_migrator
+    listMethods.push([tpLegacy.options.address, tpLegacy.methods.balanceOf(userAddress).encodeABI(), 'uint256']) // 8
+    listMethods.push([tpLegacy.options.address, tpLegacy.methods.allowance(userAddress, tokenMigrator.options.address).encodeABI(), 'uint256']) // 9
+  }
 
   // Remove decode result parameter
   const cleanListMethods = listMethods.map(x => [x[0], x[1]])
@@ -157,27 +496,128 @@ const userBalance = async (web3, dContracts, userAddress, configProject) => {
 
   const userBalance = {}
   userBalance.blockHeight = multicallResult[0]
-  userBalance.coinbase = listReturnData[0]
-  userBalance.CA = [
-      {
-        balance: listReturnData[1],
-        allowance: listReturnData[2]
-      },
-      {
-        balance: listReturnData[3],
-        allowance: listReturnData[4]
-      },
-  ]
-  userBalance.TP = [listReturnData[5], listReturnData[6]]
-  userBalance.TC = {
-    balance: listReturnData[7],
-    allowance: listReturnData[8]
+  userBalance.mocBalance = listReturnData[0]
+  userBalance.mocAllowance = listReturnData[1]
+  userBalance.docBalance = listReturnData[2]
+  userBalance.bproBalance = listReturnData[3]
+  userBalance.rbtcBalance = listReturnData[4]
+  userBalance.docToRedeem = listReturnData[5]
+  userBalance.bprox2Balance = listReturnData[6]
+  userBalance.spendableBalance = listReturnData[4]
+  userBalance.reserveAllowance = listReturnData[7]
+
+  if (dContracts.contracts.tp_legacy) {
+    userBalance.tpLegacyBalance = listReturnData[8]
+    userBalance.tpLegacyAllowance = listReturnData[9]
   }
+
+  userBalance.potentialBprox2MaxInterest = '0'
+  userBalance.bProHoldIncentive = '0'
+  userBalance.estimateGasMintBpro = '2000000'
+  userBalance.estimateGasMintDoc = '2000000'
+  userBalance.estimateGasMintBprox2 = '2000000'
+  userBalance.userAddress = userAddress
+
+  const calcMintInterest = await mocinrate.methods.calcMintInterestValues(BUCKET_X2, userBalance.rbtcBalance).call()
+
+  userBalance.potentialBprox2MaxInterest = calcMintInterest
 
   return userBalance
 }
 
+const calcCommission = async (web3, dContracts, dataContractStatus, reserveAmount, token, action) => {
+  const vendorAddress = `${process.env.VENDOR_ADDRESS}`.toLowerCase()
+
+  const multicall = dContracts.contracts.multicall
+  const mocinrate = dContracts.contracts.mocinrate
+
+  let mocType
+  let reserveType
+  switch (token) {
+    case 'DOC':
+      if (action === 'MINT') {
+        reserveType = dataContractStatus.commissionRatesTypes.MINT_DOC_FEES_RBTC
+        mocType = dataContractStatus.commissionRatesTypes.MINT_DOC_FEES_MOC
+      } else {
+        reserveType = dataContractStatus.commissionRatesTypes.REDEEM_DOC_FEES_RBTC
+        mocType = dataContractStatus.commissionRatesTypes.REDEEM_DOC_FEES_MOC
+      }
+      break
+    case 'BPRO':
+      if (action === 'MINT') {
+        reserveType = dataContractStatus.commissionRatesTypes.MINT_BPRO_FEES_RBTC
+        mocType = dataContractStatus.commissionRatesTypes.MINT_BPRO_FEES_MOC
+      } else {
+        reserveType = dataContractStatus.commissionRatesTypes.REDEEM_BPRO_FEES_RBTC
+        mocType = dataContractStatus.commissionRatesTypes.REDEEM_BPRO_FEES_MOC
+      }
+      break
+    case 'BTCX':
+      if (action === 'MINT') {
+        reserveType = dataContractStatus.commissionRatesTypes.MINT_BTCX_FEES_RBTC
+        mocType = dataContractStatus.commissionRatesTypes.MINT_BTCX_FEES_MOC
+      } else {
+        reserveType = dataContractStatus.commissionRatesTypes.REDEEM_BTCX_FEES_RBTC
+        mocType = dataContractStatus.commissionRatesTypes.REDEEM_BTCX_FEES_MOC
+      }
+      break
+    case 'STABLE':
+      if (action === 'MINT') {
+        reserveType = dataContractStatus.commissionRatesTypes.MINT_STABLETOKEN_FEES_RESERVE
+        mocType = dataContractStatus.commissionRatesTypes.MINT_STABLETOKEN_FEES_MOC
+      } else {
+        reserveType = dataContractStatus.commissionRatesTypes.REDEEM_STABLETOKEN_FEES_RESERVE
+        mocType = dataContractStatus.commissionRatesTypes.REDEEM_STABLETOKEN_FEES_MOC
+      }
+      break
+    case 'RISKPRO':
+      if (action === 'MINT') {
+        reserveType = dataContractStatus.commissionRatesTypes.MINT_RISKPRO_FEES_RESERVE
+        mocType = dataContractStatus.commissionRatesTypes.MINT_RISKPRO_FEES_MOC
+      } else {
+        reserveType = dataContractStatus.commissionRatesTypes.REDEEM_RISKPRO_FEES_RESERVE
+        mocType = dataContractStatus.commissionRatesTypes.REDEEM_RISKPRO_FEES_MOC
+      }
+      break
+    case 'RISKPROX':
+      if (action === 'MINT') {
+        reserveType = dataContractStatus.commissionRatesTypes.MINT_RISKPROX_FEES_RESERVE
+        mocType = dataContractStatus.commissionRatesTypes.MINT_RISKPROX_FEES_MOC
+      } else {
+        reserveType = dataContractStatus.commissionRatesTypes.REDEEM_RISKPROX_FEES_RESERVE
+        mocType = dataContractStatus.commissionRatesTypes.REDEEM_RISKPROX_FEES_MOC
+      }
+      break
+  }
+
+  // Calculate commission with multicall
+  const listMethods = [
+    [mocinrate.options.address, mocinrate.methods.calcCommissionValue(toContractPrecision(reserveAmount), reserveType).encodeABI(), 'uint256'], // 0
+    [mocinrate.options.address, mocinrate.methods.calcCommissionValue(toContractPrecision(reserveAmount), mocType).encodeABI(), 'uint256'], // 1
+    [mocinrate.options.address, mocinrate.methods.calculateVendorMarkup(vendorAddress, toContractPrecision(reserveAmount)).encodeABI(), 'uint256'] // 2
+  ]
+
+  // Remove decode result parameter
+  const cleanListMethods = listMethods.map(x => [x[0], x[1]])
+
+  // Multicall results
+  const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call()
+
+  // Decode multicall
+  const listReturnData = multicallResult[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData))
+
+  // Dictionary commissions
+  const commission = {}
+  commission.commission_reserve = listReturnData[0]
+  commission.commission_moc = listReturnData[1]
+  commission.vendorMarkup = listReturnData[2]
+
+  return commission
+}
+
 export {
   contractStatus,
-  userBalance
+  connectorAddresses,
+  userBalance,
+  calcCommission
 }

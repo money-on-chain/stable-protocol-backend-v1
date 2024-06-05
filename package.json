@@ -1,7 +1,7 @@
 {
-  "name": "moc-integration-js",
-  "version": "1.1.0",
-  "description": "Money On Chain Integration",
+  "name": "stable-protocol-backend-v1",
+  "version": "1.2.0",
+  "description": "Money On Chain Protocol - Backend Integration - V1 Contracts",
   "main": "index.js",
   "type": "module",
   "scripts": {
