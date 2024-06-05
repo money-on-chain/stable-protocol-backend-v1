@@ -18,16 +18,19 @@ const main = async () => {
   // get web3 connection
   const web3 = getWeb3(process.env.HOST_URI)
 
-  // Obtain all contracts
+  // Obtain all contracts from one address of the MoC.sol
   const dContracts = await readContracts(web3, configProject)
 
-  // Read info from different contract in one call through Multicall
+  // Read info from different contract MoCState.sol MoCInrate.sol MoCSettlement.sol MoC.sol
+  // in one call throught Multicall
   const dataContractStatus = await contractStatus(web3, dContracts, configProject)
 
   console.log('\x1b[35m%s\x1b[0m', 'Contract Status')
+  console.log()
   console.log('\x1b[32m%s\x1b[0m', renderContractStatus(dataContractStatus, configProject))
-  //
+
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
+
   // Get user balance
   const userBalanceStats = await userBalance(web3, dContracts, userAddress, configProject)
 

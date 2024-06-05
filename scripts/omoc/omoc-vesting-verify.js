@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'
-import { readContracts as readContractsMoC } from '../../src/moc-v0/contracts.js'
+import { readContracts as readContractsMoC } from '../../src/moc-v1/contracts.js'
 import { readContracts as readContractsOMoC } from '../../src/omoc/contracts.js'
 import { vestingVerify } from '../../src/omoc/omoc-staking.js'
 

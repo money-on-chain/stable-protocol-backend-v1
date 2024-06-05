@@ -1,8 +1,8 @@
 import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'
-import { readContracts } from '../../src/moc-v0/contracts.js'
-import { AdminVendorAllowance } from '../../src/moc-v0/moc-vendors.js'
+import { readContracts } from '../../src/moc-v1/contracts.js'
+import { AllowPayingCommissionTG } from '../../src/moc-v1/moc-base.js'
 
 dotenv.config()
 
@@ -17,7 +17,7 @@ const main = async () => {
   const dContracts = await readContracts(web3, configProject)
 
   // Send transaction and get receipt
-  const { receipt, filteredEvents } = await AdminVendorAllowance(web3, dContracts, true)
+  const { receipt, filteredEvents } = await AllowPayingCommissionTG(web3, dContracts, false)
 }
 
 main()

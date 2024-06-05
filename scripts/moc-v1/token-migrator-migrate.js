@@ -1,10 +1,8 @@
-// Mint Collateral Token
-
 import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'
 import { readContracts } from '../../src/moc-v1/contracts.js'
-import { mintTCandTP } from '../../src/moc-v1/moc-collateral-bag.js'
+import { MigrateToken } from '../../src/moc-v1/moc-base.js'
 
 dotenv.config()
 
@@ -15,16 +13,11 @@ const main = async () => {
     // get web3 connection
     const web3 = getWeb3(process.env.HOST_URI)
 
-    // Obtain all contracts
+    // Obtain all contracts from one address of the MoC.sol
     const dContracts = await readContracts(web3, configProject)
 
-    // Get amount from environment
-    const qTP = `${process.env.OPERATION_AMOUNT_MINT_TP}`
-    const caIndex = 0
-    const tpIndex = 0
-
-    const { receipt, filteredEvents } = await mintTCandTP(web3, dContracts, configProject, caIndex, tpIndex, qTP)
-
+    // Send transaction and get receipt
+    const { receipt, filteredEvents } = await MigrateToken(web3, dContracts)
 }
 
 main()

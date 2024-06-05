@@ -1,7 +1,7 @@
 {
-  "name": "moc-integration-js",
-  "version": "1.1.0",
-  "description": "Money On Chain Integration",
+  "name": "stable-protocol-backend-v1",
+  "version": "1.2.0",
+  "description": "Money On Chain Protocol - Backend Integration - V1 Contracts",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/money-on-chain/moc-integration-js.git"
+    "url": "git+https://github.com/money-on-chain/stable-protocol-backend-v1.git"
   },
   "keywords": [
     "Web3"
@@ -17,9 +17,9 @@
   "author": "Martin Mulone",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/money-on-chain/moc-integration-js/issues"
+    "url": "https://github.com/money-on-chain/stable-protocol-backend-v1/issues"
   },
-  "homepage": "https://github.com/money-on-chain/moc-integration-js#readme",
+  "homepage": "https://github.com/money-on-chain/stable-protocol-backend-v1#readme",
   "dependencies": {
     "abi-decoder": "^2.4.0",
     "bignumber.js": "^9.0.2",

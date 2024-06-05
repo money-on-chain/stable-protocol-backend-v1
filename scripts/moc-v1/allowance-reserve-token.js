@@ -1,8 +1,8 @@
 import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'
-import { readContracts } from '../../src/moc-v0/contracts.js'
-import { AllowanceUseReserveToken } from '../../src/moc-v0/moc-rrc20.js'
+import { readContracts } from '../../src/moc-v1/contracts.js'
+import { AllowanceUseReserveToken } from '../../src/moc-v1/moc-rrc20.js'
 
 dotenv.config()
 
