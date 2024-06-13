@@ -5,6 +5,8 @@ const connectorAddresses = async (web3, dContracts, configProject) => {
   const mocconnector = dContracts.contracts.mocconnector
   const appMode = configProject.appMode
 
+  const blockNumber = 6400000
+
   const listMethods = [
     [mocconnector.options.address, mocconnector.methods.mocState().encodeABI()],
     [mocconnector.options.address, mocconnector.methods.mocInrate().encodeABI()],
@@ -22,7 +24,7 @@ const connectorAddresses = async (web3, dContracts, configProject) => {
     listMethods.push([mocconnector.options.address, mocconnector.methods.reserveToken().encodeABI()])
   }
 
-  const multicallResult = await multicall.methods.tryBlockAndAggregate(false, listMethods).call()
+  const multicallResult = await multicall.methods.tryBlockAndAggregate(false, listMethods).call({}, blockNumber)
 
   const listReturnData = multicallResult[2].map(x => web3.eth.abi.decodeParameter('address', x.returnData))
 
@@ -38,6 +40,9 @@ const contractStatus = async (web3, dContracts, configProject) => {
   const mocstate = dContracts.contracts.mocstate
   const mocinrate = dContracts.contracts.mocinrate
   const mocsettlement = dContracts.contracts.mocsettlement
+  const mocexchange = dContracts.contracts.mocexchange;
+
+  const blockNumber = 6400000
 
   console.log('Reading contract status ...')
 
@@ -153,14 +158,24 @@ const contractStatus = async (web3, dContracts, configProject) => {
       [mocstate.options.address, mocstate.methods.getMoCToken().encodeABI(), 'address'], // 49
       [mocstate.options.address, mocstate.methods.getMoCPriceProvider().encodeABI(), 'address'], // 50
       [mocstate.options.address, mocstate.methods.getPriceProvider().encodeABI(), 'address'], // 51
-      [mocstate.options.address, mocstate.methods.getMoCVendors().encodeABI(), 'address'] // 52
+      [mocstate.options.address, mocstate.methods.getMoCVendors().encodeABI(), 'address'], // 52
+      [mocexchange.options.address, mocexchange.methods.maxAbsoluteOperation().encodeABI(), 'uint256'], // 53
+      [mocexchange.options.address, mocexchange.methods.maxOperationalDifference().encodeABI(), 'uint256'], // 54
+      [mocexchange.options.address, mocexchange.methods.decayBlockSpan().encodeABI(), 'uint256'], // 55
+      [mocexchange.options.address, mocexchange.methods.absoluteAccumulator().encodeABI(), 'uint256'], // 56
+      [mocexchange.options.address, mocexchange.methods.differentialAccumulator().encodeABI(), 'uint256'], // 57
+      [mocexchange.options.address, mocexchange.methods.lastOperationBlockNumber().encodeABI(), 'uint256'], // 58
+      [mocexchange.options.address, mocexchange.methods.lastMaxReserveAllowedToMint().encodeABI(), 'uint256'], // 59
+      [mocexchange.options.address, mocexchange.methods.maxReserveAllowedToMint().encodeABI(), 'uint256'], // 60
+      [mocexchange.options.address, mocexchange.methods.maxReserveAllowedToRedeem().encodeABI(), 'uint256'], // 61
+      [mocexchange.options.address, mocexchange.methods.lastMaxReserveAllowedToRedeem().encodeABI(), 'uint256'] // 62
     ]
   }
 
   // Remove decode result parameter
   const cleanListMethods = listMethods.map(x => [x[0], x[1]])
 
-  const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call()
+  const multicallResult = await multicall.methods.tryBlockAndAggregate(false, cleanListMethods).call({}, blockNumber)
 
   const listReturnData = multicallResult[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData))
 
@@ -240,6 +255,20 @@ const contractStatus = async (web3, dContracts, configProject) => {
   dMocState.getMoCPriceProvider = listReturnData[50]
   dMocState.getBtcPriceProvider = listReturnData[51]
   dMocState.getMoCVendors = listReturnData[52]
+
+  // Flux capacitor only enabled in RRC20 app mode
+  if (appMode === 'RRC20') {
+    dMocState.maxAbsoluteOperation = listReturnData[53];
+    dMocState.maxOperationalDifference = listReturnData[54];
+    dMocState.decayBlockSpan = listReturnData[55];
+    dMocState.absoluteAccumulator = listReturnData[56];
+    dMocState.differentialAccumulator = listReturnData[57];
+    dMocState.lastOperationBlockNumber = listReturnData[58];
+    dMocState.lastMaxReserveAllowedToMint = listReturnData[59];
+    dMocState.maxReserveAllowedToMint = listReturnData[60];
+    dMocState.maxReserveAllowedToRedeem = listReturnData[61];
+    dMocState.lastMaxReserveAllowedToRedeem = listReturnData[62];
+  }
 
   // Commission rates
   let listMethodsRates
@@ -374,7 +403,7 @@ const contractStatus = async (web3, dContracts, configProject) => {
   // Remove decode result parameter
   const cleanListMethodsRates = listMethodsRates.map(x => [x[0], x[1]])
 
-  const multicallResultRates = await multicall.methods.tryBlockAndAggregate(false, cleanListMethodsRates).call()
+  const multicallResultRates = await multicall.methods.tryBlockAndAggregate(false, cleanListMethodsRates).call({}, blockNumber)
 
   const listReturnDataRates = multicallResultRates[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData))
 
@@ -433,7 +462,7 @@ const contractStatus = async (web3, dContracts, configProject) => {
 
   const cleanListMethodsHistoric = listMethods.map(x => [x[0], x[1]])
 
-  const multicallResultHistoric = await multicall.methods.tryBlockAndAggregate(false, cleanListMethodsHistoric).call({}, d24BlockHeights)
+  const multicallResultHistoric = await multicall.methods.tryBlockAndAggregate(false, cleanListMethodsHistoric).call({}, blockNumber)
 
   const listReturnDataHistoric = multicallResultHistoric[2].map((item, itemIndex) => web3.eth.abi.decodeParameter(listMethods[itemIndex][2], item.returnData))
 

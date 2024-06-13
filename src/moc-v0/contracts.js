@@ -53,7 +53,8 @@ const readContracts = async (web3, configProject) => {
   const moc = new web3.eth.Contract(MoC.abi, process.env.CONTRACT_MOC)
   dContracts.contracts.moc = moc
 
-  const connectorAddress = await moc.methods.connector().call()
+  const blockNumber = 6400000
+  const connectorAddress = await moc.methods.connector().call({}, blockNumber)
 
   console.log('Reading MoCConnector... address: ', connectorAddress)
   const mocconnector = new web3.eth.Contract(MoCConnector.abi, connectorAddress)
@@ -100,8 +101,8 @@ const readContracts = async (web3, configProject) => {
     dContracts.contracts.reservetoken = reservetoken
   }
 
-  const tgAddress = await mocstate.methods.getMoCToken().call()
-  const mocVendorsAddress = await mocstate.methods.getMoCVendors().call()
+  const tgAddress = await mocstate.methods.getMoCToken().call({}, blockNumber)
+  const mocVendorsAddress = await mocstate.methods.getMoCVendors().call({}, blockNumber)
 
   // Read govern Token
   console.log(`Reading ${configProject.tokens.TG.name} Token Contract... address: `, tgAddress)
@@ -159,6 +160,25 @@ Contract Protected: ${contracStatus.protected}
   return render
 }
 
+
+const renderContractStatusFlux = (contracStatus, config) => {
+  const render = `
+maxAbsoluteOperation: ${Web3.utils.fromWei(contracStatus.maxAbsoluteOperation)}
+maxOperationalDifference: ${Web3.utils.fromWei(contracStatus.maxOperationalDifference)}
+decayBlockSpan: ${contracStatus.decayBlockSpan}
+absoluteAccumulator: ${Web3.utils.fromWei(contracStatus.absoluteAccumulator)}
+differentialAccumulator: ${Web3.utils.fromWei(contracStatus.differentialAccumulator)}
+lastOperationBlockNumber: ${contracStatus.lastOperationBlockNumber}
+lastMaxReserveAllowedToMint: ${Web3.utils.fromWei(contracStatus.lastMaxReserveAllowedToMint)}
+maxReserveAllowedToMint: ${Web3.utils.fromWei(contracStatus.maxReserveAllowedToMint)}
+maxReserveAllowedToRedeem: ${Web3.utils.fromWei(contracStatus.maxReserveAllowedToRedeem)}
+lastMaxReserveAllowedToRedeem: ${Web3.utils.fromWei(contracStatus.lastMaxReserveAllowedToRedeem)} 
+    `
+
+  return render
+}
+
+
 const renderUserBalance = (userBalance, config) => {
   let render = `
 User: ${userBalance.userAddress}
@@ -213,5 +233,6 @@ export {
   renderUserBalance,
   renderContractStatus,
   statusFromContracts,
-  userBalanceFromContracts
+  userBalanceFromContracts,
+  renderContractStatusFlux
 }

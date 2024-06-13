@@ -6,7 +6,8 @@ import {
     contractStatus,
     userBalance,
     renderUserBalance,
-    renderContractStatus
+    renderContractStatus,
+    renderContractStatusFlux
     } from '../../src/moc-v0/contracts.js'
 
 dotenv.config()
@@ -28,6 +29,9 @@ const main = async () => {
   console.log('\x1b[35m%s\x1b[0m', 'Contract Status')
   console.log()
   console.log('\x1b[32m%s\x1b[0m', renderContractStatus(dataContractStatus, configProject))
+
+  console.log()
+  console.log('\x1b[32m%s\x1b[0m', renderContractStatusFlux(dataContractStatus, configProject))
 
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
 
