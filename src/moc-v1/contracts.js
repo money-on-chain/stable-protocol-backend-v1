@@ -114,14 +114,13 @@ const readContracts = async (web3, configProject) => {
 
   // Token migrator & Legacy token
   if (process.env.CONTRACT_LEGACY_TP) {
-
     const TokenMigrator = readJsonFile(`./abis/${appProject}/TokenMigrator.json`)
     dContracts.json.TokenMigrator = TokenMigrator
 
     const tpLegacy = new web3.eth.Contract(TP.abi, process.env.CONTRACT_LEGACY_TP)
     dContracts.contracts.tp_legacy = tpLegacy
 
-    if (!process.env.CONTRACT_TOKEN_MIGRATOR) console.log("Error: Please set token migrator address!")
+    if (!process.env.CONTRACT_TOKEN_MIGRATOR) console.log('Error: Please set token migrator address!')
 
     const tokenMigrator = new web3.eth.Contract(TokenMigrator.abi, process.env.CONTRACT_TOKEN_MIGRATOR)
     dContracts.contracts.token_migrator = tokenMigrator
@@ -153,7 +152,11 @@ ${config.tokens.TC.name} Price: ${Web3.utils.fromWei(contracStatus.bproPriceInUs
 ${config.tokens.TX.name} Price: ${Web3.utils.fromWei(contracStatus.bprox2PriceInRbtc)} ${config.tokens.RESERVE.name}
 Contract State: ${contracStatus.state} 
 Contract Paused: ${contracStatus.paused} 
-Contract Protected: ${contracStatus.protected} 
+Contract Protected: ${contracStatus.protected}
+MINT_DOC_FEES_RBTC: ${Web3.utils.fromWei(contracStatus.commissionRates.MINT_DOC_FEES_RBTC, 'ether')} 
+MINT_DOC_FEES_MOC: ${Web3.utils.fromWei(contracStatus.commissionRates.MINT_DOC_FEES_MOC, 'ether')}
+
+
     `
 
   return render
@@ -173,7 +176,6 @@ ${config.tokens.TP.name} queue to redeem: ${Web3.utils.fromWei(userBalance.docTo
 
   // Token migrator
   if (process.env.CONTRACT_LEGACY_TP) {
-
     const tokenMigratorBalance = `
 TP Legacy Balance: ${Web3.utils.fromWei(userBalance.tpLegacyBalance)} ${config.tokens.TP.name}
 TP Legacy Allowance: ${Web3.utils.fromWei(userBalance.tpLegacyAllowance)} ${config.tokens.TP.name}

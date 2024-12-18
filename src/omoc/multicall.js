@@ -35,7 +35,7 @@ const omocInfoAddress = async (web3, dContracts, userAddress, vestingAddress) =>
   const listMethods = [
     [istakingmachine.options.address, istakingmachine.methods.getBalance(userAddress).encodeABI(), 'uint256'], // 0
     [istakingmachine.options.address, istakingmachine.methods.getLockedBalance(userAddress).encodeABI(), 'uint256'], // 1
-    //[istakingmachine.options.address, istakingmachine.methods.getLockingInfo(userAddress).encodeABI(), ['uint256', 'uint256']], // 2
+    // [istakingmachine.options.address, istakingmachine.methods.getLockingInfo(userAddress).encodeABI(), ['uint256', 'uint256']], // 2
     [istakingmachine.options.address, istakingmachine.methods.getLockingInfo(userAddress).encodeABI(), [{ type: 'uint256', name: 'amount' }, { type: 'uint256', name: 'untilTimestamp' }]], // 2
     [istakingmachine.options.address, istakingmachine.methods.getWithdrawLockTime().encodeABI(), 'uint256'], // 3
     [istakingmachine.options.address, istakingmachine.methods.getSupporters().encodeABI(), 'address'], // 4

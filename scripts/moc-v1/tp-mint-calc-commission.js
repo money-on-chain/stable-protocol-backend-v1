@@ -4,8 +4,6 @@ import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3, toContractPrecision } from '../../src/utils.js'
 import { readContracts, statusFromContracts } from '../../src/moc-v1/contracts.js'
-import { mintTP } from '../../src/moc-v1/moc-coinbase.js'
-import { mintTPRRC20 } from '../../src/moc-v1/moc-rrc20.js'
 
 dotenv.config()
 
@@ -21,7 +19,7 @@ const TransactionTypeIdsMoC = {
   MINT_DOC_FEES_MOC: 9,
   REDEEM_DOC_FEES_MOC: 10,
   MINT_BTCX_FEES_MOC: 11,
-  REDEEM_BTCX_FEES_MOC: 12,
+  REDEEM_BTCX_FEES_MOC: 12
 }
 
 const main = async () => {
@@ -53,15 +51,15 @@ const main = async () => {
   const mocinrate = dContracts.contracts.mocinrate
 
   const commissions = {}
-  commissions.commission_reserve =  await mocinrate.methods.calcCommissionValue(
-        toContractPrecision(reserveAmount),
-        TransactionTypeIdsMoC.MINT_DOC_FEES_RBTC).call()
-  commissions.commission_moc =  await mocinrate.methods.calcCommissionValue(
-        toContractPrecision(reserveAmount),
-        TransactionTypeIdsMoC.MINT_DOC_FEES_MOC).call()
+  commissions.commission_reserve = await mocinrate.methods.calcCommissionValue(
+    toContractPrecision(reserveAmount),
+    TransactionTypeIdsMoC.MINT_DOC_FEES_RBTC).call()
+  commissions.commission_moc = await mocinrate.methods.calcCommissionValue(
+    toContractPrecision(reserveAmount),
+    TransactionTypeIdsMoC.MINT_DOC_FEES_MOC).call()
   commissions.vendorMarkup = await mocinrate.methods.calculateVendorMarkup(
-        vendorAddress,
-        toContractPrecision(reserveAmount)).call()
+    vendorAddress,
+    toContractPrecision(reserveAmount)).call()
 
   // Calculate commissions using Reserve payment
   const commissionInReserve = new BigNumber(Web3.utils.fromWei(commissions.commission_reserve))
@@ -76,9 +74,8 @@ const main = async () => {
 
   console.log(`To mint: ${amountTP} DOC`)
   console.log(`You need to send already include commissions: ${valueToSend} RBTC`)
-  console.log(``)
+  console.log('')
   console.log(`Total Commissions: ${commissionInReserve} RBTC`)
-
 }
 
 main()

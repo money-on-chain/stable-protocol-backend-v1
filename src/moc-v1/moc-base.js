@@ -79,7 +79,7 @@ const calcMintInterest = async (dContracts, amount) => {
 const AllowUseTokenMigrator = async (web3, dContracts, allow) => {
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
 
-  if (!dContracts.contracts.tp_legacy) console.log("Error: Please set token migrator address!")
+  if (!dContracts.contracts.tp_legacy) console.log('Error: Please set token migrator address!')
 
   const tp_legacy = dContracts.contracts.tp_legacy
   const tokenMigrator = dContracts.contracts.token_migrator
@@ -92,13 +92,13 @@ const AllowUseTokenMigrator = async (web3, dContracts, allow) => {
 
   // Calculate estimate gas cost
   const estimateGas = await tp_legacy.methods
-      .approve(tokenMigrator._address, web3.utils.toWei(amountAllowance))
-      .estimateGas({ from: userAddress, value: '0x' })
+    .approve(tokenMigrator._address, web3.utils.toWei(amountAllowance))
+    .estimateGas({ from: userAddress, value: '0x' })
 
   // encode function
   const encodedCall = tp_legacy.methods
-      .approve(tokenMigrator._address, web3.utils.toWei(amountAllowance))
-      .encodeABI()
+    .approve(tokenMigrator._address, web3.utils.toWei(amountAllowance))
+    .encodeABI()
 
   // send transaction to the blockchain and get receipt
   const { receipt, filteredEvents } = await sendTransaction(web3, valueToSend, estimateGas, encodedCall, tp_legacy._address)
@@ -109,22 +109,21 @@ const AllowUseTokenMigrator = async (web3, dContracts, allow) => {
 }
 
 const MigrateToken = async (web3, dContracts) => {
-
   const userAddress = `${process.env.USER_ADDRESS}`.toLowerCase()
 
-  if (!dContracts.contracts.token_migrator) console.log("Error: Please set token migrator address!")
+  if (!dContracts.contracts.token_migrator) console.log('Error: Please set token migrator address!')
 
   const tokenMigrator = dContracts.contracts.token_migrator
 
   // Calculate estimate gas cost
   const estimateGas = await tokenMigrator.methods
-      .migrateToken()
-      .estimateGas({ from: userAddress, value: '0x' })
+    .migrateToken()
+    .estimateGas({ from: userAddress, value: '0x' })
 
   // encode function
   const encodedCall = tokenMigrator.methods
-      .migrateToken()
-      .encodeABI()
+    .migrateToken()
+    .encodeABI()
 
   const valueToSend = null
 

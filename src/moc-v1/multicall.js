@@ -410,24 +410,24 @@ const contractStatus = async (web3, dContracts, configProject) => {
 
   dMocState.commissionRates = commissionRates
 
-  if (appProject === 'bnb') return dMocState  // need archive
+  if (appProject === 'bnb') return dMocState // need archive
 
   // Historics Price 24hs ago
-  const d24BlockHeights = dMocState.blockHeight - dMocState.dayBlockSpan;
+  const d24BlockHeights = dMocState.blockHeight - dMocState.dayBlockSpan
   // Remove decode result parameter
   if (appMode === 'MoC') {
     listMethods = [
       [mocstate.options.address, mocstate.methods.getBitcoinPrice().encodeABI(), 'uint256'], // 0
       [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
       [mocstate.options.address, mocstate.methods.bproUsdPrice().encodeABI(), 'uint256'], // 2
-      [mocstate.options.address, mocstate.methods.bucketBProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 3
+      [mocstate.options.address, mocstate.methods.bucketBProTecPrice(BUCKET_X2).encodeABI(), 'uint256'] // 3
     ]
   } else {
     listMethods = [
       [mocstate.options.address, mocstate.methods.getReserveTokenPrice().encodeABI(), 'uint256'], // 0
       [mocstate.options.address, mocstate.methods.getMoCPrice().encodeABI(), 'uint256'], // 1
       [mocstate.options.address, mocstate.methods.riskProUsdPrice().encodeABI(), 'uint256'], // 2
-      [mocstate.options.address, mocstate.methods.bucketRiskProTecPrice(BUCKET_X2).encodeABI(), 'uint256'], // 3
+      [mocstate.options.address, mocstate.methods.bucketRiskProTecPrice(BUCKET_X2).encodeABI(), 'uint256'] // 3
     ]
   }
 

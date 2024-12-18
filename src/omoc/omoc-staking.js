@@ -104,7 +104,7 @@ const OmocInfo = async (web3, dContracts, config, userAddress) => {
   console.log()
   console.log('\x1b[32m%s\x1b[0m', renderOmocInfo(infoOmoc, config))
   console.log()
-  //console.log('\x1b[32m%s\x1b[0m', renderVestingParameters(infoOmoc, config))
+  // console.log('\x1b[32m%s\x1b[0m', renderVestingParameters(infoOmoc, config))
 }
 
 const StakingAllowance = async (web3, dContracts, allow) => {

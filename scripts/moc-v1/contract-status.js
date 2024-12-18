@@ -2,12 +2,12 @@ import * as dotenv from 'dotenv'
 
 import { readJsonFile, getWeb3 } from '../../src/utils.js'
 import {
-    readContracts,
-    contractStatus,
-    userBalance,
-    renderUserBalance,
-    renderContractStatus
-    } from '../../src/moc-v1/contracts.js'
+  readContracts,
+  contractStatus,
+  userBalance,
+  renderUserBalance,
+  renderContractStatus
+} from '../../src/moc-v1/contracts.js'
 
 dotenv.config()
 
